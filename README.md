@@ -4,6 +4,8 @@ A teleprompter that lives under the MacBook notch. It follows your voice, so the
 
 Keeping the text right under the camera lets you read while looking at the lens.
 
+![Sightline Prompter under the MacBook notch, following the spoken word](docs/images/social-preview.png)
+
 ## Features
 
 - **Voice following.** Speech recognition finds the word you are reading and keeps it on the reading line. It only matches words that are on screen, so it does not jump to unrelated parts of the script.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2
+
+- Language list: every language Apple offers for one-click offline download is offered, with regional variants (31 entries including Turkish). German, Italian, Korean and others are now available.
+- Removed the Keyboard settings redirect and the Dictation instructions.
+- Arabic, Hindi, Russian and Indonesian are no longer offered, because Apple has no one-click offline download for them. Scripts already saved in those languages still open.
+- Turkish has no one-click download. It works on device when macOS has its Dictation model, and online otherwise.
+
 ## 1.0.1
 
 - Fixed: Cut, Copy, Paste, Select All, Undo and Redo did not work in the script editor. The app now has a standard Edit menu.

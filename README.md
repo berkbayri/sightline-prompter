@@ -9,7 +9,7 @@ Keeping the text right under the camera lets you read while looking at the lens.
 ## Features
 
 - **Voice following.** Speech recognition finds the word you are reading and keeps it on the reading line. It only matches words that are on screen, so it does not jump to unrelated parts of the script.
-- **Eleven languages:** English, Mandarin Chinese, Hindi, Spanish, French, Arabic, Portuguese, Russian, Indonesian, Japanese and Turkish. Chinese and Japanese are segmented into words automatically. Arabic is laid out right to left.
+- **31 languages and regional variants:** every language Apple offers for one-click offline download (English, German, Italian, Spanish, French, Portuguese, Japanese, Korean, Mandarin and Cantonese, and more), plus Turkish. Chinese, Japanese and Cantonese are segmented into words automatically.
 - **Pace.** Words per minute and time left, measured from your actual reading speed. Pauses are not counted.
 - **Gamepad.** DualSense (PlayStation 5) controllers over Bluetooth or USB: analog stick for scrolling, D-pad for speed, paragraph jumps, tracking toggle. The stick response curve and max speed are adjustable.
 - **Light bar.** The DualSense light shows tracking and scroll state.
@@ -36,17 +36,18 @@ Keeping the text right under the camera lets you read while looking at the lens.
 
 ## Speech recognition
 
-Speech is recognized by Apple's Speech framework. When a language's model is on the device, recognition runs offline. Otherwise the audio goes to Apple's servers, and the status line says so.
+Speech is recognized by Apple's Speech framework. When a language's offline model is on the Mac, recognition runs offline. Otherwise the audio goes to Apple's servers, and the status line says so.
 
-The language list in Settings shows only what this Mac can use, with the state of each language:
+Settings lists every language with its state:
 
-| Language | Offline model | How to get it |
+| Language | State | How to get it |
 |---|---|---|
-| English, Turkish | Included when installed | Usually already available |
-| Spanish, French, Portuguese, Japanese, Mandarin Chinese | Downloadable | **Download for offline use** in Settings |
-| Hindi, Arabic, Russian, Indonesian | Not downloadable by apps | Open Keyboard settings from Settings and enable Dictation for the language |
+| Every language Apple offers for one-click download (31 locales with regional variants) | **Download for offline use** | Click the button in Settings. The offline model downloads from Apple. |
+| Turkish | On device when macOS has its Dictation model, otherwise online | No download button: Apple does not offer a one-click download for it |
 
-Chinese and Japanese word matching works on segments from the language tokenizer, so accuracy is lower than for spaced languages.
+Arabic, Hindi, Russian and Indonesian are not offered: Apple has no one-click offline download for them. Scripts already saved in those languages still open.
+
+Chinese, Japanese and Cantonese word matching works on segments from the language tokenizer, so accuracy is lower than for spaced languages.
 
 ## Screenshots
 
@@ -108,7 +109,7 @@ No. On a Mac without a notch the panel sits at the top center of the screen.
 Yes, for languages whose speech model is on the device. The status line tells you when recognition goes to Apple's servers.
 
 **Which languages?**
-English, Mandarin Chinese, Hindi, Spanish, French, Arabic, Portuguese, Russian, Indonesian, Japanese and Turkish. The Settings screen only lists the languages this Mac can use.
+Every language Apple offers for one-click offline download, with regional variants (for example English (United States), German (Germany), Japanese, Mandarin Chinese (Simplified), Cantonese), plus Turkish. Settings lists each one with its download state.
 
 **Can I read a script from a file?**
 Yes. Plain text, Markdown, RTF, HTML, Word, OpenDocument and PDF can be imported into the Library.

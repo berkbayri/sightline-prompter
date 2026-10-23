@@ -152,10 +152,6 @@ private struct LanguageRow: View {
     let error: String?
     let install: () -> Void
 
-    @Environment(\.openURL) private var openURL
-
-    private static let keyboardSettings = URL(string: "x-apple.systempreferences:com.apple.Keyboard-Settings.extension")
-
     var body: some View {
         LabeledContent(language.name) {
             VStack(alignment: .trailing, spacing: 4) {
@@ -172,15 +168,6 @@ private struct LanguageRow: View {
                             .frame(width: 140)
                     } else {
                         Button("Download for offline use", action: install)
-                    }
-                case .needsDictationSetup?:
-                    Text("Online · set up offline in System Settings → Keyboard → Dictation")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.trailing)
-                        .frame(maxWidth: 260, alignment: .trailing)
-                    if let url = Self.keyboardSettings {
-                        Button("Open Keyboard Settings") { openURL(url) }
                     }
                 case .online?:
                     Text("Online")

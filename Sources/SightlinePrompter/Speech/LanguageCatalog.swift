@@ -49,18 +49,13 @@ final class LanguageCatalog: ObservableObject {
     private func evaluate(_ language: ScriptLanguage) async -> LanguageReadiness {
         let locale = Locale(identifier: language.id)
         let recognizer = SFSpeechRecognizer(locale: locale)
-        var systemSupports = false
         var transcriberSupported = false
         var transcriberInstalled = false
         #if compiler(>=6.2)
-        if #available(macOS 26.0, *) {
-            systemSupports = SpeechTranscriber.isAvailable
-            if systemSupports {
-                let supported = await AnalyzerSpeechEngine.supportedLocale(for: locale)
-                transcriberSupported = supported != nil
-                if transcriberSupported {
-                    transcriberInstalled = await AnalyzerSpeechEngine.isInstalled(locale)
-                }
+        if #available(macOS 26.0, *), SpeechTranscriber.isAvailable {
+            transcriberSupported = await AnalyzerSpeechEngine.supportedLocale(for: locale) != nil
+            if transcriberSupported {
+                transcriberInstalled = await AnalyzerSpeechEngine.isInstalled(locale)
             }
         }
         #endif
@@ -68,8 +63,7 @@ final class LanguageCatalog: ObservableObject {
             recognizerAvailable: recognizer?.isAvailable ?? false,
             onDeviceSupported: recognizer?.supportsOnDeviceRecognition ?? false,
             transcriberSupported: transcriberSupported,
-            transcriberInstalled: transcriberInstalled,
-            systemSupportsTranscriber: systemSupports
+            transcriberInstalled: transcriberInstalled
         )
     }
 }

@@ -22,6 +22,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
     private var cancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        installMainMenu()
         panel = NotchPanel(prompter: prompter)
         panel.onAction = { [weak self] action in self?.handle(action) }
         panel.orderFrontRegardless()
@@ -133,9 +134,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
         // Edits made in the Library window flow back into the active prompter text.
         library.$scripts
             .receive(on: RunLoop.main)
-            .sink { [weak self] scripts in
-                guard let self,
-                      let id = UUID(uuidString: Settings.shared.activeScriptID),
+            .sink { scripts in
+                guard let id = UUID(uuidString: Settings.shared.activeScriptID),
                       let active = scripts.first(where: { $0.id == id }) else { return }
                 if active.text != Settings.shared.script {
                     Settings.shared.script = active.text
@@ -217,6 +217,55 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
             button.toolTip = "Sightline Prompter"
         }
         statusItem.menu = buildMenu()
+    }
+
+    /// Without a main menu, text fields get no Cut/Copy/Paste/Undo key equivalents.
+    private func installMainMenu() {
+        let main = NSMenu()
+
+        let appMenu = NSMenu()
+        appMenu.addItem(withTitle: "About Sightline Prompter", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
+        appMenu.addItem(.separator())
+        appMenu.addItem(menuItem("Settings…", #selector(openSettings), key: ","))
+        appMenu.addItem(menuItem("Library…", #selector(openLibrary), key: "l"))
+        appMenu.addItem(.separator())
+        appMenu.addItem(withTitle: "Hide Sightline Prompter", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
+        let hideOthers = NSMenuItem(title: "Hide Others", action: #selector(NSApplication.hideOtherApplications(_:)), keyEquivalent: "h")
+        hideOthers.keyEquivalentModifierMask = [.command, .option]
+        appMenu.addItem(hideOthers)
+        appMenu.addItem(withTitle: "Show All", action: #selector(NSApplication.unhideAllApplications(_:)), keyEquivalent: "")
+        appMenu.addItem(.separator())
+        appMenu.addItem(withTitle: "Quit Sightline Prompter", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        main.addItem(submenuItem(appMenu))
+
+        // Actions with nil target go through the responder chain to the focused text view.
+        let edit = NSMenu(title: "Edit")
+        edit.addItem(withTitle: "Undo", action: Selector(("undo:")), keyEquivalent: "z")
+        let redo = NSMenuItem(title: "Redo", action: Selector(("redo:")), keyEquivalent: "z")
+        redo.keyEquivalentModifierMask = [.command, .shift]
+        edit.addItem(redo)
+        edit.addItem(.separator())
+        edit.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        edit.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        edit.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        edit.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        main.addItem(submenuItem(edit))
+
+        let window = NSMenu(title: "Window")
+        window.addItem(withTitle: "Minimize", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m")
+        window.addItem(withTitle: "Zoom", action: #selector(NSWindow.performZoom(_:)), keyEquivalent: "")
+        window.addItem(.separator())
+        window.addItem(withTitle: "Close Window", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")
+        NSApp.windowsMenu = window
+        main.addItem(submenuItem(window))
+
+        NSApp.mainMenu = main
+    }
+
+    private func submenuItem(_ menu: NSMenu) -> NSMenuItem {
+        let item = NSMenuItem()
+        item.submenu = menu
+        return item
     }
 
     private func buildMenu() -> NSMenu {

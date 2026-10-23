@@ -1,0 +1,64 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "e.g. macOS 26.1"
+    validations:
+      required: true
+  - type: input
+    id: mac
+    attributes:
+      label: Mac model and notch
+      description: "e.g. MacBook Pro 16-inch (M2 Max), or a Mac without a notch"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      placeholder: "e.g. 1.0.1 (from the release you downloaded)"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Speech tracking
+        - Controller (gamepad)
+        - Library / import
+        - Panel and window
+        - Settings
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happened
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Script language (for speech tracking issues)
+      placeholder: "e.g. Turkish, Japanese"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: "Please remove personal script text before attaching anything."

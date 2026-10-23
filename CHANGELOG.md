@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.1
+
+- Fixed: Cut, Copy, Paste, Select All, Undo and Redo did not work in the script editor. The app now has a standard Edit menu.
+- Language list shows only the languages this Mac can use, with each one's offline status.
+- Spanish, French, Portuguese, Japanese and Mandarin Chinese can be downloaded for offline use from Settings.
+- Hindi, Arabic, Russian and Indonesian: Settings opens Keyboard settings so Dictation can be enabled for the language.
+- For languages that would otherwise use Apple's servers, speech tracking switches to the on-device engine when that language's offline model is installed.
+- README: screenshots, language and offline guide, FAQ.
+
 ## 1.0.0
 
 First public release.

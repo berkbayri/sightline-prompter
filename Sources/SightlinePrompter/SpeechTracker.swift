@@ -14,21 +14,17 @@ final class SpeechTracker {
 
     private var script: String
     private var aligner: ScriptAligner
-    private var recognizer: SFSpeechRecognizer?
     private var language: ScriptLanguage
-    private let engine = AVAudioEngine()
-    /// The engine stays up across recognition sessions; the tap feeds whichever request the box holds.
-    private let box = RequestBox()
-    private var task: SFSpeechRecognitionTask?
-    private var restartWork: Task<Void, Never>?
-    /// Bumped per session so callbacks from ended sessions are ignored.
-    private var generation = 0
+    private var recognizer: SFSpeechRecognizer?
+    private var engine: SpeechEngine?
+    private var analyzerActive = false
     private var lastPartial = ""
-    private var failures = 0
+    /// Bumped on every start and stop so a launch that finishes late is discarded.
+    private var session = 0
 
-    /// True when the recognizer has no on-device model for the language, so audio goes to Apple's servers.
+    /// True when audio goes to Apple's servers: the legacy engine on a language without an on-device model.
     var usesServerRecognition: Bool {
-        recognizer?.supportsOnDeviceRecognition == false
+        !analyzerActive && recognizer?.supportsOnDeviceRecognition == false
     }
 
     init(script: String, language: String) {
@@ -71,110 +67,87 @@ final class SpeechTracker {
 
     func start() {
         guard !isRunning else { return }
+        let token = session
         Self.requestAccess { [weak self] speechOK, micOK in
-            Task { @MainActor in self?.launch(speechOK: speechOK, micOK: micOK) }
+            Task { @MainActor in await self?.launch(token: token, speechOK: speechOK, micOK: micOK) }
         }
     }
 
     func stop() {
+        session += 1
         guard isRunning else { return }
         isRunning = false
-        restartWork?.cancel()
-        restartWork = nil
-        generation += 1
-        endCurrentTask()
-        if engine.isRunning { engine.stop() }
-        engine.inputNode.removeTap(onBus: 0)
+        analyzerActive = false
+        engine?.stop()
+        engine = nil
         onStatus?("Stopped")
     }
 
-    private func launch(speechOK: Bool, micOK: Bool) {
-        guard !isRunning else { return }
+    private func launch(token: Int, speechOK: Bool, micOK: Bool) async {
+        guard token == session, !isRunning else { return }
         guard speechOK, micOK else {
             onStatus?("Microphone or speech permission denied")
             return
         }
-        guard let recognizer else {
-            onStatus?("Speech recognizer could not be created")
-            return
-        }
-        do {
-            let input = engine.inputNode
-            input.installTap(onBus: 0, bufferSize: 1024, format: input.outputFormat(forBus: 0), block: makeTapBlock(box))
-            engine.prepare()
-            try engine.start()
-        } catch {
-            engine.inputNode.removeTap(onBus: 0)
-            onStatus?(error.localizedDescription)
-            return
-        }
         isRunning = true
-        beginSession()
-        guard isRunning else { return }
-        onStatus?(recognizer.supportsOnDeviceRecognition
-            ? "Listening…"
-            : "On-device model not installed — using server recognition")
-    }
+        let locale = Locale(identifier: language.id)
 
-    private func beginSession() {
-        guard let recognizer, recognizer.isAvailable else {
-            stop()
-            onStatus?("Speech recognizer unavailable")
-            return
-        }
-        generation += 1
-        let gen = generation
-
-        let request = SFSpeechAudioBufferRecognitionRequest()
-        request.shouldReportPartialResults = true
-        request.requiresOnDeviceRecognition = recognizer.supportsOnDeviceRecognition
-        request.taskHint = .dictation
-        box.set(request)
-
-        let handler: @Sendable (SFSpeechRecognitionResult?, Error?) -> Void = { [weak self] result, error in
-            let text = result?.bestTranscription.formattedString
-            let isFinal = result?.isFinal ?? false
-            let message = error?.localizedDescription
-            Task { @MainActor in
-                self?.handleResult(generation: gen, text: text, isFinal: isFinal, errorMessage: message)
+        if let analyzer = await analyzerEngineIfReady(locale) {
+            let analyzerError = await attach(analyzer, locale: locale, token: token)
+            guard isRunning, token == session else { return }
+            if analyzerError == nil {
+                analyzerActive = true
+                return
             }
         }
-        task = recognizer.recognitionTask(with: request, resultHandler: handler)
+
+        let legacyError = await attach(LegacySpeechEngine(), locale: locale, token: token)
+        guard isRunning, token == session else { return }
+        analyzerActive = false
+        if let legacyError {
+            isRunning = false
+            engine = nil
+            onStatus?(legacyError.localizedDescription)
+        }
     }
 
-    private func handleResult(generation gen: Int, text: String?, isFinal: Bool, errorMessage: String?) {
-        guard isRunning, gen == generation else { return }
-        if let text, !text.isEmpty { process(text) }
-        guard isFinal || errorMessage != nil else { return }
+    /// The on-device analyzer engine, used only where the legacy engine would send audio to Apple's
+    /// servers and the language model is installed. Languages the legacy engine handles on device
+    /// keep using it.
+    private func analyzerEngineIfReady(_ locale: Locale) async -> SpeechEngine? {
+        #if compiler(>=6.2)
+        if #available(macOS 26.0, *),
+           recognizer?.supportsOnDeviceRecognition == false,
+           await AnalyzerSpeechEngine.isInstalled(locale) {
+            return AnalyzerSpeechEngine()
+        }
+        #endif
+        return nil
+    }
 
-        // Session ended (time limit, error or silence). Start a fresh one; the cursor is kept.
-        failures = errorMessage == nil ? 0 : failures + 1
-        generation += 1
-        endCurrentTask()
-        let delay = failures >= 5 ? 2.0 : 0.2
-        if failures >= 5, let errorMessage { onStatus?("Retrying recognition: \(errorMessage)") }
-        restartWork = Task { @MainActor [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-            guard let self, self.isRunning else { return }
-            self.beginSession()
+    /// Makes the engine current and starts it. Returns the failure, leaving no engine behind.
+    private func attach(_ candidate: SpeechEngine, locale: Locale, token: Int) async -> Error? {
+        engine = candidate
+        candidate.onText = { [weak self] text in self?.process(text) }
+        candidate.onStatus = { [weak self] status in self?.onStatus?(status) }
+        do {
+            try await candidate.start(locale: locale)
+            return nil
+        } catch {
+            candidate.stop()
+            if engine === candidate { engine = nil }
+            return error
         }
     }
 
     private func process(_ text: String) {
         guard text != lastPartial else { return }
         lastPartial = text
-        failures = 0
 
         // The reader only ever speaks words on screen, so matching is limited to them.
         aligner.allowedRange = visibleWords?()
         guard let cursor = aligner.consume(transcript: text) else { return }
         onCursorChange?(cursor)
-    }
-
-    private func endCurrentTask() {
-        box.take()?.endAudio()
-        task?.cancel()
-        task = nil
     }
 
     /// Asks for speech and microphone access. Callbacks arrive on arbitrary threads.
@@ -185,35 +158,4 @@ final class SpeechTracker {
             }
         }
     }
-}
-
-/// Holds the live recognition request; the audio tap appends to it from the audio thread.
-private final class RequestBox: @unchecked Sendable {
-    private let lock = NSLock()
-    private var request: SFSpeechAudioBufferRecognitionRequest?
-
-    func set(_ request: SFSpeechAudioBufferRecognitionRequest) {
-        lock.lock()
-        defer { lock.unlock() }
-        self.request = request
-    }
-
-    func take() -> SFSpeechAudioBufferRecognitionRequest? {
-        lock.lock()
-        defer { lock.unlock() }
-        let current = request
-        request = nil
-        return current
-    }
-
-    func append(_ buffer: AVAudioPCMBuffer) {
-        lock.lock()
-        defer { lock.unlock() }
-        request?.append(buffer)
-    }
-}
-
-/// Built outside the main actor so the tap runs on the audio thread without isolation checks.
-private func makeTapBlock(_ box: RequestBox) -> (AVAudioPCMBuffer, AVAudioTime) -> Void {
-    { buffer, _ in box.append(buffer) }
 }

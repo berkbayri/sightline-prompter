@@ -3,12 +3,23 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject private var settings = Settings.shared
+    @StateObject private var catalog = LanguageCatalog()
+
+    /// Offered languages, plus the current one even when this Mac cannot recognize it, so the picker keeps its value.
+    private var pickerOptions: [ScriptLanguage] {
+        var options = catalog.pickerLanguages
+        if let current = ScriptLanguage.all.first(where: { $0.id == settings.scriptLanguage }),
+           !options.contains(current) {
+            options.append(current)
+        }
+        return options
+    }
 
     var body: some View {
         Form {
             Section {
                 Picker("Language", selection: $settings.scriptLanguage) {
-                    ForEach(ScriptLanguage.all) { language in
+                    ForEach(pickerOptions) { language in
                         Text(language.name).tag(language.id)
                     }
                 }
@@ -22,7 +33,23 @@ struct SettingsView: View {
             } header: {
                 Label("Script", systemImage: "text.alignleft")
             } footer: {
-                Text("The active script is chosen in the Library. Speech tracking listens in the selected language. Languages other than English and Turkish use Apple's servers for recognition.")
+                Text("The active script is chosen in the Library. Speech tracking listens in the selected language. Only languages listed below are offered here.")
+            }
+
+            Section {
+                ForEach(ScriptLanguage.all) { language in
+                    LanguageRow(
+                        language: language,
+                        readiness: catalog.readiness[language.id],
+                        progress: catalog.progress[language.id],
+                        error: catalog.errors[language.id],
+                        install: { Task { await catalog.installOffline(language.id) } }
+                    )
+                }
+            } header: {
+                Label("Languages", systemImage: "globe")
+            } footer: {
+                Text("On device works without an internet connection. Online languages use Apple's servers until their offline model is installed.")
             }
 
             Section {
@@ -79,6 +106,7 @@ struct SettingsView: View {
         }
         .formStyle(.grouped)
         .frame(minWidth: 520, minHeight: 680)
+        .onAppear { catalog.refresh() }
     }
 
     private func slider(
@@ -115,6 +143,61 @@ struct SettingsView: View {
 
 extension Notification.Name {
     static let openLibrary = Notification.Name("SightlinePrompter.openLibrary")
+}
+
+private struct LanguageRow: View {
+    let language: ScriptLanguage
+    let readiness: LanguageReadiness?
+    let progress: Double?
+    let error: String?
+    let install: () -> Void
+
+    @Environment(\.openURL) private var openURL
+
+    private static let keyboardSettings = URL(string: "x-apple.systempreferences:com.apple.Keyboard-Settings.extension")
+
+    var body: some View {
+        LabeledContent(language.name) {
+            VStack(alignment: .trailing, spacing: 4) {
+                switch readiness {
+                case nil:
+                    Text("Checking…")
+                        .foregroundStyle(.secondary)
+                case .onDevice?:
+                    Text("On device")
+                        .foregroundStyle(.secondary)
+                case .onlineDownloadable?:
+                    if let progress {
+                        ProgressView(value: progress)
+                            .frame(width: 140)
+                    } else {
+                        Button("Download for offline use", action: install)
+                    }
+                case .needsDictationSetup?:
+                    Text("Online · set up offline in System Settings → Keyboard → Dictation")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.trailing)
+                        .frame(maxWidth: 260, alignment: .trailing)
+                    if let url = Self.keyboardSettings {
+                        Button("Open Keyboard Settings") { openURL(url) }
+                    }
+                case .online?:
+                    Text("Online")
+                        .foregroundStyle(.secondary)
+                case .unavailable?:
+                    Text("Unavailable")
+                        .foregroundStyle(.secondary)
+                }
+                if let error {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.trailing)
+                }
+            }
+        }
+    }
 }
 
 /// Plots speed (y) against stick travel (x) for the chosen curve, after the deadzone.

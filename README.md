@@ -36,15 +36,23 @@ Keeping the text right under the camera lets you read while looking at the lens.
 
 ## Speech recognition
 
-Speech is recognized by Apple's Speech framework. It runs on the device when the language model is installed, and otherwise the audio is sent to Apple's servers. Check the current state in the app: the status line says when the server is used.
+Speech is recognized by Apple's Speech framework. When a language's model is on the device, recognition runs offline. Otherwise the audio goes to Apple's servers, and the status line says so.
 
-| Language | Speech tracking | Recognition |
+The language list in Settings shows only what this Mac can use, with the state of each language:
+
+| Language | Offline model | How to get it |
 |---|---|---|
-| English | Yes | On device when installed |
-| Turkish | Yes | On device when installed |
-| Mandarin Chinese, Hindi, Spanish, French, Arabic, Portuguese, Russian, Indonesian, Japanese | Yes | Apple's servers, unless the model is installed |
+| English, Turkish | Included when installed | Usually already available |
+| Spanish, French, Portuguese, Japanese, Mandarin Chinese | Downloadable | **Download for offline use** in Settings |
+| Hindi, Arabic, Russian, Indonesian | Not downloadable by apps | Open Keyboard settings from Settings and enable Dictation for the language |
 
 Chinese and Japanese word matching works on segments from the language tokenizer, so accuracy is lower than for spaced languages.
+
+## Screenshots
+
+| Panel under the notch | Script library | Settings |
+|---|---|---|
+| ![Panel under the notch](docs/images/panel.png) | ![Script library](docs/images/library.png) | ![Settings](docs/images/settings.png) |
 
 ## Controls
 
@@ -87,6 +95,26 @@ swift test
 ## Contributing
 
 Bug reports and pull requests are welcome. Keep changes focused, and run `swift test` before opening a pull request.
+
+## FAQ
+
+**Is there a teleprompter that follows my voice on a Mac?**
+Yes, this one. It listens while you read and keeps the word you are on at the reading line, without jumping to other parts of the script.
+
+**Does it need a MacBook with a notch?**
+No. On a Mac without a notch the panel sits at the top center of the screen.
+
+**Does it work offline?**
+Yes, for languages whose speech model is on the device. The status line tells you when recognition goes to Apple's servers.
+
+**Which languages?**
+English, Mandarin Chinese, Hindi, Spanish, French, Arabic, Portuguese, Russian, Indonesian, Japanese and Turkish. The Settings screen only lists the languages this Mac can use.
+
+**Can I read a script from a file?**
+Yes. Plain text, Markdown, RTF, HTML, Word, OpenDocument and PDF can be imported into the Library.
+
+**Can I use a PlayStation controller?**
+Yes, a DualSense over Bluetooth or USB. The stick, D-pad and buttons are mapped above, and the light bar shows the state.
 
 ## License
 

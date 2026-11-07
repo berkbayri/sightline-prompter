@@ -24,6 +24,9 @@ final class AppModel: ObservableObject {
     let prompter = PrompterUIView(settings: PhoneSettings.shared)
     let tracker = SpeechTracker(script: "", language: "en-US")
     let camera = CameraEngine()
+    let pro = ProStore.shared
+    /// Set when a free-version limit was hit or a Pro feature was tapped; the root view shows the paywall.
+    @Published var showPaywall = false
 
     private let controller = ControllerInput()
     private let light = GamepadLight()
@@ -55,6 +58,26 @@ final class AppModel: ObservableObject {
         tracker.visibleWords = { [prompter] in prompter.visibleWordRange() }
         tracker.onStatus = { [weak self] text in self?.receiveStatus(text) }
         camera.onAudioBuffer = { [weak self] buffer in self?.tracker.feed(buffer) }
+        camera.isProUnlocked = { [pro] in pro.isUnlocked }
+        camera.onRecordingLimit = { [weak self] in self?.showPaywall = true }
+        tracker.sessionLimit = { [pro] in pro.isUnlocked ? nil : FreeTier.maxTrackingSeconds }
+        tracker.onLimitReached = { [weak self] in
+            self?.receiveStatus("Free voice following ended after \(Int(FreeTier.maxTrackingSeconds / 60)) minutes. Sightline Pro removes the limit.")
+            self?.refreshControls()
+            self?.showPaywall = true
+        }
+        #if DEBUG
+        if !ScreenshotMode.isActive { pro.start() }
+        #else
+        pro.start()
+        #endif
+        pro.objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                // The entitlement may have changed: recompute what the camera offers.
+                Task { @MainActor in self?.camera.entitlementChanged() }
+            }
+            .store(in: &cancellables)
         controller.delegate = self
         controller.stickResponse = { [settings] in (Float(settings.stickDeadzone), settings.stickCurve) }
         controller.start()
@@ -80,19 +103,37 @@ final class AppModel: ObservableObject {
             library.create(title: "Welcome", language: .named("en-US"), text: Self.welcomeText)
         }
         seedTurkishSample()
+        #if DEBUG
+        if ScreenshotMode.isActive { seedScreenshotLibrary() }
+        #endif
         reloadActiveScript()
 
         // While the camera records, the script follows the speaker: tracking starts with the camera.
         camera.$status
             .sink { [weak self] status in
                 guard status == .running, let self, self.cameraOn, !self.tracker.isRunning else { return }
-                self.tracker.start()
+                self.startTrackingIfAllowed()
                 self.refreshControls()
             }
             .store(in: &cancellables)
     }
 
     // MARK: - Library and active script
+
+    #if DEBUG
+    /// Fills the library with realistic scripts for App Store screenshots (simulator, debug builds only).
+    private func seedScreenshotLibrary() {
+        for script in library.scripts { library.delete(script.id) }
+        for item in ScreenshotMode.scripts.reversed() {
+            let id = item.title.hasPrefix("Türkçe") ? "tr-TR" : "en-US"
+            library.create(title: item.title, language: .named(id), text: item.text)
+        }
+        pro.useSampleOffers()
+        if let first = library.scripts.first(where: { $0.title == "Product launch video" }) {
+            settings.activeScriptID = first.id.uuidString
+        }
+    }
+    #endif
 
     /// Adds a Turkish test script once, so Turkish recognition can be tried without importing anything.
     private func seedTurkishSample() {
@@ -165,9 +206,20 @@ final class AppModel: ObservableObject {
         if tracker.isRunning {
             tracker.stop()
         } else {
-            tracker.start()
+            startTrackingIfAllowed()
         }
         refreshControls()
+    }
+
+    /// Starts voice following. In the free version only English, Turkish and Spanish scripts are followed.
+    private func startTrackingIfAllowed() {
+        let language = activeScript?.language ?? .named("en-US")
+        guard pro.isUnlocked || FreeTier.allowsLanguage(language.id) else {
+            receiveStatus("Voice following in \(language.name) is part of Sightline Pro.")
+            showPaywall = true
+            return
+        }
+        tracker.start()
     }
 
     /// The app left the foreground: stop scrolling, listening and the camera. A recording in progress is saved.
@@ -193,6 +245,15 @@ final class AppModel: ObservableObject {
     /// Camera mode also moves speech tracking onto the camera's microphone audio, so the two never open the
     /// microphone at the same time.
     func setCameraOn(_ on: Bool) {
+        #if DEBUG
+        if ScreenshotMode.isActive {
+            // No camera in the simulator: only the layout is set up.
+            cameraOn = on
+            prompter.setCameraMode(on)
+            refreshControls()
+            return
+        }
+        #endif
         cameraOn = on
         if !on, tracker.isRunning {
             // Leaving the camera ends tracking; switching audio source would reopen the microphone.
@@ -273,7 +334,7 @@ final class AppModel: ObservableObject {
 
     private func samplePace() {
         let running = prompter.isPlaying || tracker.isRunning
-        guard running, settings.showPace, totalWords > 0 else {
+        guard running, settings.showPace, pro.isUnlocked, totalWords > 0 else {
             if !running { pace.reset() }
             paceText = nil
             return
@@ -331,31 +392,38 @@ final class AppModel: ObservableObject {
 
 extension AppModel: ControllerInputDelegate {
     func controllerStick(_ value: Float) {
+        guard pro.isUnlocked else { return }
         prompter.setStick(CGFloat(value))
     }
 
     func controllerAdjustSpeed(_ direction: Int) {
+        guard pro.isUnlocked else { return }
         adjustSpeed(direction)
     }
 
     func controllerTogglePlay() {
+        guard pro.isUnlocked else { return }
         togglePlay()
     }
 
     func controllerRestart() {
+        guard pro.isUnlocked else { return }
         restart()
     }
 
     func controllerJumpParagraph(forward: Bool) {
+        guard pro.isUnlocked else { return }
         prompter.jumpParagraph(forward: forward)
         tracker.reset(to: prompter.currentWordIndex)
     }
 
     func controllerToggleTracking() {
+        guard pro.isUnlocked else { return }
         toggleTracking()
     }
 
     func controllerToggleVisibility() {
+        guard pro.isUnlocked else { return }
         toggleControls()
     }
 }

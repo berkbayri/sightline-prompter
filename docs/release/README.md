@@ -6,6 +6,8 @@ Bu rehber, ilk kez App Store'a uygulama gönderen biri için yazıldı. Her adı
 - **[BEN]** Claude'a "şunu yap" dediğinde yapacağım şey.
 - **[KARAR]** Senin vermen gereken karar. Önerimi yazdım, değiştirebilirsin.
 
+**Güncel durum:** satış modeli ve fiyatlar kararlaştırıldı, Pro kodu (satın alma, paywall, ücretsiz sınırlar) iPhone ve Mac'e yazıldı, ekran görüntüleri hazır (`screenshots/`). Geriye hesap onayı, Apple tarafındaki işler ve uygulama adı kontrolü kaldı.
+
 Hazır olan her şey bu klasörde: `pricing.md` (fiyat ve abonelik önerisi), `store-listing.md` (mağaza metinleri, kopyala-yapıştır).
 
 ---
@@ -48,7 +50,7 @@ Doğrulananlar: Mac paketi evrensel derleniyor ve yalnızca sistem kütüphanele
 
 1. **[KARAR] Satış modelini seç.** `pricing.md` dosyasını oku, "Karar 1-4" bölümüne bak. Önerim: ücretsiz indirme + Pro (yıllık / aylık / ömür boyu).
 2. **[SEN] Uygulama adının boş olduğunu kontrol et.** App Store'da her isim tekildir. Onaydan sonra App Store Connect'te "Sightline Prompter" yazınca alınmışsa hata verir. Alternatifler `store-listing.md`'de.
-3. **[SEN] Ekran görüntüleri çek.** Gerekenler:
+3. ~~Ekran görüntüleri~~ **[BEN] Hazır:** `docs/release/screenshots/`. iPhone 6,9" (1320×2868) 3 adet, Mac (2880×1800) 3 adet. iPhone görüntüleri simülatörde, kamera önizlemesi yerine örnek bir görselle üretildi; mağazada "örnek görüntü" olarak kabul edilir, ama istersen gerçek telefon görüntülerinle değiştir. Eski talimat (isteğe bağlı, gerçek ekran için):
    - iPhone: 6,9" ekran. iPhone 16 Pro'nun ekran görüntüsü (1206×2622) kabul ediliyor. En az 3, en fazla 10 adet. Öneri: script listesi, dikey kayıt ekranı, yatay kayıt ekranı, ayarlar.
    - Mac: 2880×1800 (veya 1440×900, 2560×1600). Notch'taki paneli gösteren 3 görüntü.
    - Telefondan almak için ses yukarı + yan düğme. Mac'te Cmd+Shift+5.

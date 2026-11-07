@@ -1,9 +1,11 @@
+import SightlineCore
 import SwiftUI
 
 /// Camera controls that do not fit on the prompter's control row: video format, codec, color, HDR,
 /// stabilization, exposure, locks, torch. Only options the current camera supports are shown.
 struct CameraSettingsScreen: View {
     @ObservedObject var camera: CameraEngine
+    @ObservedObject private var pro = ProStore.shared
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -56,10 +58,13 @@ struct CameraSettingsScreen: View {
                     Text(mode.name).tag(mode)
                 }
             }
+            .disabled(!pro.isUnlocked)
         } header: {
             Label("Video", systemImage: "video")
         } footer: {
-            Text("Options follow what the selected camera and format support. ProRes and Apple Log need a compatible iPhone and format.")
+            Text(pro.isUnlocked
+                 ? "Options follow what the selected camera and format support. ProRes and Apple Log need a compatible iPhone and format."
+                 : "Free recordings: 16:9, up to 1080p at 30 fps, HEVC or H.264, two minutes. 4K, 60 fps, HDR, ProRes, 4:3 and stabilization are part of Sightline Pro.")
         }
     }
 
@@ -79,8 +84,9 @@ struct CameraSettingsScreen: View {
         } header: {
             Label("Exposure and focus", systemImage: "sun.max")
         } footer: {
-            Text("Tap the preview to focus and expose at a point. Pinch to zoom.")
+            Text(pro.isUnlocked ? "Tap the preview to focus and expose at a point. Pinch to zoom." : "Exposure and focus locks are part of Sightline Pro. Tap the preview to focus and pinch to zoom.")
         }
+        .disabled(!pro.isUnlocked)
     }
 
     @ViewBuilder

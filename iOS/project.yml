@@ -82,6 +82,9 @@ schemes:
     build:
       targets:
         SightlinePrompter: all
+    run:
+      config: Debug
+      storeKitConfiguration: Sightline.storekit
     test:
       targets:
         - SightlinePrompterUITests

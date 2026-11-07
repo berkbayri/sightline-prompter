@@ -1,5 +1,28 @@
 # Fiyatlandırma ve ücretli özellikler
 
+> **Durum (7 Kasım 2026):** Karar verildi ve uygulamaya işlendi. Satış modeli: ücretsiz + Pro. Fiyatlar: aylık $4.99, yıllık $29.99 (7 gün deneme), ömür boyu $59.99. Tek hak iPhone ve Mac'te geçerli. Aşağıdaki kod tarafı bitti; App Store Connect'te ürünleri tanımlamak hesap onayından sonra yapılacak (`README.md`, Adım 9).
+
+### Uygulamada ne var
+
+| Ürün | Product ID |
+|---|---|
+| Pro Yıllık (7 gün deneme) | `com.berkbayri.SightlinePrompter.pro.yearly` |
+| Pro Aylık | `com.berkbayri.SightlinePrompter.pro.monthly` |
+| Pro Ömür Boyu | `com.berkbayri.SightlinePrompter.pro.lifetime` |
+
+Abonelik grubu adı: **Sightline Pro**. ID'ler App Store Connect'te **birebir** aynı yazılmalı.
+
+Ücretsiz sürümde uygulanan sınırlar (koddaki karşılığı: `Shared/Core/FreeTier.swift`):
+
+- Sesle takip: bir çalıştırmada **2 dakika**, yalnızca **İngilizce, Türkçe, İspanyolca**.
+- iPhone video: **1080p, en fazla 30 fps, 16:9, HEVC/H.264, 2 dakika**. 4K, 60 fps, HDR, ProRes, 4:3, görüntü sabitleme ve pozlama/odak kilitleri Pro.
+- Prompter alanının genişlik/yükseklik ayarı, hız göstergesi (kelime/dk), DualSense kontrolü: Pro.
+- Sınırsız script, içe aktarma, düzenleme, el ile kaydırma: ücretsiz.
+
+Notlar: Sesle takip süresi her başlatışta yeniden sayılır; bu, süreyi sıfırlamak için kapatıp açmayı mümkün kılar. İlk sürüm için bilerek basit tutuldu. İstismar çoğalırsa günlük toplam süreye çevrilir.
+
+Test için: Xcode'dan çalıştırınca `Sightline.storekit` dosyası devreye girer ve sahte satın alma yapabilirsin. Telefona kurduğum geliştirme sürümünde Ayarlar'da **"Debug: act as Pro"** anahtarı var; Pro özelliklerini mağaza olmadan denemek içindir. Mağaza sürümünde bu anahtar yok.
+
 Araştırma tarihi: 7 Kasım 2026. Rakam kaynakları: App Store sayfaları, RevenueCat "State of Subscription Apps 2026", Apple geliştirici belgeleri. Rakamlar bölgeye ve zamana göre değişir, bunları **başlangıç noktası** say.
 
 ## Rakipler (ABD App Store)

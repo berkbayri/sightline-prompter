@@ -1,0 +1,82 @@
+{
+  "identifier": "3CE469D7-00F1-47AD-9E07-A118E48B11CC",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "59.99",
+      "familyShareable": true,
+      "internalID": "4E113AD2-5D78-4398-A259-644026C72F4A",
+      "localizations": [
+        {
+          "description": "One purchase unlocks Sightline Pro on iPhone and Mac",
+          "displayName": "Sightline Pro Lifetime",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.berkbayri.SightlinePrompter.pro.lifetime",
+      "referenceName": "Pro Lifetime",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {},
+  "subscriptionGroups": [
+    {
+      "id": "91A1908F-DBEF-4BF3-818F-88857F2C4F07",
+      "localizations": [],
+      "name": "Sightline Pro",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "29.99",
+          "familyShareable": true,
+          "groupNumber": 1,
+          "internalID": "F5504D39-E2E3-4563-AAD4-1234997E8449",
+          "localizations": [
+            {
+              "description": "Unlimited voice following and recording",
+              "displayName": "Sightline Pro Yearly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.berkbayri.SightlinePrompter.pro.yearly",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Sightline Pro Yearly",
+          "subscriptionGroupID": "91A1908F-DBEF-4BF3-818F-88857F2C4F07",
+          "type": "RecurringSubscription",
+          "winbackOffers": [],
+          "introductoryOffer": {
+            "internalID": "6FEB8E9E-AF06-418C-8A24-A0CDE9AC6400",
+            "paymentMode": "free",
+            "subscriptionPeriod": "P1W"
+          }
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "4.99",
+          "familyShareable": true,
+          "groupNumber": 2,
+          "internalID": "F4BBB3A1-E0F7-4ED4-806B-DE0921FC1B70",
+          "localizations": [
+            {
+              "description": "Unlimited voice following and recording",
+              "displayName": "Sightline Pro Monthly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.berkbayri.SightlinePrompter.pro.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Sightline Pro Monthly",
+          "subscriptionGroupID": "91A1908F-DBEF-4BF3-818F-88857F2C4F07",
+          "type": "RecurringSubscription",
+          "winbackOffers": []
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}

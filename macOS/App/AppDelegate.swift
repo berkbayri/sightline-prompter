@@ -19,6 +19,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
     private var statusItem: NSStatusItem!
     private var trackingMenuItem: NSMenuItem?
     private var settingsWindow: NSWindow?
+    private var paywallWindow: NSWindow?
+    private let pro = ProStore.shared
     private var libraryWindow: LibraryWindowController!
     private var cancellables = Set<AnyCancellable>()
 
@@ -53,6 +55,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
             self.lastStatusWasError = !(text == "Listening…" || text == "Stopped" || text.hasPrefix("On-device"))
             self.panel.setStatus(text)
             self.refreshControls()
+        }
+
+        pro.start()
+        tracker.sessionLimit = { [pro] in pro.isUnlocked ? nil : FreeTier.maxTrackingSeconds }
+        tracker.onLimitReached = { [weak self] in
+            self?.panel.setStatus("Free voice following ended after \(Int(FreeTier.maxTrackingSeconds / 60)) minutes. Sightline Pro removes the limit.")
+            self?.refreshControls()
+            self?.openPaywall()
         }
 
         controller.delegate = self
@@ -182,7 +192,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
 
     private func samplePace() {
         let running = prompter.isPlaying || tracker.isRunning
-        guard running, Settings.shared.showPace, totalWords > 0 else {
+        guard running, Settings.shared.showPace, pro.isUnlocked, totalWords > 0 else {
             if !running { pace.reset() }
             panel.setPace(nil)
             return
@@ -331,10 +341,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
     @objc private func toggleTracking() {
         if tracker.isRunning {
             tracker.stop()
-        } else {
+        } else if pro.isUnlocked || FreeTier.allowsLanguage(Settings.shared.scriptLanguage) {
             tracker.start()
+        } else {
+            panel.setStatus("Voice following in this language is part of Sightline Pro.")
+            openPaywall()
         }
         refreshControls()
+    }
+
+    /// The Sightline Pro upgrade window, above the panel like the settings window.
+    func openPaywall() {
+        if paywallWindow == nil {
+            let view = PaywallView(store: pro) { [weak self] in self?.paywallWindow?.close() }
+                .frame(minWidth: 420, minHeight: 620)
+            let window = NSWindow(contentViewController: NSHostingController(rootView: view))
+            window.title = "Sightline Pro"
+            window.styleMask = [.titled, .closable]
+            window.level = NSWindow.Level(rawValue: NSWindow.Level.mainMenu.rawValue + 3)
+            window.collectionBehavior = [.fullScreenAuxiliary, .moveToActiveSpace]
+            window.isReleasedWhenClosed = false
+            window.center()
+            paywallWindow = window
+        }
+        NSApp.activate()
+        paywallWindow?.makeKeyAndOrderFront(nil)
     }
 
     @objc private func quit() {
@@ -379,31 +410,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
     // MARK: - ControllerInputDelegate
 
     func controllerStick(_ value: Float) {
+        guard pro.isUnlocked else { return }
         prompter.setStick(CGFloat(value))
     }
 
     func controllerAdjustSpeed(_ direction: Int) {
+        guard pro.isUnlocked else { return }
         adjustSpeed(direction)
     }
 
     func controllerTogglePlay() {
+        guard pro.isUnlocked else { return }
         togglePlay()
     }
 
     func controllerRestart() {
+        guard pro.isUnlocked else { return }
         restart()
     }
 
     func controllerJumpParagraph(forward: Bool) {
+        guard pro.isUnlocked else { return }
         prompter.jumpParagraph(forward: forward)
         tracker.reset(to: prompter.currentWordIndex)
     }
 
     func controllerToggleTracking() {
+        guard pro.isUnlocked else { return }
         toggleTracking()
     }
 
     func controllerToggleVisibility() {
+        guard pro.isUnlocked else { return }
         panel.togglePanel()
     }
 }

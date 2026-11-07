@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject private var settings = Settings.shared
     @StateObject private var catalog = LanguageCatalog()
+    @ObservedObject private var pro = ProStore.shared
 
     /// Offered languages, plus the current one even when this Mac cannot recognize it, so the picker keeps its value.
     private var pickerOptions: [ScriptLanguage] {
@@ -18,6 +19,26 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section {
+                if pro.isUnlocked {
+                    Label("Sightline Pro is active", systemImage: "checkmark.seal.fill")
+                        .foregroundStyle(.green)
+                } else {
+                    Button {
+                        (NSApp.delegate as? AppDelegate)?.openPaywall()
+                    } label: {
+                        Label("Upgrade to Sightline Pro", systemImage: "sparkles")
+                    }
+                }
+                #if DEBUG
+                Toggle("Debug: act as Pro", isOn: $pro.debugPro)
+                #endif
+            } header: {
+                Label("Sightline Pro", systemImage: "star")
+            } footer: {
+                Text(pro.isUnlocked ? "One purchase covers iPhone and Mac." : "Free: voice following up to 2 minutes at a time, in English, Turkish and Spanish. Pro removes every limit and adds the controller and pace readout.")
+            }
+
             Section {
                 Picker("Language", selection: $settings.scriptLanguage) {
                     ForEach(pickerOptions) { language in
@@ -69,6 +90,7 @@ struct SettingsView: View {
                 slider("Font size", value: $settings.fontSize, range: 12...72, step: 1, unit: "pt")
                 slider("Auto-scroll speed", value: $settings.autoSpeed, range: 0...300, step: 5, unit: "pt/s")
                 Toggle("Show words per minute and time left", isOn: $settings.showPace)
+                    .disabled(!pro.isUnlocked)
             } header: {
                 Label("Reading", systemImage: "textformat.size")
             }
@@ -90,6 +112,7 @@ struct SettingsView: View {
             } footer: {
                 Text("Precise starts very slowly for fine adjustments. Smooth is in between. Linear is 1:1.")
             }
+            .disabled(!pro.isUnlocked)
 
             Section {
                 shortcutRow("Play / pause", "Click text · X")

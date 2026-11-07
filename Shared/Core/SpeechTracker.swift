@@ -94,6 +94,24 @@ public final class SpeechTracker {
         engine?.append(buffer)
     }
 
+    /// Free version: how long one tracking run may last. nil means no limit.
+    public var sessionLimit: (() -> TimeInterval?)?
+    /// Called after a run ended because the limit was reached.
+    public var onLimitReached: (() -> Void)?
+    private var limitTask: Task<Void, Never>?
+
+    private func armLimit() {
+        limitTask?.cancel()
+        limitTask = nil
+        guard let seconds = sessionLimit?() else { return }
+        limitTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+            guard !Task.isCancelled, let self, self.isRunning else { return }
+            self.stop()
+            self.onLimitReached?()
+        }
+    }
+
     /// When audio last arrived from the capture session, in system uptime seconds.
     private var lastFeed: TimeInterval = 0
 
@@ -125,6 +143,8 @@ public final class SpeechTracker {
     }
 
     public func stop() {
+        limitTask?.cancel()
+        limitTask = nil
         session += 1
         guard isRunning else { return }
         isRunning = false
@@ -152,6 +172,7 @@ public final class SpeechTracker {
             }
         }
         isRunning = true
+        armLimit()
         let locale = Locale(identifier: language.id)
 
         if let analyzer = await analyzerEngineIfReady(locale) {

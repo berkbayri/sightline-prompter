@@ -1,3 +1,4 @@
+import SightlineCore
 import SwiftUI
 
 @main
@@ -34,6 +35,9 @@ struct RootView: View {
         .sheet(isPresented: $showingSettings) {
             SettingsScreen(model: model)
         }
+        .sheet(isPresented: Binding(get: { model.showPaywall && !showingPrompter }, set: { model.showPaywall = $0 })) {
+            PaywallView(store: model.pro) { model.showPaywall = false }
+        }
         .fullScreenCover(isPresented: $showingPrompter) {
             PrompterScreen(
                 model: model,
@@ -47,10 +51,16 @@ struct RootView: View {
             .sheet(isPresented: $showingCameraSettings) {
                 CameraSettingsScreen(camera: model.camera)
             }
+            .sheet(isPresented: Binding(get: { model.showPaywall && showingPrompter }, set: { model.showPaywall = $0 })) {
+                PaywallView(store: model.pro) { model.showPaywall = false }
+            }
             .onChange(of: showingCameraSettings) { _, isOpen in
                 if isOpen { model.pause() }
             }
         }
+        #if DEBUG
+        .onAppear { openScreenshotScene() }
+        #endif
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .background: model.enterBackground()
@@ -59,4 +69,27 @@ struct RootView: View {
             }
         }
     }
+
+    #if DEBUG
+    /// Opens the screen named by `-ScreenshotScene` (simulator screenshots for the App Store).
+    private func openScreenshotScene() {
+        guard let scene = ScreenshotMode.scene else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            switch scene {
+            case "recording":
+                if let script = model.activeScript ?? model.library.scripts.first { model.activate(script) }
+                model.setCameraOn(true)
+                showingPrompter = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { model.prompter.setCursor(wordIndex: 3) }
+            case "settings": showingSettings = true
+            case "paywall": model.showPaywall = true
+            case "camera":
+                model.setCameraOn(true)
+                showingPrompter = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { showingCameraSettings = true }
+            default: break
+            }
+        }
+    }
+    #endif
 }

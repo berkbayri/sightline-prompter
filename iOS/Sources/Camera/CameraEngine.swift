@@ -2,6 +2,7 @@ import AVFoundation
 import CoreMedia
 import CoreVideo
 import Photos
+import SightlineCore
 import UIKit
 
 /// The live camera behind the prompter. Wraps AVCaptureSession and exposes the controls the iPhone camera
@@ -331,6 +332,17 @@ final class CameraEngine: NSObject, ObservableObject {
         }
     }
 
+    /// Whether Sightline Pro is unlocked. The free version records 1080p at up to 30 fps, in 16:9, for two minutes.
+    var isProUnlocked: () -> Bool = { true }
+    /// Called when a free recording was stopped at the time limit.
+    var onRecordingLimit: (() -> Void)?
+
+    /// The purchase state changed: offer the modes and codecs it allows.
+    func entitlementChanged() {
+        guard configured, !isRecording else { return }
+        refreshDeviceState()
+    }
+
     /// Re-reads everything the controls show from the current device, and re-applies the chosen settings.
     private func refreshDeviceState() {
         guard let device else { return }
@@ -339,8 +351,13 @@ final class CameraEngine: NSObject, ObservableObject {
         zoomPresets = Self.zoomPresets(for: device)
         zoomFactor = device.videoZoomFactor
 
-        let allModes = Self.modes(for: device)
-        aspects = AspectRatio.allCases.filter { shape in allModes.contains { $0.aspect == shape } }
+        let pro = isProUnlocked()
+        let allModes = Self.modes(for: device).filter {
+            pro || ($0.height <= FreeTier.maxVideoHeight && $0.frameRate <= FreeTier.maxFrameRate)
+        }
+        aspects = AspectRatio.allCases.filter { shape in
+            (pro || shape == .widescreen) && allModes.contains { $0.aspect == shape }
+        }
         if !aspects.contains(aspect), let first = aspects.first {
             aspect = first
         }
@@ -363,10 +380,13 @@ final class CameraEngine: NSObject, ObservableObject {
         }
         applyColorMode(colorMode)
 
-        hdrSupported = format.isVideoHDRSupported
+        hdrSupported = pro && format.isVideoHDRSupported
+        if !pro { hdrEnabled = false }
         applyHDR(hdrEnabled)
 
-        codecs = Codec.allCases.filter { movieOutput.availableVideoCodecTypes.contains($0.videoType) }
+        codecs = Codec.allCases.filter {
+            movieOutput.availableVideoCodecTypes.contains($0.videoType) && (pro || $0 == .hevc || $0 == .h264)
+        }
         if !codecs.contains(codec) {
             codec = codecs.first ?? .h264
         }
@@ -683,6 +703,11 @@ final class CameraEngine: NSObject, ObservableObject {
             Task { @MainActor in
                 guard let self, let start = self.recordingStart else { return }
                 self.recordedSeconds = Int(Date().timeIntervalSince(start))
+                if self.recordedSeconds >= FreeTier.maxRecordSeconds, !self.isProUnlocked() {
+                    self.stopRecording()
+                    self.message = "Free recordings stop after \(FreeTier.maxRecordSeconds / 60) minutes. Sightline Pro removes the limit."
+                    self.onRecordingLimit?()
+                }
             }
         }
     }

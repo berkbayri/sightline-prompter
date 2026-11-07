@@ -6,6 +6,7 @@ import SwiftUI
 struct PrompterScreen: View {
     @ObservedObject var model: AppModel
     @ObservedObject private var camera: CameraEngine
+    @ObservedObject private var pro = ProStore.shared
     @ObservedObject private var settings = PhoneSettings.shared
     let onExit: () -> Void
     let onCameraSettings: () -> Void
@@ -20,6 +21,25 @@ struct PrompterScreen: View {
     /// Height of one text line, matching the paragraph style the prompter view draws with.
     private var lineHeight: CGFloat {
         UIFont.systemFont(ofSize: CGFloat(settings.fontSize), weight: .semibold).lineHeight * 1.35
+    }
+
+    @ViewBuilder
+    private func previewView(passThrough: CGRect) -> some View {
+        #if DEBUG
+        if ScreenshotMode.isActive {
+            Group {
+                if let image = ScreenshotMode.backdrop {
+                    Image(uiImage: image).resizable().scaledToFill()
+                } else {
+                    Color.gray.opacity(0.4)
+                }
+            }
+        } else {
+            CameraPreview(engine: model.camera, passThrough: passThrough)
+        }
+        #else
+        CameraPreview(engine: model.camera, passThrough: passThrough)
+        #endif
     }
 
     var body: some View {
@@ -37,13 +57,13 @@ struct PrompterScreen: View {
                     isLandscape: proxy.size.width > proxy.size.height,
                     cameraEdge: model.cameraEdge,
                     readingDistanceCm: CGFloat(settings.readingDistanceCm),
-                    landscapeColumnWidth: CGFloat(settings.landscapeColumnWidth),
+                    landscapeColumnWidth: pro.isUnlocked ? CGFloat(settings.landscapeColumnWidth) : 480,
                     recording: CameraLayout.RecordingBand(
                         lineHeight: lineHeight,
-                        portraitLines: CGFloat(settings.portraitLines),
-                        landscapeLines: CGFloat(settings.landscapeLines),
-                        portraitWidthFraction: CGFloat(settings.portraitWidthPercent / 100),
-                        landscapeWidth: CGFloat(settings.landscapeColumnWidth),
+                        portraitLines: pro.isUnlocked ? CGFloat(settings.portraitLines) : 3,
+                        landscapeLines: pro.isUnlocked ? CGFloat(settings.landscapeLines) : 5,
+                        portraitWidthFraction: pro.isUnlocked ? CGFloat(settings.portraitWidthPercent / 100) : 1,
+                        landscapeWidth: pro.isUnlocked ? CGFloat(settings.landscapeColumnWidth) : 480,
                         videoAspect: camera.aspect.ratio
                     )
                 )
@@ -52,7 +72,7 @@ struct PrompterScreen: View {
                 let passThrough = model.controlsVisible ? controls : CGRect.zero
                 ZStack(alignment: .topLeading) {
                     if model.cameraOn, let preview = layout.previewFrame {
-                        CameraPreview(engine: model.camera, passThrough: passThrough)
+                        previewView(passThrough: passThrough)
                             .frame(width: preview.width, height: preview.height)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                             .offset(x: preview.minX, y: preview.minY)

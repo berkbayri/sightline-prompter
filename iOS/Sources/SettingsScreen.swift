@@ -5,15 +5,40 @@ import SwiftUI
 struct SettingsScreen: View {
     @ObservedObject private var settings = PhoneSettings.shared
     @ObservedObject private var catalog: LanguageCatalog
+    @ObservedObject private var pro = ProStore.shared
+    @ObservedObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
 
     init(model: AppModel) {
         _catalog = ObservedObject(wrappedValue: model.catalog)
+        _model = ObservedObject(wrappedValue: model)
     }
 
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    if pro.isUnlocked {
+                        Label("Sightline Pro is active", systemImage: "checkmark.seal.fill")
+                            .foregroundStyle(.green)
+                    } else {
+                        Button {
+                            dismiss()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { model.showPaywall = true }
+                        } label: {
+                            Label("Upgrade to Sightline Pro", systemImage: "sparkles")
+                        }
+                        .accessibilityIdentifier("settings.upgrade")
+                    }
+                    #if DEBUG
+                    Toggle("Debug: act as Pro", isOn: $pro.debugPro)
+                    #endif
+                } header: {
+                    Label("Sightline Pro", systemImage: "star")
+                } footer: {
+                    Text(pro.isUnlocked ? "One purchase covers iPhone and Mac." : "Free: voice following and recording up to 2 minutes, 1080p, in English, Turkish and Spanish. Pro removes every limit.")
+                }
+
                 Section {
                     ForEach(ScriptLanguage.all) { language in
                         LanguageRow(
@@ -35,6 +60,7 @@ struct SettingsScreen: View {
                     slider("Font size", value: $settings.fontSize, range: 20...72, step: 1, unit: "pt")
                     slider("Auto-scroll speed", value: $settings.autoSpeed, range: 0...300, step: 5, unit: "pt/s")
                     Toggle("Show words per minute and time left", isOn: $settings.showPace)
+                        .disabled(!pro.isUnlocked)
                 } header: {
                     Label("Reading", systemImage: "textformat.size")
                 }
@@ -61,8 +87,11 @@ struct SettingsScreen: View {
                 } header: {
                     Label("Prompter area while recording", systemImage: "rectangle.and.text.magnifyingglass")
                 } footer: {
-                    Text("A narrow, short area keeps your eye movement small on the recording. Width is centered in portrait and sits next to the camera in landscape.")
+                    Text(pro.isUnlocked
+                         ? "A narrow, short area keeps your eye movement small on the recording. Width is centered in portrait and sits next to the camera in landscape."
+                         : "Adjusting the prompter area is part of Sightline Pro.")
                 }
+                .disabled(!pro.isUnlocked)
 
                 Section {
                     Picker("Response", selection: $settings.stickCurve) {

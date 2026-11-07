@@ -1,6 +1,6 @@
 # Sightline Prompter
 
-A teleprompter that lives under the MacBook notch. It follows your voice, so the script moves with you, and it can be driven by mouse, trackpad or a PlayStation controller.
+A teleprompter that lives under the MacBook notch. It follows your voice, so the script moves with you, and it can be driven by mouse, trackpad or a PlayStation controller. An iPhone version records video while you read.
 
 Keeping the text right under the camera lets you read while looking at the lens.
 
@@ -16,6 +16,19 @@ Keeping the text right under the camera lets you read while looking at the lens.
 - **Script library.** Scripts are saved as one file each, in iCloud Drive if it is available, otherwise in Documents. Switch the folder in Settings.
 - **Import.** Plain text, Markdown, RTF, HTML, Word (.doc, .docx), OpenDocument (.odt) and PDF. Drop a file on the Library window, or open it with the app.
 - **Window.** Width, height and horizontal position are set in Settings. Hover over the panel for controls. The window joins every Space, including full-screen apps, and can be hidden from screen sharing.
+
+## iPhone app
+
+The iPhone app is a recording teleprompter. Pick a script, and the app opens the front camera with a short prompter band right under the Dynamic Island, so you read while looking near the lens.
+
+- **Script picker.** The home screen lists your scripts. Tap one to start. Create, import, search, edit, duplicate and delete scripts there, using the same import formats as the Mac app.
+- **Prompter band.** 3 lines in portrait, 5 lines in landscape, next to the camera. The live preview is scaled down into the rest of the screen, with the record button and camera controls.
+- **Adjustable area.** Width and height of the band are set per orientation in Settings. A narrow, short band keeps eye movement small on the recording.
+- **Voice following.** The same word-by-word following as on the Mac, fed by the camera's microphone, so it keeps working while you record. It follows spoken numbers, resumes after notifications, and picks up from the words on screen when you scroll to another part.
+- **Video.** 16:9 or 4:3, resolution and frame rate, codec (HEVC, H.264, ProRes), color, HDR, stabilization, torch, exposure and focus locks. Each launch starts with the front camera, 16:9, 4K, 30 fps. Recordings are saved to Photos.
+- **Languages.** The same languages as the Mac app. Turkish needs the iOS Dictation model for on-device recognition, otherwise audio goes to Apple's servers.
+
+Requires iOS 17 or later and the Xcode project in `iOS/`, see Build from source. There is no App Store release yet.
 
 ## Requirements
 
@@ -78,13 +91,21 @@ Chinese, Japanese and Cantonese word matching works on segments from the languag
 ## Build from source
 
 Requires Xcode 26 or later.
-
 ```sh
 git clone https://github.com/berkbayri/sightline-prompter.git
 cd sightline-prompter
 swift build -c release
 swift test
-./build.sh   # builds, installs to /Applications and launches
+./macOS/build.sh   # builds, installs to /Applications and launches
+```
+
+The iPhone app uses [XcodeGen](https://github.com/yonaskolb/XcodeGen) to create its Xcode project from `iOS/project.yml`:
+
+```sh
+brew install xcodegen
+cd iOS
+xcodegen generate
+open SightlinePrompter.xcodeproj   # choose your team under Signing, then run on an iPhone
 ```
 
 ## Known limits

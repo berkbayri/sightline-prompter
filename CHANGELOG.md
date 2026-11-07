@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- iPhone app (iOS 17+): script picker as the home screen, a recording view with a prompter band under the Dynamic Island, and the front-camera preview scaled into the rest of the screen. 3 lines in portrait, 5 in landscape; width and height are adjustable per orientation.
+- iPhone video: 16:9 or 4:3, resolution and frame rate, codec, color, HDR, stabilization, torch, exposure and focus locks. Starts on the front camera, 16:9, 4K, 30 fps. Saved to Photos.
+- Voice following: spoken numbers now match whether the recognizer writes digits or words; the next expected word moves the cursor at once; cost per update no longer grows with the length of the recording.
+- Voice following: when you scroll to a different part, speaking the words on screen moves the reading position there.
+- Voice following on iPhone: recognition survives notifications and audio interruptions; camera audio feeds the on-device engine; script words are given to the recognizer as hints.
+- Project layout: shared code in `Shared/`, Mac app in `macOS/`, iPhone app in `iOS/`. The Mac build script is now `macOS/build.sh`.
+
 ## 1.0.2
 
 - Language list: every language Apple offers for one-click offline download is offered, with regional variants (31 entries including Turkish). German, Italian, Korean and others are now available.

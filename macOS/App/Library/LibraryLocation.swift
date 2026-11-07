@@ -19,7 +19,9 @@ enum LibraryLocation: Equatable {
     }
 
     private static var documentsRoot: URL {
-        FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents", isDirectory: true)
+        // The Documents folder of the app: ~/Documents, or the app's own container when sandboxed (Mac App Store).
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents", isDirectory: true)
     }
 
     /// iCloud Drive when it is available, otherwise ~/Documents.

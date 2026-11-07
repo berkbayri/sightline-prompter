@@ -47,6 +47,7 @@ targets:
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         ITSAppUsesNonExemptEncryption: false
+        LSApplicationCategoryType: public.app-category.video
         NSMicrophoneUsageDescription: The microphone is used to follow your speech and scroll the script automatically.
         NSSpeechRecognitionUsageDescription: Speech recognition is used to find the word you are reading. Audio is processed on device when possible.
         NSCameraUsageDescription: The camera records your video while you read the script.

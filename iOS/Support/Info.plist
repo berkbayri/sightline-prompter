@@ -36,6 +36,18 @@
 	<string>Recordings are saved to your Photos library.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Speech recognition is used to find the word you are reading. Audio is processed on device when possible.</string>
+	<key>NSUbiquitousContainers</key>
+	<dict>
+		<key>iCloud.com.berkbayri.SightlinePrompter</key>
+		<dict>
+			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
+			<true/>
+			<key>NSUbiquitousContainerName</key>
+			<string>Sightline Prompter</string>
+			<key>NSUbiquitousContainerSupportedFolderLevels</key>
+			<string>Any</string>
+		</dict>
+	</dict>
 	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchScreen</key>

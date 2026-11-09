@@ -13,7 +13,8 @@ Keeping the text right under the camera lets you read while looking at the lens.
 - **Pace.** Words per minute and time left, measured from your actual reading speed. Pauses are not counted.
 - **Gamepad.** DualSense (PlayStation 5) controllers over Bluetooth or USB: analog stick for scrolling, D-pad for speed, paragraph jumps, tracking toggle. The stick response curve and max speed are adjustable.
 - **Light bar.** The DualSense light shows tracking and scroll state.
-- **Script library.** Scripts are saved as one file each, in iCloud Drive if it is available, otherwise in Documents. Switch the folder in Settings.
+- **Script library.** Scripts are saved as one file each, in the iCloud container shared by the Mac and iPhone apps (iCloud Drive > Sightline Prompter), so a script added or edited on one shows up on the other. Without iCloud they stay in Documents.
+- **Delivery cues.** Anything written between double square brackets, like `[[pause, smile]]` or `[[look at the camera]]`, is a direction to you, not text to say. The prompter shows it in its own small italic blue style, on its own line when the cue stands alone and inline when it sits inside a sentence. Speech following skips it, and it does not count in the word total or the pace estimate. The same on iPhone and Mac.
 - **Import.** Plain text, Markdown, RTF, HTML, Word (.doc, .docx), OpenDocument (.odt) and PDF. Drop a file on the Library window, or open it with the app.
 - **Window.** Width, height and horizontal position are set in Settings. Hover over the panel for controls. The window joins every Space, including full-screen apps, and can be hidden from screen sharing.
 

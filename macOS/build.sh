@@ -12,7 +12,8 @@ APP="/Applications/Sightline Prompter.app"
 
 echo "==> Building (release)..."
 mkdir -p "$SCRATCH"
-swift build -c release --product SightlinePrompter --scratch-path "$SCRATCH"
+# SIGHTLINE_DEV opens every Pro feature in this local build. macOS/appstore.sh does not set it.
+swift build -c release --product SightlinePrompter --scratch-path "$SCRATCH" -Xswiftc -DSIGHTLINE_DEV
 
 echo "==> Stopping the running copy..."
 pkill -x SightlinePrompter || true

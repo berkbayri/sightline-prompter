@@ -48,6 +48,11 @@ targets:
         LSSupportsOpeningDocumentsInPlace: true
         ITSAppUsesNonExemptEncryption: false
         LSApplicationCategoryType: public.app-category.video
+        NSUbiquitousContainers:
+          iCloud.com.berkbayri.SightlinePrompter:
+            NSUbiquitousContainerIsDocumentScopePublic: true
+            NSUbiquitousContainerName: Sightline Prompter
+            NSUbiquitousContainerSupportedFolderLevels: Any
         NSMicrophoneUsageDescription: The microphone is used to follow your speech and scroll the script automatically.
         NSSpeechRecognitionUsageDescription: Speech recognition is used to find the word you are reading. Audio is processed on device when possible.
         NSCameraUsageDescription: The camera records your video while you read the script.
@@ -60,6 +65,12 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME: ""
         INFOPLIST_KEY_UILaunchScreen_Generation: NO
+      configs:
+        # The iCloud container needs a paid developer team: a personal team cannot sign it. Release builds
+        # (App Store, TestFlight) carry the entitlement; Debug builds on a personal team run without it and use
+        # the folder chosen in Settings instead.
+        Release:
+          CODE_SIGN_ENTITLEMENTS: Support/SightlinePrompter.entitlements
 
   SightlinePrompterUITests:
     type: bundle.ui-testing

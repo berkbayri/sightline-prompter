@@ -361,10 +361,29 @@ final class AppModel: ObservableObject {
 
     // MARK: - Storage
 
-    /// Scripts live in Documents/Sightline Prompter, visible in the Files app.
-    private static var libraryFolder: URL {
+    /// This phone's own library folder: Documents/Sightline Prompter, visible in the Files app. Used when iCloud is
+    /// not available, and as the place earlier versions saved scripts.
+    private static var localLibraryFolder: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("Sightline Prompter", isDirectory: true)
+            .appendingPathComponent(LibraryContainer.legacyFolderName, isDirectory: true)
+    }
+
+    /// Where scripts live, best first: the iCloud container shared with the Mac app (iCloud Drive > Sightline Prompter),
+    /// a folder picked in Settings (for builds that cannot have the iCloud entitlement), or this phone only. Scripts
+    /// saved on the phone earlier are moved into the shared folder.
+    private static var libraryFolder: URL {
+        if let shared = LibraryContainer.documentsURL ?? LibraryFolderBookmark.resolve() {
+            LibraryContainer.adopt(from: [localLibraryFolder], into: shared)
+            return shared
+        }
+        return localLibraryFolder
+    }
+
+    /// Where the library is stored now, for Settings.
+    static var libraryDescription: String {
+        if LibraryContainer.documentsURL != nil { return "iCloud Drive, shared with your Mac" }
+        if LibraryFolderBookmark.isSet { return "Folder you chose in Files" }
+        return "This iPhone only"
     }
 
     private static let turkishSampleText = """

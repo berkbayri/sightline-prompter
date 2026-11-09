@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Delivery cues: text between double square brackets (`[[pause]]`) is shown in the prompter as a direction, in its own style, and is never spoken: speech following, word counts and the pace estimate skip it. Mac and iPhone.
+- Script library shared between Mac and iPhone through the iCloud container `iCloud.com.berkbayri.SightlinePrompter` (iCloud Drive > Sightline Prompter). Scripts saved by earlier versions are moved in on first launch. Needs a build signed by a paid developer team; on a personal team the iPhone app can instead use a folder chosen in Settings > Library.
+- Developer build of the Mac app (`macOS/build.sh`) opens every Pro feature.
 - iPhone app (iOS 17+): script picker as the home screen, a recording view with a prompter band under the Dynamic Island, and the front-camera preview scaled into the rest of the screen. 3 lines in portrait, 5 in landscape; width and height are adjustable per orientation.
 - iPhone video: 16:9 or 4:3, resolution and frame rate, codec, color, HDR, stabilization, torch, exposure and focus locks. Starts on the front camera, 16:9, 4K, 30 fps. Saved to Photos.
 - Voice following: spoken numbers now match whether the recognizer writes digits or words; the next expected word moves the cursor at once; cost per update no longer grows with the length of the recording.

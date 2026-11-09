@@ -44,8 +44,9 @@ public final class ProStore: ObservableObject {
     @Published public private(set) var loadFailed = false
     @Published public var message: String?
 
-    #if DEBUG
-    /// Debug builds only: act as if Pro were bought, to try the paid features without the App Store.
+    #if DEBUG || SIGHTLINE_DEV
+    /// Debug and developer builds only (macOS/build.sh sets SIGHTLINE_DEV): act as if Pro were bought, to try
+    /// the paid features without the App Store. Never compiled into the App Store build.
     @Published public var debugPro: Bool {
         didSet { UserDefaults.standard.set(debugPro, forKey: "debugPro") }
     }
@@ -56,14 +57,17 @@ public final class ProStore: ObservableObject {
     private var started = false
 
     private init() {
-        #if DEBUG
+        #if SIGHTLINE_DEV
+        // Developer build: everything open unless switched off with `defaults write ... debugPro -bool false`.
+        debugPro = UserDefaults.standard.object(forKey: "debugPro") as? Bool ?? true
+        #elseif DEBUG
         debugPro = UserDefaults.standard.bool(forKey: "debugPro")
         #endif
     }
 
     /// Whether paid features are open. Use this everywhere, never `isPro` directly.
     public var isUnlocked: Bool {
-        #if DEBUG
+        #if DEBUG || SIGHTLINE_DEV
         if debugPro { return true }
         #endif
         return isPro

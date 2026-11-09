@@ -93,7 +93,9 @@ developer.apple.com → Certificates, Identifiers & Profiles → **Identifiers**
 
 - Description: Sightline Prompter
 - Bundle ID: **Explicit**, `com.berkbayri.SightlinePrompter`
-- Capabilities: şimdilik **hiçbirini** seçme. (iCloud Drive senkronu eklersek sonra ekleriz.)
+- Capabilities: **iCloud** kutusunu işaretle. Mac ve iPhone kütüphanesi aynı iCloud kapsayıcısını kullanıyor, bu yüzden bunu açmadan senkron çalışmaz.
+- Sonra **Identifiers → iCloud Containers → +** ile bir kapsayıcı oluştur: ID tam olarak **`iCloud.com.berkbayri.SightlinePrompter`** olmalı (kodda, entitlement dosyalarında ve Info.plist'te bu yazıyor). Ardından App ID'nin iCloud ayarında **Include CloudKit support** değil, **iCloud Documents** seçili olsun ve bu kapsayıcıyı ona ata.
+- Mac için de aynısını yap: Mac App Store provisioning profile'ı (`PROFILE`) bu iCloud kapsayıcısını içermeli. Profili kapsayıcıyı atadıktan **sonra** oluştur ya da yenile.
 
 ### Adım 5. App Store Connect'te uygulamayı oluştur **[SEN]**
 
@@ -122,7 +124,7 @@ Her yüklemede **derleme numarası (build)** bir öncekinden büyük olmalı.
 
 Ben `macOS/appstore.sh` komutunu imza bilgileriyle çalıştırırım, `.pkg` çıkar. Sen **Transporter** uygulamasını (Mac App Store'dan ücretsiz) aç, `.pkg`'yi sürükle, **Deliver**'a bas.
 
-> **Önemli, Mac sandbox'ı:** Mac App Store sürümü kum havuzunda (sandbox) çalışır. Ev dizinindeki iCloud Drive klasörüne doğrudan erişemez; kütüphane uygulamanın kendi klasörüne yazılır. Kod buna şimdiden uyumlu çalışıyor (iCloud Drive yolu bulunamazsa kendi belgeler klasörüne geçiyor). Konuşma tanıma, DualSense ve dosya içe aktarma sandbox'ta **gerçekten denenmeli**: bunu TestFlight'ta yaparız. Sorun çıkarsa düzeltirim.
+> **Önemli, Mac sandbox'ı:** Mac App Store sürümü kum havuzunda (sandbox) çalışır. Ev dizinindeki iCloud Drive klasörüne doğrudan erişemez; bu yüzden kütüphane iCloud kapsayıcısına (`iCloud.com.berkbayri.SightlinePrompter`) yazılır ve iPhone ile aynı klasörü paylaşır. Kapsayıcı yoksa (iCloud kapalı) uygulamanın kendi belgeler klasörüne geçer. Konuşma tanıma, DualSense ve dosya içe aktarma sandbox'ta **gerçekten denenmeli**: bunu TestFlight'ta yaparız. Sorun çıkarsa düzeltirim.
 
 ### Adım 9. TestFlight ile dene **[SEN]**
 

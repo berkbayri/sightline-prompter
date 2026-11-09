@@ -1,6 +1,7 @@
 import Aligner
 import SightlineCore
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsScreen: View {
     @ObservedObject private var settings = PhoneSettings.shared
@@ -8,6 +9,8 @@ struct SettingsScreen: View {
     @ObservedObject private var pro = ProStore.shared
     @ObservedObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
+    @State private var choosingFolder = false
+    @State private var libraryNote: String?
 
     init(model: AppModel) {
         _catalog = ObservedObject(wrappedValue: model.catalog)
@@ -111,6 +114,8 @@ struct SettingsScreen: View {
                     Text("Precise starts very slowly for fine adjustments. Smooth is in between. Linear is 1:1.")
                 }
 
+                librarySection
+
                 Section {
                     shortcutRow("Play / pause", "Tap the text")
                     shortcutRow("Scroll", "Drag the text")
@@ -130,6 +135,44 @@ struct SettingsScreen: View {
                 }
             }
             .onAppear { catalog.refresh() }
+        }
+    }
+
+    /// Where scripts are stored. With the iCloud container they sync with the Mac on their own. A build that cannot
+    /// have it (a personal development team) can still share by pointing at the Mac's iCloud Drive folder.
+    private var librarySection: some View {
+        Section {
+            LabeledContent("Scripts") {
+                Text(AppModel.libraryDescription).foregroundStyle(.secondary)
+            }
+            if LibraryContainer.documentsURL == nil {
+                Button("Choose a Folder in iCloud Drive…") { choosingFolder = true }
+                if LibraryFolderBookmark.isSet {
+                    Button("Keep Scripts on This iPhone Only", role: .destructive) {
+                        LibraryFolderBookmark.clear()
+                        libraryNote = "Close and reopen Sightline Prompter to use this iPhone's own folder."
+                    }
+                }
+            }
+        } header: {
+            Label("Library", systemImage: "icloud")
+        } footer: {
+            if let libraryNote {
+                Text(libraryNote)
+            } else if LibraryContainer.documentsURL != nil {
+                Text("Scripts you add or edit here appear on your Mac, and the other way round. They are the files in iCloud Drive > Sightline Prompter.")
+            } else {
+                Text("iCloud sync needs a build signed with the iCloud capability. Until then, choose the Sightline Prompter folder in iCloud Drive that your Mac uses, and both share it.")
+            }
+        }
+        .fileImporter(isPresented: $choosingFolder, allowedContentTypes: [.folder]) { result in
+            guard case .success(let url) = result else { return }
+            do {
+                try LibraryFolderBookmark.save(url)
+                libraryNote = "Saved. Close and reopen Sightline Prompter to start using \"\(url.lastPathComponent)\"."
+            } catch {
+                libraryNote = "Could not use that folder: \(error.localizedDescription)"
+            }
         }
     }
 

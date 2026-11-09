@@ -36,6 +36,8 @@ final class PrompterView: NSView {
     private var script = ""
     private var fontSize: CGFloat
     private var words: [Word] = []
+    private var cues: [PrompterText.CueRun] = []
+    private var cueRects: [CGRect] = []
     private var paragraphStarts: [Int] = []
     private var cursorIndex = 0
     private var settleTask: Task<Void, Never>?
@@ -123,6 +125,7 @@ final class PrompterView: NSView {
         Self.highlightFill.setFill()
         NSBezierPath(roundedRect: highlight, xRadius: 6, yRadius: 6).fill()
 
+        layoutManager.drawBackground(forGlyphRange: glyphs, at: origin)
         layoutManager.drawGlyphs(forGlyphRange: glyphs, at: origin)
     }
 
@@ -208,50 +211,23 @@ final class PrompterView: NSView {
     }
 
     private func buildText() {
-        let tokens = ScriptTokenizer.tokenize(script, language: language)
-        cursorIndex = min(cursorIndex, max(tokens.count - 1, 0))
+        let built = PrompterText.build(
+            script: script,
+            language: language,
+            fontSize: fontSize,
+            cursor: cursorIndex,
+            wordColor: { [cursorIndex] in Self.color(for: $0, cursor: cursorIndex) }
+        )
+        textStorage.setAttributedString(built.attributed)
+        words = built.words.map { Word(range: $0.range, paragraph: $0.paragraph) }
+        cues = built.cues
+        paragraphStarts = built.paragraphStarts
 
-        let font = NSFont.systemFont(ofSize: fontSize, weight: .semibold)
-        let style = NSMutableParagraphStyle()
-        style.lineHeightMultiple = 1.35
-        style.paragraphSpacing = fontSize * 0.8
-        style.lineBreakMode = .byWordWrapping
-        style.baseWritingDirection = language.rightToLeft ? .rightToLeft : .natural
-        style.alignment = language.rightToLeft ? .right : .left
-
-        let separatorAttributes: [NSAttributedString.Key: Any] = [
-            .font: font,
-            .paragraphStyle: style,
-            .foregroundColor: Self.normalColor,
-        ]
-        let wordSpacer = language.spaced ? " " : ""
-
-        let text = NSMutableAttributedString()
-        var built: [Word] = []
-        var starts: [Int] = []
-
-        for (index, token) in tokens.enumerated() {
-            if index == 0 || token.paragraph != tokens[index - 1].paragraph {
-                if index > 0 {
-                    text.append(NSAttributedString(string: "\n", attributes: separatorAttributes))
-                }
-                starts.append(index)
-            } else if !wordSpacer.isEmpty {
-                text.append(NSAttributedString(string: wordSpacer, attributes: separatorAttributes))
-            }
-            let range = NSRange(location: text.length, length: token.display.utf16.count)
-            let attributes: [NSAttributedString.Key: Any] = [
-                .font: font,
-                .paragraphStyle: style,
-                .foregroundColor: Self.color(for: index, cursor: cursorIndex),
-            ]
-            text.append(NSAttributedString(string: token.display, attributes: attributes))
-            built.append(Word(range: range, paragraph: token.paragraph))
+        let clamped = min(cursorIndex, max(words.count - 1, 0))
+        if clamped != cursorIndex {
+            cursorIndex = clamped
+            recolor(0, words.count - 1)
         }
-
-        textStorage.setAttributedString(text)
-        words = built
-        paragraphStarts = starts
         relayout()
     }
 
@@ -271,9 +247,15 @@ final class PrompterView: NSView {
             words[index].rect = layoutManager.boundingRect(forGlyphRange: glyphs, in: textContainer)
         }
 
-        // Scrolling stops once the last word reaches the reading line.
+        cueRects = cues.map { cue in
+            let glyphs = layoutManager.glyphRange(forCharacterRange: cue.range, actualCharacterRange: nil)
+            return layoutManager.boundingRect(forGlyphRange: glyphs, in: textContainer)
+        }
+
+        // Scrolling stops once the last word, or a cue after it, reaches the reading line.
         if let last = words.last {
-            scroll.maxOffset = max(0, Self.insetTop + last.rect.midY - readingLineY)
+            let end = max(last.rect.midY, cueRects.last?.midY ?? 0)
+            scroll.maxOffset = max(0, Self.insetTop + end - readingLineY)
         } else {
             scroll.maxOffset = 0
         }
@@ -305,6 +287,14 @@ final class PrompterView: NSView {
             textStorage.addAttribute(.foregroundColor,
                                      value: Self.color(for: index, cursor: cursorIndex),
                                      range: words[index].range)
+        }
+        for cue in cues {
+            textStorage.addAttribute(.foregroundColor,
+                                     value: PrompterText.cueColor(wordsBefore: cue.wordsBefore, cursor: cursorIndex),
+                                     range: cue.range)
+            textStorage.addAttribute(.backgroundColor,
+                                     value: PrompterText.cueBackground(wordsBefore: cue.wordsBefore, cursor: cursorIndex),
+                                     range: cue.range)
         }
         textStorage.endEditing()
     }

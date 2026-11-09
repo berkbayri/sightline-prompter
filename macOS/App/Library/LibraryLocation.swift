@@ -1,4 +1,5 @@
 import Foundation
+import SightlineCore
 
 enum LibraryLocation: Equatable {
     case iCloudDrive
@@ -8,14 +9,15 @@ enum LibraryLocation: Equatable {
     private static let defaultsKey = "libraryLocation"
     private static let folderName = "Sightline Prompter"
 
-    private static var iCloudDriveRoot: URL? {
+    /// Where the first versions kept scripts in iCloud Drive: a plain folder, not the app's container.
+    private static var legacyICloudFolder: URL? {
         let root = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Mobile Documents/com~apple~CloudDocs", isDirectory: true)
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: root.path, isDirectory: &isDirectory), isDirectory.boolValue else {
             return nil
         }
-        return root
+        return root.appendingPathComponent(folderName, isDirectory: true)
     }
 
     private static var documentsRoot: URL {
@@ -24,10 +26,13 @@ enum LibraryLocation: Equatable {
             ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents", isDirectory: true)
     }
 
-    /// iCloud Drive when it is available, otherwise ~/Documents.
+    /// iCloud Drive (the shared container, or the plain folder of earlier versions) when available, otherwise ~/Documents.
     private static var automatic: LibraryLocation {
-        iCloudDriveRoot == nil ? .documents : .iCloudDrive
+        LibraryContainer.documentsURL == nil && legacyICloudFolder == nil ? .documents : .iCloudDrive
     }
+
+    /// Scripts saved by earlier versions are moved into the shared library once per launch.
+    private static var adoptedLegacyScripts = false
 
     /// The default library folder, used when the user has not picked one.
     static func resolve() -> URL {
@@ -66,8 +71,19 @@ enum LibraryLocation: Equatable {
         let folder: URL
         switch self {
         case .iCloudDrive:
-            folder = (Self.iCloudDriveRoot ?? Self.documentsRoot)
-                .appendingPathComponent(Self.folderName, isDirectory: true)
+            if let shared = LibraryContainer.documentsURL {
+                folder = shared
+                if !Self.adoptedLegacyScripts {
+                    Self.adoptedLegacyScripts = true
+                    let legacy = [Self.legacyICloudFolder, Self.documentsRoot.appendingPathComponent(Self.folderName, isDirectory: true)]
+                    LibraryContainer.adopt(from: legacy.compactMap { $0 }, into: shared)
+                }
+            } else if let legacy = Self.legacyICloudFolder {
+                // No container (a build without the iCloud entitlement): the plain iCloud Drive folder still syncs.
+                folder = legacy
+            } else {
+                folder = Self.documentsRoot.appendingPathComponent(Self.folderName, isDirectory: true)
+            }
         case .documents:
             folder = Self.documentsRoot.appendingPathComponent(Self.folderName, isDirectory: true)
         case .custom(let url):
@@ -80,7 +96,7 @@ enum LibraryLocation: Equatable {
     /// Human-readable location for the settings UI.
     var displayName: String {
         switch self {
-        case .iCloudDrive: return "iCloud Drive"
+        case .iCloudDrive: return "iCloud Drive (shared with iPhone)"
         case .documents: return "This Mac (Documents)"
         case .custom(let url): return url.lastPathComponent
         }

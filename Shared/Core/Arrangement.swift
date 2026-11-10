@@ -46,8 +46,9 @@ public enum ArrangedItem: Sendable {
 ///
 /// - The preview keeps its aspect ratio whatever is done to it.
 /// - The text is free-form.
-/// - The two never overlap. Resizing one shrinks the other when it has to; a move slides along the other
-///   item or stops, because moving never resizes.
+/// - By default the two never overlap. Resizing one shrinks the other when it has to; a move slides along
+///   the other item or stops, because moving never resizes. With `textMayCoverPreview` the text floats
+///   over the preview and nothing is avoided or shrunk; each item only stays inside the area.
 public struct ArrangementGeometry: Sendable {
     public var area: CGRect
     /// Width / height of the preview.
@@ -56,6 +57,8 @@ public struct ArrangementGeometry: Sendable {
     public var minText = CGSize(width: 120, height: 60)
     /// Empty room kept between the items.
     public var gap: CGFloat = 8
+    /// The prompter text may sit on top of the preview.
+    public var textMayCoverPreview = false
 
     public init(area: CGRect, aspect: CGFloat, minText: CGSize = CGSize(width: 120, height: 60)) {
         self.area = area
@@ -78,7 +81,7 @@ public struct ArrangementGeometry: Sendable {
             width: arrangement.text.width * area.width,
             height: arrangement.text.height * area.height
         ))
-        if overlaps(preview, text) {
+        if !textMayCoverPreview, overlaps(preview, text) {
             if let shrunk = shrink(text, avoiding: preview) {
                 text = shrunk
             } else if let shrunk = shrinkPreview(preview, avoiding: text) {
@@ -96,6 +99,13 @@ public struct ArrangementGeometry: Sendable {
     /// touching the other item.
     public func move(_ item: ArrangedItem, in frames: ArrangedFrames, to origin: CGPoint) -> ArrangedFrames {
         var result = frames
+        if textMayCoverPreview {
+            switch item {
+            case .preview: result.preview = clampOrigin(CGRect(origin: origin, size: frames.preview.size))
+            case .text: result.text = clampOrigin(CGRect(origin: origin, size: frames.text.size))
+            }
+            return result
+        }
         switch item {
         case .preview:
             let size = frames.preview.size
@@ -134,6 +144,10 @@ public struct ArrangementGeometry: Sendable {
     /// Resizes the preview to `width`, keeping its top-left corner and its aspect ratio. The text shrinks if the
     /// preview would run into it; if it cannot shrink enough, the preview stops growing.
     public func resizePreview(in frames: ArrangedFrames, width requested: CGFloat) -> ArrangedFrames {
+        if textMayCoverPreview {
+            let width = min(max(requested, minPreviewWidth), maxPreviewWidth(from: frames.preview.origin))
+            return ArrangedFrames(preview: clampPreview(origin: frames.preview.origin, width: width), text: frames.text)
+        }
         var width = min(max(requested, minPreviewWidth), maxPreviewWidth(from: frames.preview.origin))
         while true {
             let preview = clampPreview(origin: frames.preview.origin, width: width)
@@ -154,6 +168,7 @@ public struct ArrangementGeometry: Sendable {
     /// would run into it; if it cannot shrink enough, the text stops growing.
     public func resizeText(in frames: ArrangedFrames, size requested: CGSize) -> ArrangedFrames {
         var target = clamp(CGRect(origin: frames.text.origin, size: requested))
+        if textMayCoverPreview { return ArrangedFrames(preview: frames.preview, text: target) }
         if !overlaps(frames.preview, target) {
             return ArrangedFrames(preview: frames.preview, text: target)
         }

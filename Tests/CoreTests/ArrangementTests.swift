@@ -164,4 +164,59 @@ final class ArrangementTests: XCTestCase {
         let wide = layout(landscape: true, arrangement: moved).previewFrame!
         XCTAssertEqual(wide.width / wide.height, 16.0 / 9.0, accuracy: 0.001)
     }
+
+    // MARK: - Text floating over the preview
+
+    private var floating: ArrangementGeometry {
+        var geometry = ArrangementGeometry(area: area, aspect: aspect)
+        geometry.textMayCoverPreview = true
+        return geometry
+    }
+
+    func testTextCanBeMovedOverThePreview() {
+        let moved = floating.move(.text, in: start, to: start.preview.origin)
+        XCTAssertEqual(moved.text.origin, start.preview.origin)
+        XCTAssertTrue(moved.text.intersects(moved.preview))
+        XCTAssertEqual(moved.preview, start.preview)
+        XCTAssertEqual(moved.text.size, start.text.size)
+    }
+
+    func testResizingOneNeverResizesTheOtherWhenTextFloats() {
+        let bigText = floating.resizeText(in: start, size: CGSize(width: 350, height: 600))
+        XCTAssertEqual(bigText.preview, start.preview)
+        XCTAssertTrue(area.contains(bigText.text))
+        let bigPreview = floating.resizePreview(in: start, width: 340)
+        XCTAssertEqual(bigPreview.text, start.text)
+        XCTAssertEqual(bigPreview.preview.width / bigPreview.preview.height, aspect, accuracy: 0.001)
+        XCTAssertTrue(area.contains(bigPreview.preview))
+    }
+
+    func testFloatingItemsStayInsideTheAreaWhateverIsDone() {
+        var frames = start
+        var seed: UInt64 = 11
+        func next() -> CGFloat {
+            seed = seed &* 6364136223846793005 &+ 1442695040888963407
+            return CGFloat((seed >> 33) % 1000) / 1000
+        }
+        for _ in 0..<300 {
+            switch Int(next() * 4) {
+            case 0: frames = floating.resizePreview(in: frames, width: 60 + next() * 320)
+            case 1: frames = floating.resizeText(in: frames, size: CGSize(width: 60 + next() * 330, height: 40 + next() * 560))
+            case 2: frames = floating.move(.preview, in: frames, to: CGPoint(x: next() * 400, y: next() * 700))
+            default: frames = floating.move(.text, in: frames, to: CGPoint(x: next() * 400, y: next() * 700))
+            }
+            XCTAssertTrue(area.contains(frames.preview))
+            XCTAssertTrue(area.contains(frames.text))
+            XCTAssertEqual(frames.preview.width / frames.preview.height, aspect, accuracy: 0.001)
+        }
+    }
+
+    func testSavedOverlapIsKeptWhenTextFloats() {
+        let saved = Arrangement(
+            preview: CGRect(x: 0.1, y: 0.2, width: 0.5, height: 0),
+            text: CGRect(x: 0.1, y: 0.25, width: 0.8, height: 0.3)
+        )
+        let frames = floating.resolve(saved)
+        XCTAssertTrue(frames.text.intersects(frames.preview))
+    }
 }

@@ -278,11 +278,14 @@ extension CameraLayout {
 extension CameraLayout {
     /// Geometry for moving and resizing the two items in this layout.
     public func arrangement(videoAspect: CGFloat, lineHeight: CGFloat) -> ArrangementGeometry {
-        ArrangementGeometry(
+        var geometry = ArrangementGeometry(
             area: arrangeArea,
             aspect: isLandscape ? videoAspect : 1 / videoAspect,
             minText: CGSize(width: 120, height: lineHeight * 1.5)
         )
+        // The prompter text floats over the video, so it may be placed anywhere in the area.
+        geometry.textMayCoverPreview = true
+        return geometry
     }
 
     /// The frames now in use, for starting an edit.

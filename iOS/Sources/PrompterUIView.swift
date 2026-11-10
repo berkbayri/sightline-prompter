@@ -118,15 +118,6 @@ final class PrompterUIView: UIView {
     }
 
     override func draw(_ rect: CGRect) {
-        if cameraMode {
-            let backing = UIBezierPath(
-                roundedRect: CGRect(x: textFrame.minX - 12, y: textFrame.minY, width: textFrame.width + 24, height: textFrame.height),
-                cornerRadius: 14
-            )
-            UIColor(white: 0, alpha: 0.45).setFill()
-            backing.fill()
-        }
-
         guard !words.isEmpty, let context = UIGraphicsGetCurrentContext() else {
             drawPlaceholder()
             return
@@ -151,6 +142,11 @@ final class PrompterUIView: UIView {
         UIBezierPath(roundedRect: highlight, cornerRadius: 6).fill()
 
         layoutManager.drawBackground(forGlyphRange: glyphs, at: origin)
+        if cameraMode {
+            // No backing behind the text in camera mode: it floats over the video, so a soft shadow keeps it
+            // readable on any scene.
+            context.setShadow(offset: CGSize(width: 0, height: 1), blur: 5, color: UIColor(white: 0, alpha: 0.85).cgColor)
+        }
         layoutManager.drawGlyphs(forGlyphRange: glyphs, at: origin)
         context.restoreGState()
     }

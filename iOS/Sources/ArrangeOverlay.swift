@@ -124,15 +124,21 @@ struct ArrangeBar: View {
         let frame = layout.controlsFrame
         let stack = layout.isLandscape ? AnyLayout(VStackLayout(spacing: 10)) : AnyLayout(HStackLayout(spacing: 12))
         stack {
-            Text("Drag to move.\nDrag the corner to resize.")
+            Text("Drag to move.\nDrag the corner to resize.\nThe text floats over the video.")
                 .font(.caption)
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.white.opacity(0.85))
                 .fixedSize(horizontal: false, vertical: true)
-            Button("Reset", action: onReset)
-                .buttonStyle(.bordered)
-                .tint(.white)
-                .accessibilityIdentifier("arrange.reset")
+            Button(action: onReset) {
+                Image(systemName: "arrow.counterclockwise")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 36, height: 36)
+                    .background(Color.white.opacity(0.18), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Reset layout")
+            .accessibilityIdentifier("arrange.reset")
             Button("Done", action: onDone)
                 .buttonStyle(.borderedProminent)
                 .tint(.yellow)

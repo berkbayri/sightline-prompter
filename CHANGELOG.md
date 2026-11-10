@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- iPhone, landscape recording: a guide on the camera preview marks the centered 9:16 strip that stays when the clip is cropped to a vertical video in the edit. Shown on screen only, never in the recorded file. Portrait is unchanged.
+
+- iPhone: press and hold the camera preview or the prompter text, in portrait or landscape, to move and resize it. The preview keeps the chosen aspect ratio, the text resizes freely. The two never overlap: resizing one shrinks the other when needed. The placement is saved per orientation; Reset returns to the automatic layout.
+
 - Delivery cues: text between double square brackets (`[[pause]]`) is shown in the prompter as a direction, in its own style, and is never spoken: speech following, word counts and the pace estimate skip it. Mac and iPhone.
 - Script library shared between Mac and iPhone through the iCloud container `iCloud.com.berkbayri.SightlinePrompter` (iCloud Drive > Sightline Prompter). Scripts saved by earlier versions are moved in on first launch. Needs a build signed by a paid developer team; on a personal team the iPhone app can instead use a folder chosen in Settings > Library.
 - Developer build of the Mac app (`macOS/build.sh`) opens every Pro feature.

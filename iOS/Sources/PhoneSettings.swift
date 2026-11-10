@@ -25,6 +25,7 @@ final class PhoneSettings: ObservableObject {
     private enum Key: String {
         case activeScriptID, fontSize, autoSpeed, showPace, readingDistanceCm, landscapeColumnWidth
         case portraitWidthPercent, portraitLines, landscapeLines
+        case arrangementPortrait, arrangementLandscape
         case cameraSide, stickCurve, stickMaxSpeed, stickDeadzone, gamepadLight
     }
 
@@ -75,6 +76,15 @@ final class PhoneSettings: ObservableObject {
         didSet { defaults.set(landscapeLines, forKey: Key.landscapeLines.rawValue) }
     }
 
+    /// Camera mode: where the user put the preview and the text, per orientation. Nil is the automatic layout.
+    @Published var arrangementPortrait: Arrangement? {
+        didSet { store(arrangementPortrait, key: .arrangementPortrait) }
+    }
+
+    @Published var arrangementLandscape: Arrangement? {
+        didSet { store(arrangementLandscape, key: .arrangementLandscape) }
+    }
+
     @Published var cameraSide: CameraSide {
         didSet { defaults.set(cameraSide.rawValue, forKey: Key.cameraSide.rawValue) }
     }
@@ -99,6 +109,18 @@ final class PhoneSettings: ObservableObject {
         didSet { defaults.set(gamepadLight, forKey: Key.gamepadLight.rawValue) }
     }
 
+    private func store(_ arrangement: Arrangement?, key: Key) {
+        if let arrangement, let data = try? JSONEncoder().encode(arrangement) {
+            defaults.set(data, forKey: key.rawValue)
+        } else {
+            defaults.removeObject(forKey: key.rawValue)
+        }
+    }
+
+    private static func load(_ key: Key) -> Arrangement? {
+        UserDefaults.standard.data(forKey: key.rawValue).flatMap { try? JSONDecoder().decode(Arrangement.self, from: $0) }
+    }
+
     private init() {
         activeScriptID = defaults.string(forKey: Key.activeScriptID.rawValue) ?? ""
         fontSize = defaults.object(forKey: Key.fontSize.rawValue) as? Double ?? 34
@@ -109,6 +131,8 @@ final class PhoneSettings: ObservableObject {
         portraitWidthPercent = defaults.object(forKey: Key.portraitWidthPercent.rawValue) as? Double ?? 100
         portraitLines = defaults.object(forKey: Key.portraitLines.rawValue) as? Double ?? 3
         landscapeLines = defaults.object(forKey: Key.landscapeLines.rawValue) as? Double ?? 5
+        arrangementPortrait = Self.load(.arrangementPortrait)
+        arrangementLandscape = Self.load(.arrangementLandscape)
         cameraSide = CameraSide(rawValue: defaults.string(forKey: Key.cameraSide.rawValue) ?? "") ?? .automatic
         stickCurve = StickCurve(rawValue: defaults.string(forKey: Key.stickCurve.rawValue) ?? "") ?? .cubic
         stickMaxSpeed = defaults.object(forKey: Key.stickMaxSpeed.rawValue) as? Double ?? 400

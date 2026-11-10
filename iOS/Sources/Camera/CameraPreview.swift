@@ -7,6 +7,8 @@ struct CameraPreview: UIViewRepresentable {
     let engine: CameraEngine
     /// Controls area in window coordinates; taps there go to the controls, not to focus.
     let passThrough: CGRect
+    /// Called when the preview is pressed and held, to start moving and resizing it.
+    var onLongPress: () -> Void = {}
 
     func makeUIView(context: Context) -> PreviewUIView {
         let view = PreviewUIView()
@@ -17,12 +19,16 @@ struct CameraPreview: UIViewRepresentable {
         view.addGestureRecognizer(tap)
         let pinch = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handlePinch(_:)))
         view.addGestureRecognizer(pinch)
+        let hold = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleHold(_:)))
+        hold.minimumPressDuration = 0.5
+        view.addGestureRecognizer(hold)
         context.coordinator.view = view
         return view
     }
 
     func updateUIView(_ uiView: PreviewUIView, context: Context) {
         context.coordinator.engine = engine
+        context.coordinator.onLongPress = onLongPress
         uiView.passThroughRect = passThrough
     }
 
@@ -35,6 +41,13 @@ struct CameraPreview: UIViewRepresentable {
         var engine: CameraEngine
         weak var view: PreviewUIView?
         private var zoomAtPinchStart: CGFloat = 1
+        var onLongPress: () -> Void = {}
+
+        @objc func handleHold(_ hold: UILongPressGestureRecognizer) {
+            guard hold.state == .began else { return }
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            onLongPress()
+        }
 
         init(engine: CameraEngine) {
             self.engine = engine

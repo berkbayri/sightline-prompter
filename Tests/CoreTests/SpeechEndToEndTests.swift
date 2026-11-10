@@ -10,7 +10,7 @@ import Aligner
 @MainActor
 final class SpeechEndToEndTests: XCTestCase {
     private let script = """
-    Hello, my name is Berk. Today I will show you how a teleprompter helps you speak to the camera with confidence. \
+    Hello, dear viewers. Today I will show you how a teleprompter helps you speak to the camera with confidence. \
     The word you are reading always sits right under the lens, so you keep eye contact with your audience.
 
     Now let us count together: one, two, three, four, five, twenty five, one hundred, one thousand. \
@@ -38,7 +38,7 @@ final class SpeechEndToEndTests: XCTestCase {
 
         let aligner = ScriptAligner(script: script, language: .named("en-US"))
         let engine = AnalyzerSpeechEngine(externalAudio: true)
-        engine.contextualStrings = ["teleprompter", "Berk"]
+        engine.contextualStrings = ["teleprompter"]
         var timeline: [(time: Double, cursor: Int, heard: String)] = []
         let began = Date()
         engine.onText = { text in

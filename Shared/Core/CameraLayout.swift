@@ -42,6 +42,8 @@ public struct CameraLayout: Equatable, Sendable {
     public let isLandscape: Bool
     /// Where the scaled-down camera preview goes while recording. Nil when the camera is off.
     public let previewFrame: CGRect?
+    /// Screen area the preview and the text can be moved and resized in (camera mode only; empty otherwise).
+    public let arrangeArea: CGRect
 
     public init(
         textFrame: CGRect,
@@ -49,8 +51,10 @@ public struct CameraLayout: Equatable, Sendable {
         controlsFrame: CGRect,
         cameraEdge: CameraEdge,
         isLandscape: Bool,
-        previewFrame: CGRect? = nil
+        previewFrame: CGRect? = nil,
+        arrangeArea: CGRect = .zero
     ) {
+        self.arrangeArea = arrangeArea
         self.previewFrame = previewFrame
         self.textFrame = textFrame
         self.readingLineY = readingLineY
@@ -69,12 +73,14 @@ public struct CameraLayout: Equatable, Sendable {
         cameraEdge: CameraEdge,
         readingDistanceCm: CGFloat,
         landscapeColumnWidth: CGFloat,
-        recording: RecordingBand? = nil
+        recording: RecordingBand? = nil,
+        arrangement: Arrangement? = nil
     ) -> CameraLayout {
         if let recording {
-            return isLandscape
+            let layout = isLandscape
                 ? recordingLandscape(size: size, insets: insets, cameraEdge: cameraEdge, columnWidth: landscapeColumnWidth, band: recording)
                 : recordingPortrait(size: size, insets: insets, band: recording)
+            return arrangement.map { layout.arranged($0, band: recording) } ?? layout
         }
         if isLandscape {
             return landscape(size: size, insets: insets, cameraEdge: cameraEdge, columnWidth: landscapeColumnWidth)
@@ -220,7 +226,8 @@ extension CameraLayout {
             controlsFrame: controlsFrame,
             cameraEdge: .top,
             isLandscape: false,
-            previewFrame: fit(aspect: 1 / band.videoAspect, in: area)
+            previewFrame: fit(aspect: 1 / band.videoAspect, in: area),
+            arrangeArea: CGRect(x: left, y: top, width: fullWidth, height: max(controlsTop - 8 - top, 1))
         )
     }
 
@@ -257,7 +264,51 @@ extension CameraLayout {
             controlsFrame: controlsFrame,
             cameraEdge: cameraOnLeft ? .left : .right,
             isLandscape: true,
-            previewFrame: fit(aspect: band.videoAspect, in: area)
+            previewFrame: fit(aspect: band.videoAspect, in: area),
+            arrangeArea: CGRect(
+                x: cameraOnLeft ? cameraInset + gap : controlsFrame.maxX + gap,
+                y: 16,
+                width: max(size.width - cameraInset - gap - controlsFrame.width - farInset - gap, 1),
+                height: size.height - 32
+            )
         )
     }
+}
+
+extension CameraLayout {
+    /// Geometry for moving and resizing the two items in this layout.
+    public func arrangement(videoAspect: CGFloat, lineHeight: CGFloat) -> ArrangementGeometry {
+        ArrangementGeometry(
+            area: arrangeArea,
+            aspect: isLandscape ? videoAspect : 1 / videoAspect,
+            minText: CGSize(width: 120, height: lineHeight * 1.5)
+        )
+    }
+
+    /// The frames now in use, for starting an edit.
+    public var arrangedFrames: ArrangedFrames? {
+        previewFrame.map { ArrangedFrames(preview: $0, text: textFrame) }
+    }
+
+    /// The same layout with the preview and the text where the user put them.
+    func arranged(_ saved: Arrangement, band: RecordingBand) -> CameraLayout {
+        guard previewFrame != nil, arrangeArea.width > 1 else { return self }
+        let frames = arrangement(videoAspect: band.videoAspect, lineHeight: band.lineHeight).resolve(saved)
+        return placing(frames)
+    }
+
+    /// The same layout with the given frames. The reading line stays where it belongs for the orientation.
+    public func placing(_ frames: ArrangedFrames) -> CameraLayout {
+        CameraLayout(
+            textFrame: frames.text,
+            readingLineY: isLandscape ? frames.text.midY : frames.text.minY + readingLineOffset,
+            controlsFrame: controlsFrame,
+            cameraEdge: cameraEdge,
+            isLandscape: isLandscape,
+            previewFrame: frames.preview,
+            arrangeArea: arrangeArea
+        )
+    }
+
+    private var readingLineOffset: CGFloat { readingLineY - textFrame.minY }
 }

@@ -136,11 +136,17 @@ final class AppModel: ObservableObject {
     #endif
 
     /// Adds a Turkish test script once, so Turkish recognition can be tried without importing anything.
+    /// Copies saved by earlier versions, whose opening line carried a personal name, are updated to the generic
+    /// text. A sample the user has edited is left alone.
     private func seedTurkishSample() {
+        let title = "Türkçe Örnek Metin"
+        for script in library.scripts where script.title == title && script.text.hasPrefix("Merhaba, ben ") {
+            library.update(script.id, text: Self.turkishSampleText)
+        }
         let key = "seededTurkishSample"
         guard !UserDefaults.standard.bool(forKey: key) else { return }
         UserDefaults.standard.set(true, forKey: key)
-        library.create(title: "Türkçe Örnek Metin", language: .named("tr-TR"), text: Self.turkishSampleText)
+        library.create(title: title, language: .named("tr-TR"), text: Self.turkishSampleText)
     }
 
     /// Loads a library script into the prompter and the speech tracker.
@@ -387,7 +393,7 @@ final class AppModel: ObservableObject {
     }
 
     private static let turkishSampleText = """
-    Merhaba, ben Berk. Bugün size teleprompter ile kamera karşısında nasıl daha rahat konuşabileceğinizi anlatacağım.
+    Merhaba sevgili izleyiciler. Bugün size teleprompter ile kamera karşısında nasıl daha rahat konuşabileceğinizi anlatacağım.
 
     Metni okurken gözleriniz sürekli kameraya yakın kalır. Böylece izleyiciyle göz teması kurduğunuz izlenimini verirsiniz. Okuduğunuz kelime, ön kameranın hemen altında durur.
 

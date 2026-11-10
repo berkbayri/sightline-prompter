@@ -6,7 +6,7 @@ import XCTest
 /// the odd mistaken word). The cursor must follow word by word, with no lag.
 final class LiveReadingTests: XCTestCase {
     static let turkishScript = """
-    Merhaba, ben Berk. Bugün size teleprompter ile kamera karşısında nasıl daha rahat konuşabileceğinizi anlatacağım.
+    Merhaba sevgili izleyiciler. Bugün size teleprompter ile kamera karşısında nasıl daha rahat konuşabileceğinizi anlatacağım.
 
     Metni okurken gözleriniz sürekli kameraya yakın kalır. Böylece izleyiciyle göz teması kurduğunuz izlenimini verirsiniz. Okuduğunuz kelime, ön kameranın hemen altında durur.
 
@@ -113,7 +113,7 @@ final class LiveReadingTests: XCTestCase {
         let history = String(repeating: "alakasız kelimeler söyleniyor burada ", count: 3000)
         measure {
             for _ in 0..<20 {
-                _ = aligner.consume(transcript: history + "Merhaba ben")
+                _ = aligner.consume(transcript: history + "Merhaba sevgili")
             }
         }
     }
@@ -132,9 +132,9 @@ final class LiveReadingTests: XCTestCase {
         let aligner = ScriptAligner(script: Self.turkishScript, language: turkish)
         aligner.reset(to: 70)
         aligner.allowedRange = 0...25   // the words now on screen
-        XCTAssertNotNil(aligner.consume(transcript: "Merhaba ben Berk"))
+        XCTAssertNotNil(aligner.consume(transcript: "Merhaba sevgili izleyiciler"))
         XCTAssertEqual(aligner.cursor, 3)
-        _ = aligner.consume(transcript: "Merhaba ben Berk Bugün size teleprompter")
+        _ = aligner.consume(transcript: "Merhaba sevgili izleyiciler Bugün size teleprompter")
         XCTAssertEqual(aligner.cursor, 6)
     }
 

@@ -17,7 +17,7 @@ enum ScreenshotMode {
 
     static let scripts: [(title: String, text: String)] = [
         ("Product launch video", """
-        Hi, I'm Berk, and today I want to show you something I have been building for a long time.
+        Hi everyone, and today I want to show you something I have been building for a long time.
 
         Most videos fall apart in the first ten seconds, because we look away from the camera to read. This fixes that. The words sit right under the lens, and they move at the speed of your voice.
 
@@ -25,7 +25,7 @@ enum ScreenshotMode {
         """),
         ("YouTube intro", "Welcome back to the channel. In this video, we are going to cover three things you can do today to look more confident on camera."),
         ("Conference keynote", "Good morning, everyone. Thank you for being here. Over the next twenty minutes I want to share what we learned."),
-        ("Türkçe Örnek Metin", "Merhaba, ben Berk. Bugün size teleprompter ile kamera karşısında nasıl daha rahat konuşabileceğinizi anlatacağım."),
+        ("Türkçe Örnek Metin", "Merhaba sevgili izleyiciler. Bugün size teleprompter ile kamera karşısında nasıl daha rahat konuşabileceğinizi anlatacağım."),
         ("Welcome", "Welcome to Sightline Prompter."),
     ]
 }

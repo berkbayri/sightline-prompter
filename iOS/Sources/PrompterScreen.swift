@@ -11,6 +11,11 @@ struct PrompterScreen: View {
     let onExit: () -> Void
     let onCameraSettings: () -> Void
 
+    /// The item being moved or resized; nil when not arranging.
+    @State private var arranging: ArrangedItem?
+    /// Frames while a drag is going on (and until Done), instead of the saved ones.
+    @State private var liveFrames: ArrangedFrames?
+
     init(model: AppModel, onExit: @escaping () -> Void, onCameraSettings: @escaping () -> Void) {
         self.model = model
         _camera = ObservedObject(wrappedValue: model.camera)
@@ -24,7 +29,7 @@ struct PrompterScreen: View {
     }
 
     @ViewBuilder
-    private func previewView(passThrough: CGRect) -> some View {
+    private func previewView(passThrough: CGRect, onLongPress: @escaping () -> Void) -> some View {
         #if DEBUG
         if ScreenshotMode.isActive {
             Group {
@@ -35,63 +40,122 @@ struct PrompterScreen: View {
                 }
             }
         } else {
-            CameraPreview(engine: model.camera, passThrough: passThrough)
+            CameraPreview(engine: model.camera, passThrough: passThrough, onLongPress: onLongPress)
         }
         #else
-        CameraPreview(engine: model.camera, passThrough: passThrough)
+        CameraPreview(engine: model.camera, passThrough: passThrough, onLongPress: onLongPress)
         #endif
     }
 
     var body: some View {
         ZStack {
             GeometryReader { proxy in
-                let insets = proxy.safeAreaInsets
-                let layout = CameraLayout.make(
-                    size: proxy.size,
-                    insets: ScreenInsets(
-                        top: insets.top,
-                        left: insets.leading,
-                        bottom: insets.bottom,
-                        right: insets.trailing
-                    ),
-                    isLandscape: proxy.size.width > proxy.size.height,
-                    cameraEdge: model.cameraEdge,
-                    readingDistanceCm: CGFloat(settings.readingDistanceCm),
-                    landscapeColumnWidth: pro.isUnlocked ? CGFloat(settings.landscapeColumnWidth) : 480,
-                    recording: CameraLayout.RecordingBand(
-                        lineHeight: lineHeight,
-                        portraitLines: pro.isUnlocked ? CGFloat(settings.portraitLines) : 3,
-                        landscapeLines: pro.isUnlocked ? CGFloat(settings.landscapeLines) : 5,
-                        portraitWidthFraction: pro.isUnlocked ? CGFloat(settings.portraitWidthPercent / 100) : 1,
-                        landscapeWidth: pro.isUnlocked ? CGFloat(settings.landscapeColumnWidth) : 480,
-                        videoAspect: camera.aspect.ratio
-                    )
-                )
-                // Touches on the controls must reach the SwiftUI buttons, not the text or the preview beneath.
-                let controls = layout.controlsFrame.offsetBy(dx: proxy.frame(in: .global).minX, dy: proxy.frame(in: .global).minY)
-                let passThrough = model.controlsVisible ? controls : CGRect.zero
-                ZStack(alignment: .topLeading) {
-                    if model.cameraOn, let preview = layout.previewFrame {
-                        previewView(passThrough: passThrough)
-                            .frame(width: preview.width, height: preview.height)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                            .offset(x: preview.minX, y: preview.minY)
-                    }
-                    PrompterSurface(view: model.prompter, layout: layout, passThrough: passThrough)
-                    ControlsPane(
-                        model: model,
-                        camera: model.camera,
-                        layout: layout,
-                        onExit: onExit,
-                        onCameraSettings: onCameraSettings
-                    )
-                }
-                .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
+                screen(proxy)
             }
         }
         .background(Color.black.ignoresSafeArea())
         .statusBarHidden()
         .persistentSystemOverlays(.hidden)
+    }
+
+    private func screen(_ proxy: GeometryProxy) -> some View {
+        let insets = proxy.safeAreaInsets
+        let isLandscape = proxy.size.width > proxy.size.height
+        let band = CameraLayout.RecordingBand(
+            lineHeight: lineHeight,
+            portraitLines: pro.isUnlocked ? CGFloat(settings.portraitLines) : 3,
+            landscapeLines: pro.isUnlocked ? CGFloat(settings.landscapeLines) : 5,
+            portraitWidthFraction: pro.isUnlocked ? CGFloat(settings.portraitWidthPercent / 100) : 1,
+            landscapeWidth: pro.isUnlocked ? CGFloat(settings.landscapeColumnWidth) : 480,
+            videoAspect: camera.aspect.ratio
+        )
+        func makeLayout(_ arrangement: Arrangement?) -> CameraLayout {
+            CameraLayout.make(
+                size: proxy.size,
+                insets: ScreenInsets(
+                    top: insets.top,
+                    left: insets.leading,
+                    bottom: insets.bottom,
+                    right: insets.trailing
+                ),
+                isLandscape: isLandscape,
+                cameraEdge: model.cameraEdge,
+                readingDistanceCm: CGFloat(settings.readingDistanceCm),
+                landscapeColumnWidth: pro.isUnlocked ? CGFloat(settings.landscapeColumnWidth) : 480,
+                recording: band,
+                arrangement: arrangement
+            )
+        }
+        let saved = isLandscape ? settings.arrangementLandscape : settings.arrangementPortrait
+        let automatic = makeLayout(nil)
+        let stored = saved == nil ? automatic : makeLayout(saved)
+        let layout = liveFrames.map { stored.placing($0) } ?? stored
+        let geometry = layout.arrangement(videoAspect: camera.aspect.ratio, lineHeight: lineHeight)
+        let canArrange = model.cameraOn && layout.previewFrame != nil
+        func beginArranging(_ item: ArrangedItem) {
+            guard canArrange, arranging == nil, let frames = stored.arrangedFrames else { return }
+            liveFrames = frames
+            arranging = item
+        }
+        func save(_ frames: ArrangedFrames) {
+            let arrangement = Arrangement(frames: frames, in: layout.arrangeArea)
+            if isLandscape { settings.arrangementLandscape = arrangement } else { settings.arrangementPortrait = arrangement }
+        }
+        // Touches on the controls must reach the SwiftUI buttons, not the text or the preview beneath.
+        let controls = layout.controlsFrame.offsetBy(dx: proxy.frame(in: .global).minX, dy: proxy.frame(in: .global).minY)
+        let passThrough = (model.controlsVisible || arranging != nil) ? controls : CGRect.zero
+        return ZStack(alignment: .topLeading) {
+            if model.cameraOn, let preview = layout.previewFrame {
+                previewView(passThrough: passThrough, onLongPress: { beginArranging(.preview) })
+                    .frame(width: preview.width, height: preview.height)
+                    .overlay {
+                        // Only landscape footage is cropped to vertical afterwards.
+                        if layout.isLandscape { VerticalCropGuide() }
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .offset(x: preview.minX, y: preview.minY)
+            }
+            PrompterSurface(
+                view: model.prompter,
+                layout: layout,
+                passThrough: passThrough,
+                onLongPress: { beginArranging(.text) }
+            )
+            if let item = arranging {
+                ArrangeOverlay(
+                    frames: Binding(get: { liveFrames ?? layout.arrangedFrames ?? ArrangedFrames(preview: .zero, text: .zero) },
+                                    set: { liveFrames = $0 }),
+                    selected: Binding(get: { arranging ?? item }, set: { arranging = $0 }),
+                    geometry: geometry,
+                    onCommit: save
+                )
+                ArrangeBar(
+                    layout: layout,
+                    onReset: {
+                        if isLandscape { settings.arrangementLandscape = nil } else { settings.arrangementPortrait = nil }
+                        liveFrames = automatic.arrangedFrames
+                    },
+                    onDone: {
+                        arranging = nil
+                        liveFrames = nil
+                    }
+                )
+            } else {
+                ControlsPane(
+                    model: model,
+                    camera: model.camera,
+                    layout: layout,
+                    onExit: onExit,
+                    onCameraSettings: onCameraSettings
+                )
+            }
+        }
+        // A turn of the phone changes the free area, so arranging ends with it.
+        .onChange(of: isLandscape) { _, _ in
+            arranging = nil
+            liveFrames = nil
+        }
+        .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
     }
 }
 
@@ -100,6 +164,7 @@ private struct PrompterSurface: UIViewRepresentable {
     let view: PrompterUIView
     let layout: CameraLayout
     let passThrough: CGRect
+    let onLongPress: () -> Void
 
     func makeUIView(context: Context) -> PrompterUIView {
         view
@@ -108,6 +173,7 @@ private struct PrompterSurface: UIViewRepresentable {
     func updateUIView(_ uiView: PrompterUIView, context: Context) {
         uiView.apply(layout)
         uiView.passThroughRect = passThrough
+        uiView.onLongPress = onLongPress
     }
 }
 
@@ -283,5 +349,35 @@ private extension View {
         } else {
             self.background(.ultraThinMaterial, in: shape)
         }
+    }
+}
+
+/// Landscape recording: marks the centered 9:16 strip of the frame that stays when the clip is cropped to
+/// a vertical video in the edit. The sides are dimmed, the strip edges get thin lines. Touches pass through.
+private struct VerticalCropGuide: View {
+    var body: some View {
+        GeometryReader { proxy in
+            let width = min(proxy.size.height * 9 / 16, proxy.size.width)
+            let left = (proxy.size.width - width) / 2
+            ZStack(alignment: .topLeading) {
+                Rectangle()
+                    .fill(Color.black.opacity(0.35))
+                    .frame(width: left, height: proxy.size.height)
+                Rectangle()
+                    .fill(Color.black.opacity(0.35))
+                    .frame(width: left, height: proxy.size.height)
+                    .offset(x: left + width)
+                Rectangle()
+                    .fill(Color.white.opacity(0.7))
+                    .frame(width: 1, height: proxy.size.height)
+                    .offset(x: left)
+                Rectangle()
+                    .fill(Color.white.opacity(0.7))
+                    .frame(width: 1, height: proxy.size.height)
+                    .offset(x: left + width - 1)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }

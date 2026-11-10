@@ -50,6 +50,8 @@ final class PrompterUIView: UIView {
     var onManualScrollEnded: ((Int) -> Void)?
     /// Called on a tap on the text. The owner decides what a tap does.
     var onTap: (() -> Void)?
+    /// Called when the text is pressed and held, to start moving and resizing it.
+    var onLongPress: (() -> Void)?
 
     /// Screen y where the text starts at zero scroll offset.
     private var contentTop: CGFloat { textFrame.minY }
@@ -170,6 +172,15 @@ final class PrompterUIView: UIView {
     private func installGestures() {
         addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTap)))
         addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:))))
+        let hold = UILongPressGestureRecognizer(target: self, action: #selector(handleHold(_:)))
+        hold.minimumPressDuration = 0.5
+        addGestureRecognizer(hold)
+    }
+
+    @objc private func handleHold(_ hold: UILongPressGestureRecognizer) {
+        guard hold.state == .began else { return }
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        onLongPress?()
     }
 
     @objc private func handleTap() {

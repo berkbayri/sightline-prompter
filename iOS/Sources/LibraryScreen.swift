@@ -15,6 +15,10 @@ struct LibraryScreen: View {
     @State private var showingImporter = false
     @State private var pendingDelete: Script?
     @State private var message: String?
+    @State private var choosingSyncFolder = false
+    @State private var isShared = AppModel.isShared
+    @State private var explainingSync = false
+    @State private var askedThisLaunch = false
 
     init(model: AppModel, onUse: @escaping (Script) -> Void, onSettings: @escaping () -> Void) {
         self.model = model
@@ -62,6 +66,32 @@ struct LibraryScreen: View {
                 ScriptEditor(library: library, scriptID: id)
             }
             .toolbar { toolbarItems }
+            .onAppear {
+                // Without the iCloud entitlement the phone cannot reach iCloud Drive by itself: it asks for the
+                // folder once, remembers it, and does not ask again.
+                if !isShared, !askedThisLaunch {
+                    askedThisLaunch = true
+                    explainingSync = true
+                }
+            }
+            .alert("Keep your scripts in iCloud Drive", isPresented: $explainingSync) {
+                Button("Choose Folder") { choosingSyncFolder = true }
+            } message: {
+                Text("Open iCloud Drive and choose the folder Sightline Prompter, or iCloud Drive itself. Your scripts on this iPhone move there and match your Mac.")
+            }
+            .fileImporter(isPresented: $choosingSyncFolder, allowedContentTypes: [.folder]) { result in
+                switch result {
+                case .success(let url):
+                    do {
+                        try model.useSharedFolder(url)
+                        isShared = true
+                    } catch {
+                        message = "Could not use that folder: \(error.localizedDescription)"
+                    }
+                case .failure(let error):
+                    message = error.localizedDescription
+                }
+            }
             .fileImporter(
                 isPresented: $showingImporter,
                 allowedContentTypes: Self.importTypes,

@@ -9,8 +9,6 @@ struct SettingsScreen: View {
     @ObservedObject private var pro = ProStore.shared
     @ObservedObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
-    @State private var choosingFolder = false
-    @State private var libraryNote: String?
 
     init(model: AppModel) {
         _catalog = ObservedObject(wrappedValue: model.catalog)
@@ -145,33 +143,13 @@ struct SettingsScreen: View {
             LabeledContent("Scripts") {
                 Text(AppModel.libraryDescription).foregroundStyle(.secondary)
             }
-            if LibraryContainer.documentsURL == nil {
-                Button("Choose a Folder in iCloud Drive…") { choosingFolder = true }
-                if LibraryFolderBookmark.isSet {
-                    Button("Keep Scripts on This iPhone Only", role: .destructive) {
-                        LibraryFolderBookmark.clear()
-                        libraryNote = "Close and reopen Sightline Prompter to use this iPhone's own folder."
-                    }
-                }
-            }
         } header: {
             Label("Library", systemImage: "icloud")
         } footer: {
-            if let libraryNote {
-                Text(libraryNote)
-            } else if LibraryContainer.documentsURL != nil {
+            if LibraryContainer.documentsURL != nil {
                 Text("Scripts you add or edit here appear on your Mac, and the other way round. They are the files in iCloud Drive > Sightline Prompter.")
             } else {
-                Text("iCloud sync needs a build signed with the iCloud capability. Until then, choose the Sightline Prompter folder in iCloud Drive that your Mac uses, and both share it.")
-            }
-        }
-        .fileImporter(isPresented: $choosingFolder, allowedContentTypes: [.folder]) { result in
-            guard case .success(let url) = result else { return }
-            do {
-                try LibraryFolderBookmark.save(url)
-                libraryNote = "Saved. Close and reopen Sightline Prompter to start using \"\(url.lastPathComponent)\"."
-            } catch {
-                libraryNote = "Could not use that folder: \(error.localizedDescription)"
+                Text("Scripts are the files in iCloud Drive > Sightline Prompter, the same folder the Mac app uses.")
             }
         }
     }

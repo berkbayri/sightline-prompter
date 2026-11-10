@@ -7,7 +7,7 @@ public final class LibraryStore: ObservableObject {
     @Published public private(set) var scripts: [Script] = []
     @Published public private(set) var lastError: String?
 
-    public let directory: URL
+    public private(set) var directory: URL
 
     private static let fileExtension = "sightline"
     private static let saveDelay: UInt64 = 500_000_000
@@ -22,12 +22,106 @@ public final class LibraryStore: ObservableObject {
     private var downloadPollTask: Task<Void, Never>?
     private var downloadPolls = 0
     private var watcher: DispatchSourceFileSystemObject?
+    private var pollTask: Task<Void, Never>?
+    private var presenter: FolderPresenter?
+    private var lastSignature = ""
+    /// How often the folder is checked for changes made by another device. iCloud does not always raise file
+    /// events for files it brings in, so the folder is also polled.
+    private static let pollDelay: UInt64 = 2_000_000_000
+    /// Every this many polls the folder is read in full even if its listing looks unchanged: a file iCloud is still
+    /// bringing in can keep its old size and date until it is read.
+    private static let fullReloadEvery = 4
 
     public init(directory: URL) {
         self.directory = directory
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         load()
         startWatching()
+        startPolling()
+        startPresenting()
+    }
+
+    /// Points the library at another folder (for example the iCloud Drive folder shared with the Mac) without a
+    /// restart. Scripts in the old folder are not touched; the caller moves them first if they should come along.
+    public func relocate(to newDirectory: URL) {
+        guard newDirectory.standardizedFileURL != directory.standardizedFileURL else { return }
+        for task in pendingSaves.values { task.cancel() }
+        pendingSaves = [:]
+        failedSaves = []
+        reloadTask?.cancel()
+        downloadPollTask?.cancel()
+        watcher?.cancel()
+        watcher = nil
+        stopPresenting()
+        directory = newDirectory
+        try? FileManager.default.createDirectory(at: newDirectory, withIntermediateDirectories: true)
+        scripts = []
+        lastSignature = ""
+        load()
+        startWatching()
+        startPresenting()
+    }
+
+    /// Registers as a file presenter of the folder, so the system tells this store when another process or iCloud
+    /// changes, adds or removes a script, even when no file event reaches the directory watcher.
+    private func startPresenting() {
+        let presenter = FolderPresenter(url: directory)
+        presenter.onChange = { [weak self] in
+            Task { @MainActor in self?.scheduleReload() }
+        }
+        NSFileCoordinator.addFilePresenter(presenter)
+        self.presenter = presenter
+    }
+
+    private func stopPresenting() {
+        if let presenter { NSFileCoordinator.removeFilePresenter(presenter) }
+        presenter = nil
+    }
+
+    /// Writes every script in the folder again, through file coordination. Files that reached a shared iCloud
+    /// folder without being written by this app (moved in, or put there by an earlier build) are then noticed by
+    /// iCloud and uploaded.
+    public func republishAll() {
+        for script in scripts {
+            try? write(script)
+        }
+    }
+
+    /// Reloads if anything in the folder changed. Cheap enough to call on every app activation.
+    public func refresh() {
+        let signature = folderSignature()
+        guard signature != lastSignature else { return }
+        load()
+    }
+
+    private func folderSignature() -> String {
+        let keys: [URLResourceKey] = [.contentModificationDateKey, .fileSizeKey]
+        let entries = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: keys, options: [])) ?? []
+        return entries
+            .map { url -> String in
+                let values = try? url.resourceValues(forKeys: Set(keys))
+                let time = values?.contentModificationDate?.timeIntervalSince1970 ?? 0
+                return "\(url.lastPathComponent)|\(time)|\(values?.fileSize ?? 0)"
+            }
+            .sorted()
+            .joined(separator: "\n")
+    }
+
+    private func startPolling() {
+        pollTask?.cancel()
+        pollTask = Task { [weak self] in
+            var ticks = 0
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: Self.pollDelay)
+                guard let self, !Task.isCancelled else { return }
+                ticks += 1
+                if ticks % Self.fullReloadEvery == 0 {
+                    self.load()
+                } else {
+                    self.refresh()
+                }
+            }
+        }
     }
 
     public func fileURL(for id: UUID) -> URL {
@@ -35,6 +129,8 @@ public final class LibraryStore: ObservableObject {
     }
 
     public func load() {
+        defer { logSync() }
+        lastSignature = folderSignature()
         let fileManager = FileManager.default
         let entries = (try? fileManager.contentsOfDirectory(
             at: directory,
@@ -283,6 +379,24 @@ public final class LibraryStore: ObservableObject {
         }
     }
 
+    // MARK: - Sync log (debug builds)
+
+    /// Debug builds keep a short log of what each reload found, in Caches/sync.log, to see why a change from the
+    /// other device did or did not arrive.
+    private func logSync() {
+        #if DEBUG
+        guard let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
+        let url = caches.appendingPathComponent("sync.log")
+        let stamp = ISO8601DateFormatter().string(from: Date())
+        let newest = scripts.map(\.updatedAt).max().map { ISO8601DateFormatter().string(from: $0) } ?? "-"
+        let line = "\(stamp) dir=\(directory.lastPathComponent) scripts=\(scripts.count) newestUpdate=\(newest)\n"
+        var text = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        text += line
+        if text.utf8.count > 20_000 { text = String(text.suffix(10_000)) }
+        try? text.write(to: url, atomically: true, encoding: .utf8)
+        #endif
+    }
+
     // MARK: - iCloud placeholders
 
     private func placeholderURL(for id: UUID) -> URL {
@@ -339,6 +453,26 @@ public final class LibraryStore: ObservableObject {
             guard !Task.isCancelled, let self else { return }
             self.load()
         }
+    }
+}
+
+/// Tells the store when the system sees a change in the library folder.
+private final class FolderPresenter: NSObject, NSFilePresenter {
+    let presentedItemURL: URL?
+    let presentedItemOperationQueue = OperationQueue()
+    var onChange: (() -> Void)?
+
+    init(url: URL) {
+        presentedItemURL = url
+        super.init()
+    }
+
+    func presentedItemDidChange() { onChange?() }
+    func presentedSubitemDidAppear(at url: URL) { onChange?() }
+    func presentedSubitemDidChange(at url: URL) { onChange?() }
+    func accommodatePresentedSubitemDeletion(at url: URL, completionHandler: @escaping (Error?) -> Void) {
+        completionHandler(nil)
+        onChange?()
     }
 }
 

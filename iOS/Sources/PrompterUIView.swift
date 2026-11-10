@@ -104,6 +104,9 @@ final class PrompterUIView: UIView {
     func setCameraMode(_ on: Bool) {
         backgroundColor = on ? .clear : .black
         isOpaque = !on
+        // Difference with white inverts whatever is behind the text: over the video the letters show the
+        // inverse of the picture, over the black screen they stay white.
+        layer.compositingFilter = on ? "differenceBlendMode" : nil
         cameraMode = on
         setNeedsDisplay()
     }
@@ -142,11 +145,6 @@ final class PrompterUIView: UIView {
         UIBezierPath(roundedRect: highlight, cornerRadius: 6).fill()
 
         layoutManager.drawBackground(forGlyphRange: glyphs, at: origin)
-        if cameraMode {
-            // No backing behind the text in camera mode: it floats over the video, so a soft shadow keeps it
-            // readable on any scene.
-            context.setShadow(offset: CGSize(width: 0, height: 1), blur: 5, color: UIColor(white: 0, alpha: 0.85).cgColor)
-        }
         layoutManager.drawGlyphs(forGlyphRange: glyphs, at: origin)
         context.restoreGState()
     }

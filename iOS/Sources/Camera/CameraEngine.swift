@@ -192,6 +192,12 @@ final class CameraEngine: NSObject, ObservableObject {
     private(set) var device: AVCaptureDevice?
     private var configured = false
     private var movieDelegate: MovieDelegate?
+    private let metadataOutput = AVCaptureMetadataOutput()
+    private var faceDelegate: FaceDelegate?
+    private var subjectAreaObserver: NSObjectProtocol?
+
+    /// Faces the camera currently sees, as metadata objects. Called on the main actor; empty when none.
+    var onFaces: (([AVMetadataObject]) -> Void)?
 
     /// Microphone audio as it is recorded, for live speech tracking. Called on the main actor.
     var onAudioBuffer: ((AVAudioPCMBuffer) -> Void)?
@@ -264,6 +270,18 @@ final class CameraEngine: NSObject, ObservableObject {
         }
         if session.canAddOutput(movieOutput) {
             session.addOutput(movieOutput)
+        }
+        // Face detection: the preview outlines the faces, and focus and exposure follow them.
+        if session.canAddOutput(metadataOutput) {
+            session.addOutput(metadataOutput)
+            if metadataOutput.availableMetadataObjectTypes.contains(.face) {
+                metadataOutput.metadataObjectTypes = [.face]
+                let delegate = FaceDelegate { [weak self] faces in
+                    Task { @MainActor in self?.onFaces?(faces) }
+                }
+                faceDelegate = delegate
+                metadataOutput.setMetadataObjectsDelegate(delegate, queue: .main)
+            }
         }
         session.commitConfiguration()
         configured = true
@@ -344,8 +362,38 @@ final class CameraEngine: NSObject, ObservableObject {
     }
 
     /// Re-reads everything the controls show from the current device, and re-applies the chosen settings.
+    /// Face-driven autofocus and auto exposure on, in continuous modes, so the camera keeps the face sharp and
+    /// well exposed. A tap to focus switches to a single focus; when the scene changes the continuous mode, and
+    /// with it the face tracking, comes back.
+    private func enableFaceTracking() {
+        guard let device else { return }
+        do {
+            try device.lockForConfiguration()
+            device.automaticallyAdjustsFaceDrivenAutoFocusEnabled = true
+            device.automaticallyAdjustsFaceDrivenAutoExposureEnabled = true
+            if !focusLocked, device.isFocusModeSupported(.continuousAutoFocus) {
+                device.focusMode = .continuousAutoFocus
+            }
+            if !exposureLocked, device.isExposureModeSupported(.continuousAutoExposure) {
+                device.exposureMode = .continuousAutoExposure
+            }
+            device.isSubjectAreaChangeMonitoringEnabled = true
+            device.unlockForConfiguration()
+        } catch {}
+        if let subjectAreaObserver { NotificationCenter.default.removeObserver(subjectAreaObserver) }
+        subjectAreaObserver = NotificationCenter.default.addObserver(
+            forName: AVCaptureDevice.subjectAreaDidChangeNotification, object: device, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, !self.focusLocked, !self.exposureLocked else { return }
+                self.enableFaceTracking()
+            }
+        }
+    }
+
     private func refreshDeviceState() {
         guard let device else { return }
+        enableFaceTracking()
         let format = device.activeFormat
 
         zoomPresets = Self.zoomPresets(for: device)
@@ -812,5 +860,22 @@ private extension CGFloat {
     func rounded(toPlaces places: Int) -> CGFloat {
         let scale = pow(10, CGFloat(places))
         return (self * scale).rounded() / scale
+    }
+}
+
+/// Receives the faces the capture session detects.
+private final class FaceDelegate: NSObject, AVCaptureMetadataOutputObjectsDelegate {
+    private let handler: ([AVMetadataObject]) -> Void
+
+    init(handler: @escaping ([AVMetadataObject]) -> Void) {
+        self.handler = handler
+    }
+
+    func metadataOutput(
+        _ output: AVCaptureMetadataOutput,
+        didOutput metadataObjects: [AVMetadataObject],
+        from connection: AVCaptureConnection
+    ) {
+        handler(metadataObjects.filter { $0.type == .face })
     }
 }

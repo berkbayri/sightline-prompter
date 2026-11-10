@@ -102,6 +102,21 @@ final class AppModel: ObservableObject {
         if library.scripts.isEmpty {
             library.create(title: "Welcome", language: .named("en-US"), text: Self.welcomeText)
         }
+        if Self.isShared { library.republishAll() }
+
+        // Scripts changed on the other device show up in the prompter within seconds, in the camera view too.
+        library.$scripts
+            .dropFirst()
+            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+            .sink { [weak self] _ in self?.libraryDidChange() }
+            .store(in: &cancellables)
+        camera.$isRecording
+            .removeDuplicates()
+            .filter { !$0 }
+            .dropFirst()
+            .sink { [weak self] _ in self?.libraryDidChange() }
+            .store(in: &cancellables)
+
         seedTurkishSample()
         #if DEBUG
         if ScreenshotMode.isActive { seedScreenshotLibrary() }
@@ -166,21 +181,46 @@ final class AppModel: ObservableObject {
         refreshControls()
     }
 
+    #if DEBUG
+    /// Appends a line to Caches/sync.log (debug builds), next to the library's own sync log.
+    private static func debugLog(_ message: String) {
+        guard let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
+        let url = caches.appendingPathComponent("sync.log")
+        let line = "\(ISO8601DateFormatter().string(from: Date())) \(message)\n"
+        let old = (try? String(contentsOf: url, encoding: .utf8)) ?? ""
+        try? (old + line).write(to: url, atomically: true, encoding: .utf8)
+    }
+    #endif
+
     /// Loads the script that was active last time, or the first one in the library.
     func reloadActiveScript() {
         let id = UUID(uuidString: settings.activeScriptID)
         activate(library.scripts.first { $0.id == id } ?? library.scripts.first)
     }
 
-    /// Called when the Library closes: picks up edits to the active script, or a deleted one.
+    /// Picks up edits to the active script (made here, or on the Mac and synced in), or a deleted one. The reading
+    /// position stays where it was. While a take is being recorded the prompter text is left alone; the change is
+    /// applied when the recording stops.
     func libraryDidChange() {
+        guard !camera.isRecording else { return }
         guard let active = activeScript,
               let updated = library.scripts.first(where: { $0.id == active.id }) else {
             reloadActiveScript()
             return
         }
         if updated.text != active.text || updated.languageID != active.languageID {
+            let position = prompter.currentWordIndex
+            #if DEBUG
+            Self.debugLog("active script updated from library at word \(position)")
+            #endif
             activate(updated)
+            if position > 0 {
+                let clamped = min(position, max(totalWords - 1, 0))
+                prompter.setCursor(wordIndex: clamped)
+                tracker.reset(to: clamped)
+            }
+        } else if updated != active {
+            activeScript = updated
         }
     }
 
@@ -244,6 +284,8 @@ final class AppModel: ObservableObject {
         if cameraOn {
             camera.start()
         }
+        // Edits made on the Mac while the app was in the background.
+        library.load()
     }
 
     // MARK: - Camera mode
@@ -379,10 +421,28 @@ final class AppModel: ObservableObject {
     /// saved on the phone earlier are moved into the shared folder.
     private static var libraryFolder: URL {
         if let shared = LibraryContainer.documentsURL ?? LibraryFolderBookmark.resolve() {
-            LibraryContainer.adopt(from: [localLibraryFolder], into: shared)
+            LibraryContainer.adopt(from: [localLibraryFolder, LibraryContainer.nestedFolder(in: shared)], into: shared)
             return shared
         }
         return localLibraryFolder
+    }
+
+    /// True when scripts live in a folder shared with the Mac (the iCloud container or a folder chosen in Files).
+    static var isShared: Bool {
+        LibraryContainer.documentsURL != nil || LibraryFolderBookmark.isSet
+    }
+
+    /// Starts sharing scripts through a folder the user picked in iCloud Drive. The scripts on this phone move into
+    /// it, and the library switches to it at once.
+    func useSharedFolder(_ picked: URL) throws {
+        try LibraryFolderBookmark.save(picked)
+        guard let folder = LibraryFolderBookmark.resolve() else {
+            throw CocoaError(.fileReadNoPermission)
+        }
+        LibraryContainer.adopt(from: [Self.localLibraryFolder, LibraryContainer.nestedFolder(in: folder)], into: folder)
+        library.relocate(to: folder)
+        library.republishAll()
+        reloadActiveScript()
     }
 
     /// Where the library is stored now, for Settings.

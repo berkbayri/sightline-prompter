@@ -24,6 +24,16 @@ public enum LibraryContainer {
         return nil
     }
 
+    /// True for the container's Documents folder, which iCloud Drive lists as "Sightline Prompter".
+    public static func isContainerDocuments(_ url: URL) -> Bool {
+        url.standardizedFileURL.path.hasSuffix("/" + identifier.replacingOccurrences(of: ".", with: "~") + "/Documents")
+    }
+
+    /// A "Sightline Prompter" folder inside the library, left by a build that nested the library one level down.
+    public static func nestedFolder(in library: URL) -> URL {
+        library.appendingPathComponent(legacyFolderName, isDirectory: true)
+    }
+
     private static func makeFolder(_ url: URL) -> URL? {
         do {
             try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
@@ -52,22 +62,33 @@ public enum LibraryContainer {
         return moved
     }
 
+    /// Copies the file into the destination through file coordination (so iCloud notices the new file), and only
+    /// removes the original once the copy is there. A plain move can leave the file where iCloud never sees it.
     private static func move(_ source: URL, to target: URL) -> Bool {
-        var coordinationError: NSError?
-        var moved = false
-        NSFileCoordinator(filePresenter: nil).coordinate(
-            writingItemAt: source, options: .forMoving,
-            writingItemAt: target, options: .forReplacing,
-            error: &coordinationError
-        ) { from, to in
+        var readError: NSError?
+        var data: Data?
+        NSFileCoordinator(filePresenter: nil).coordinate(readingItemAt: source, options: [], error: &readError) { url in
+            data = try? Data(contentsOf: url)
+        }
+        guard readError == nil, let data else { return false }
+
+        var writeError: NSError?
+        var written = false
+        NSFileCoordinator(filePresenter: nil).coordinate(writingItemAt: target, options: .forReplacing, error: &writeError) { url in
             do {
-                try FileManager.default.moveItem(at: from, to: to)
-                moved = true
+                try data.write(to: url, options: .atomic)
+                written = true
             } catch {
-                moved = false
+                written = false
             }
         }
-        return moved && coordinationError == nil
+        guard writeError == nil, written, FileManager.default.fileExists(atPath: target.path) else { return false }
+
+        var removeError: NSError?
+        NSFileCoordinator(filePresenter: nil).coordinate(writingItemAt: source, options: .forDeleting, error: &removeError) { url in
+            try? FileManager.default.removeItem(at: url)
+        }
+        return true
     }
 }
 
@@ -105,7 +126,19 @@ public enum LibraryFolderBookmark {
         if stale, let fresh = try? url.bookmarkData() {
             UserDefaults.standard.set(fresh, forKey: key)
         }
-        return url
+        // The library is always the folder named "Sightline Prompter": the one picked, or inside the one picked
+        // (iCloud Drive itself), so the phone and the Mac end up in the same place.
+        // The folder iCloud Drive shows as "Sightline Prompter" is the container's own Documents folder, which is
+        // already the library.
+        guard url.lastPathComponent != LibraryContainer.legacyFolderName, !LibraryContainer.isContainerDocuments(url)
+        else { return url }
+        let folder = url.appendingPathComponent(LibraryContainer.legacyFolderName, isDirectory: true)
+        do {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            return folder
+        } catch {
+            return nil
+        }
     }
 }
 #endif

@@ -138,7 +138,7 @@ final class ArrangementTests: XCTestCase {
         )
     }
 
-    func testLayoutOffersAnAreaAndKeepsItemsInsideItWithoutOverlap() {
+    func testLayoutOffersAnAreaAndKeepsItemsInsideIt() {
         for landscape in [false, true] {
             let automatic = layout(landscape: landscape, arrangement: nil)
             XCTAssertGreaterThan(automatic.arrangeArea.width, 100)
@@ -146,11 +146,10 @@ final class ArrangementTests: XCTestCase {
             let saved = Arrangement(frames: frames, in: automatic.arrangeArea)
             let arranged = layout(landscape: landscape, arrangement: saved)
             let result = arranged.arrangedFrames!
-            XCTAssertFalse(result.preview.intersects(result.text), "landscape=\(landscape)")
-            XCTAssertTrue(arranged.arrangeArea.contains(result.preview))
-            XCTAssertTrue(arranged.arrangeArea.contains(result.text))
-            XCTAssertFalse(result.text.intersects(arranged.controlsFrame))
-            XCTAssertFalse(result.preview.intersects(arranged.controlsFrame))
+            XCTAssertTrue(arranged.arrangeArea.contains(result.preview), "landscape=\(landscape)")
+            XCTAssertTrue(arranged.arrangeArea.contains(result.text), "landscape=\(landscape)")
+            XCTAssertEqual(result.preview.width, frames.preview.width, accuracy: 0.5)
+            XCTAssertEqual(result.text.width, frames.text.width, accuracy: 0.5)
         }
     }
 

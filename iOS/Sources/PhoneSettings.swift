@@ -131,6 +131,12 @@ final class PhoneSettings: ObservableObject {
         portraitWidthPercent = defaults.object(forKey: Key.portraitWidthPercent.rawValue) as? Double ?? 100
         portraitLines = defaults.object(forKey: Key.portraitLines.rawValue) as? Double ?? 3
         landscapeLines = defaults.object(forKey: Key.landscapeLines.rawValue) as? Double ?? 5
+        // Placements saved before the preview filled the whole screen refer to a smaller area: start from the new layout.
+        if !defaults.bool(forKey: "arrangementResetForFullScreen") {
+            defaults.removeObject(forKey: Key.arrangementPortrait.rawValue)
+            defaults.removeObject(forKey: Key.arrangementLandscape.rawValue)
+            defaults.set(true, forKey: "arrangementResetForFullScreen")
+        }
         arrangementPortrait = Self.load(.arrangementPortrait)
         arrangementLandscape = Self.load(.arrangementLandscape)
         cameraSide = CameraSide(rawValue: defaults.string(forKey: Key.cameraSide.rawValue) ?? "") ?? .automatic

@@ -44,6 +44,8 @@ public struct CameraLayout: Equatable, Sendable {
     public let previewFrame: CGRect?
     /// Screen area the preview and the text can be moved and resized in (camera mode only; empty otherwise).
     public let arrangeArea: CGRect
+    /// Width / height of the recorded picture as it is shown (the video shape in this orientation).
+    public let previewAspect: CGFloat
 
     public init(
         textFrame: CGRect,
@@ -52,8 +54,10 @@ public struct CameraLayout: Equatable, Sendable {
         cameraEdge: CameraEdge,
         isLandscape: Bool,
         previewFrame: CGRect? = nil,
-        arrangeArea: CGRect = .zero
+        arrangeArea: CGRect = .zero,
+        previewAspect: CGFloat = 16.0 / 9.0
     ) {
+        self.previewAspect = previewAspect
         self.arrangeArea = arrangeArea
         self.previewFrame = previewFrame
         self.textFrame = textFrame
@@ -218,7 +222,12 @@ extension CameraLayout {
         let controlsTop = size.height - insets.bottom - controlsHeight
         let controlsFrame = CGRect(x: 0, y: controlsTop, width: size.width, height: size.height - controlsTop)
 
-        let area = CGRect(x: left, y: textFrame.maxY + 12, width: fullWidth, height: max(controlsTop - textFrame.maxY - 20, 1))
+        // The video uses the whole screen below the camera cutout, edge to edge. The prompter text and the
+        // controls sit on top of it, so the picture is as large as the screen allows.
+        let area = CGRect(x: 0, y: top, width: size.width, height: max(size.height - top, 1))
+        // The whole recorded picture is shown, never cropped, as large as the screen allows. The screen around it is
+        // not left empty: the app draws the same live picture, dimmed and blurred, behind it.
+        let preview = fit(aspect: 1 / band.videoAspect, in: CGRect(origin: .zero, size: size))
         // First line of the band is the reading line, so the word being read sits right under the lens.
         return CameraLayout(
             textFrame: textFrame,
@@ -226,8 +235,9 @@ extension CameraLayout {
             controlsFrame: controlsFrame,
             cameraEdge: .top,
             isLandscape: false,
-            previewFrame: fit(aspect: 1 / band.videoAspect, in: area),
-            arrangeArea: CGRect(x: left, y: top, width: fullWidth, height: max(controlsTop - 8 - top, 1))
+            previewFrame: preview,
+            arrangeArea: area,
+            previewAspect: 1 / band.videoAspect
         )
     }
 
@@ -254,9 +264,11 @@ extension CameraLayout {
         let railX = cameraOnLeft ? size.width - farInset - rail : farInset
         let controlsFrame = CGRect(x: railX, y: 16, width: rail, height: size.height - 32)
 
-        let previewX = cameraOnLeft ? textFrame.maxX + gap : controlsFrame.maxX + gap
-        let previewWidth = cameraOnLeft ? controlsFrame.minX - gap - previewX : textFrame.minX - gap - previewX
-        let area = CGRect(x: previewX, y: 16, width: max(previewWidth, 1), height: size.height - 32)
+        // The video uses the whole screen beside the camera cutout, full height. The text column and the control
+        // rail sit on top of it.
+        let leftInset = insets.left
+        let rightInset = insets.right
+        let area = CGRect(x: leftInset, y: 0, width: max(size.width - leftInset - rightInset, 1), height: size.height)
 
         return CameraLayout(
             textFrame: textFrame,
@@ -264,13 +276,9 @@ extension CameraLayout {
             controlsFrame: controlsFrame,
             cameraEdge: cameraOnLeft ? .left : .right,
             isLandscape: true,
-            previewFrame: fit(aspect: band.videoAspect, in: area),
-            arrangeArea: CGRect(
-                x: cameraOnLeft ? cameraInset + gap : controlsFrame.maxX + gap,
-                y: 16,
-                width: max(size.width - cameraInset - gap - controlsFrame.width - farInset - gap, 1),
-                height: size.height - 32
-            )
+            previewFrame: fit(aspect: band.videoAspect, in: CGRect(origin: .zero, size: size)),
+            arrangeArea: area,
+            previewAspect: band.videoAspect
         )
     }
 }
@@ -309,9 +317,23 @@ extension CameraLayout {
             cameraEdge: cameraEdge,
             isLandscape: isLandscape,
             previewFrame: frames.preview,
-            arrangeArea: arrangeArea
+            arrangeArea: arrangeArea,
+            previewAspect: previewAspect
         )
     }
 
     private var readingLineOffset: CGFloat { readingLineY - textFrame.minY }
+}
+
+extension CameraLayout {
+    /// The centered vertical strip of a landscape picture that stays when it is cropped to a 9:16 video, in the
+    /// coordinates of `frame` (the preview). The strip always has the full height of the picture and a width of
+    /// exactly 9/16 of that height, so it is exactly 9:16 whatever the shape of the video is. When the preview is
+    /// wider than the picture (it crops the top and bottom) the strip is measured on the picture's full height.
+    public static func verticalCropStrip(in frame: CGRect, videoAspect: CGFloat) -> CGRect {
+        guard frame.width > 0, frame.height > 0, videoAspect > 0 else { return .zero }
+        let pictureHeight = max(frame.height, frame.width / videoAspect)
+        let width = min(pictureHeight * 9 / 16, frame.width)
+        return CGRect(x: frame.midX - width / 2, y: frame.minY, width: width, height: frame.height)
+    }
 }

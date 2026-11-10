@@ -22,6 +22,7 @@ struct CameraPreview: UIViewRepresentable {
         let hold = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleHold(_:)))
         hold.minimumPressDuration = 0.5
         view.addGestureRecognizer(hold)
+        engine.onFaces = { [weak view] faces in view?.showFaces(faces) }
         context.coordinator.view = view
         return view
     }
@@ -92,6 +93,32 @@ final class PreviewUIView: UIView {
         return super.hitTest(point, with: event)
     }
 
+    private var faceLayers: [CAShapeLayer] = []
+
+    /// Outlines the detected faces on the preview. The outline fades when the face is gone.
+    func showFaces(_ faces: [AVMetadataObject]) {
+        let rects = faces.compactMap { previewLayer.transformedMetadataObject(for: $0)?.bounds }
+        while faceLayers.count < rects.count {
+            let layer = CAShapeLayer()
+            layer.fillColor = UIColor.clear.cgColor
+            layer.strokeColor = UIColor.systemYellow.cgColor
+            layer.lineWidth = 2
+            self.layer.addSublayer(layer)
+            faceLayers.append(layer)
+        }
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        for (index, layer) in faceLayers.enumerated() {
+            if index < rects.count {
+                layer.path = UIBezierPath(roundedRect: rects[index].insetBy(dx: -4, dy: -4), cornerRadius: 10).cgPath
+                layer.isHidden = false
+            } else {
+                layer.isHidden = true
+            }
+        }
+        CATransaction.commit()
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
         guard let connection = previewLayer.connection,
@@ -99,4 +126,19 @@ final class PreviewUIView: UIView {
               connection.isVideoRotationAngleSupported(angle) else { return }
         connection.videoRotationAngle = angle
     }
+}
+
+/// The live picture filling the whole view, with no gestures: a backdrop behind the real preview.
+struct CameraBackdrop: UIViewRepresentable {
+    let engine: CameraEngine
+
+    func makeUIView(context: Context) -> PreviewUIView {
+        let view = PreviewUIView()
+        view.previewLayer.session = engine.session
+        view.previewLayer.videoGravity = .resizeAspectFill
+        view.isUserInteractionEnabled = false
+        return view
+    }
+
+    func updateUIView(_ uiView: PreviewUIView, context: Context) {}
 }

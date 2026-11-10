@@ -12,6 +12,7 @@ struct PrompterScreen: View {
     let onCameraSettings: () -> Void
 
     /// The item being moved or resized; nil when not arranging.
+    @StateObject private var level = LevelMonitor()
     @State private var arranging: ArrangedItem?
     /// Frames while a drag is going on (and until Done), instead of the saved ones.
     @State private var liveFrames: ArrangedFrames?
@@ -47,19 +48,51 @@ struct PrompterScreen: View {
         #endif
     }
 
+    @ViewBuilder
+    private var previewBackdrop: some View {
+        #if DEBUG
+        if ScreenshotMode.isActive {
+            Group {
+                if let image = ScreenshotMode.backdrop {
+                    Image(uiImage: image).resizable().scaledToFill()
+                } else {
+                    Color.gray.opacity(0.4)
+                }
+            }
+            .blur(radius: 24)
+            .overlay(Color.black.opacity(0.45))
+        } else {
+            CameraBackdrop(engine: model.camera)
+                .blur(radius: 24)
+                .overlay(Color.black.opacity(0.45))
+        }
+        #else
+        CameraBackdrop(engine: model.camera)
+            .blur(radius: 24)
+            .overlay(Color.black.opacity(0.45))
+        #endif
+    }
+
     var body: some View {
         ZStack {
-            GeometryReader { proxy in
-                screen(proxy)
+            // The outer reader only reports the real safe-area insets (camera cutout, home indicator). The inner
+            // one covers the whole screen, so the layout can use every point and keep its own items clear of them.
+            GeometryReader { safe in
+                let insets = safe.safeAreaInsets
+                GeometryReader { proxy in
+                    screen(proxy, insets: insets)
+                }
+                .ignoresSafeArea()
             }
         }
         .background(Color.black.ignoresSafeArea())
         .statusBarHidden()
+        .onAppear { level.start() }
+        .onDisappear { level.stop() }
         .persistentSystemOverlays(.hidden)
     }
 
-    private func screen(_ proxy: GeometryProxy) -> some View {
-        let insets = proxy.safeAreaInsets
+    private func screen(_ proxy: GeometryProxy, insets: EdgeInsets) -> some View {
         let isLandscape = proxy.size.width > proxy.size.height
         let band = CameraLayout.RecordingBand(
             lineHeight: lineHeight,
@@ -105,13 +138,21 @@ struct PrompterScreen: View {
         let controls = layout.controlsFrame.offsetBy(dx: proxy.frame(in: .global).minX, dy: proxy.frame(in: .global).minY)
         let passThrough = (model.controlsVisible || arranging != nil) ? controls : CGRect.zero
         return ZStack(alignment: .topLeading) {
+            if model.cameraOn, layout.previewFrame != nil {
+                // The same live picture fills the whole screen, dimmed and blurred, so no part of the screen is empty
+                // around the exact frame in front of it.
+                previewBackdrop
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+                    .clipped()
+            }
             if model.cameraOn, let preview = layout.previewFrame {
                 previewView(passThrough: passThrough, onLongPress: { beginArranging(.preview) })
                     .frame(width: preview.width, height: preview.height)
                     .overlay {
                         // Only landscape footage is cropped to vertical afterwards.
-                        if layout.isLandscape { VerticalCropGuide() }
+                        if layout.isLandscape { VerticalCropGuide(videoAspect: layout.previewAspect) }
                     }
+                    .overlay { LevelOverlay(level: level) }
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                     .offset(x: preview.minX, y: preview.minY)
             }
@@ -189,6 +230,13 @@ private struct ControlsPane: View {
         let frame = layout.controlsFrame
         cameraPane
         .frame(width: frame.width, height: frame.height)
+        // The controls float over the video, so they sit on a dark plate that keeps them visible on any scene.
+        .background {
+            RoundedRectangle(cornerRadius: 30, style: .continuous)
+                .fill(Color.black.opacity(0.42))
+                .padding(.vertical, 3)
+                .padding(.horizontal, layout.isLandscape ? 3 : 10)
+        }
         .offset(x: frame.minX, y: frame.minY)
         .opacity(model.controlsVisible ? 1 : 0)
         .allowsHitTesting(model.controlsVisible)
@@ -355,10 +403,15 @@ private extension View {
 /// Landscape recording: marks the centered 9:16 strip of the frame that stays when the clip is cropped to
 /// a vertical video in the edit. The sides are dimmed, the strip edges get thin lines. Touches pass through.
 private struct VerticalCropGuide: View {
+    /// Width / height of the recorded picture. When the preview is wider than that the picture is cropped at the
+    /// top and bottom, so the strip is measured on the picture's full height, not on the visible part.
+    let videoAspect: CGFloat
+
     var body: some View {
         GeometryReader { proxy in
-            let width = min(proxy.size.height * 9 / 16, proxy.size.width)
-            let left = (proxy.size.width - width) / 2
+            let strip = CameraLayout.verticalCropStrip(in: CGRect(origin: .zero, size: proxy.size), videoAspect: videoAspect)
+            let width = strip.width
+            let left = strip.minX
             ZStack(alignment: .topLeading) {
                 Rectangle()
                     .fill(Color.black.opacity(0.35))

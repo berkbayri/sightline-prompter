@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- iPhone camera view: the whole recorded picture is shown, never cropped, as large as the screen allows in portrait and landscape. The rest of the screen is not left empty: the same live picture is drawn behind it, dimmed and blurred. The prompter text and the controls sit on top; the controls have a dark plate so they stay visible on bright scenes. The layout previously counted the safe area twice and left empty strips at the top and bottom; that is fixed. Placements saved by earlier versions are reset once.
+- iPhone, landscape: the 9:16 guide is exactly 9:16 of the recorded picture (full height, width 9/16 of it) for every video shape, and because the preview is never cropped it also looks 9:16 on screen. Covered by tests for 16:9, 4:3 and common pixel sizes.
+- iPhone camera view: face detection outlines faces on the preview, and focus and exposure follow the face (face-driven autofocus and auto exposure in continuous mode, which comes back after a tap to focus).
+- iPhone camera view: a spirit level (horizon line that tilts against the phone, plus a lean bubble) turns green when the phone is level and upright. Works in portrait and landscape.
+- iPhone: prompter text over the video is drawn with a difference blend (an invert, like Photoshop's Difference mode), so it reads on bright and dark scenes alike; over the black part of the screen it stays white.
+- Library sync: the folder is observed through file presenters, checked every 2 s and fully re-read every 8 s, and re-read when the app comes to the foreground, so a change from the other device shows up in seconds.
+
+- iPhone: an edit to the active script made on the Mac (or on the phone) shows up in the prompter within seconds, in the camera view too, with the reading position kept. While a take is being recorded the text is left alone and the change is applied when the recording stops.
+
+- Library sync: the library always lives in iCloud Drive > Sightline Prompter, on the Mac and on the iPhone, and each side picks up the other's added, edited and deleted scripts within a couple of seconds (the folder is checked every 2 s, besides file events). The Mac moves scripts from its old folders (Documents, a custom folder, the unregistered container folder) into it. A build without the iCloud entitlement cannot reach iCloud Drive by itself on the iPhone, so it asks once for the folder (iCloud Drive or Sightline Prompter), moves the scripts on the phone into it and remembers it.
+
 - iPhone, camera mode: the prompter text is always the top layer and has no background, so it can be placed over the video (a soft shadow keeps it readable). The preview keeps its aspect ratio and is no longer shrunk by the text. Arrange mode has a small reset-layout icon button.
 
 - iPhone, landscape recording: a guide on the camera preview marks the centered 9:16 strip that stays when the clip is cropped to a vertical video in the edit. Shown on screen only, never in the recorded file. Portrait is unchanged.

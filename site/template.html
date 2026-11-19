@@ -40,21 +40,31 @@
 <body>
 <a class="skip" href="#main">{{skip}}</a>
 
+{{#lang_offers}}<div class="langbar" id="langbar" hidden data-offers="{{lang_offers}}"><a class="langbar-link" href="/"></a><button type="button" class="langbar-x" aria-label="{{nav.lang_dismiss}}"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></div>{{/lang_offers}}
 {{{chrome_top}}}
 
 <main id="main">
 
 <section class="hero">
-  <div class="wrap">
-    <h1 class="reading">
-      <span class="ln dim">{{hero.lines.0}} <span class="cue" aria-hidden="true">{{hero.cue}}</span></span>
-      <span class="ln" data-read style="--w:{{hero_w}}">{{hero.lines.1}}</span>
-      <span class="ln dim">{{hero.lines.2}}</span>
-    </h1>
-    <p class="sub">{{hero.sub}}</p>
-    <div class="actions">
-      <a class="store" href="{{store.url_hero}}"><img src="{{store.badge}}" alt="{{store.badge_alt}}" width="156" height="52"></a>
-      <a class="link" href="#devices">{{hero.cta_secondary}}</a>
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <h1 class="reading" style="--w:{{hero_w}}">
+        <span class="ln dim">{{hero.lines.0}} <span class="cue" aria-hidden="true">{{hero_cue}}</span></span>
+        <span class="ln" data-read>{{hero.lines.1}}</span>
+        <span class="ln dim">{{hero.lines.2}}</span>
+      </h1>
+      <p class="sub">{{hero.sub}}</p>
+      <div class="actions">
+        <a class="store lg" href="{{store.url_hero}}"><img src="{{store.badge}}" alt="{{store.badge_alt}}" width="168" height="56"></a>
+        <a class="link" href="#devices">{{hero.cta_secondary}}</a>
+      </div>
+    </div>
+    <div class="hero-dev">
+      <div class="dev p" style="--sh:var(--hero-h)">
+        <div class="scr"><video data-loop autoplay muted loop playsinline preload="metadata" poster="{{video.portrait.poster}}" width="720" height="1564" aria-label="{{devices.iphone_label}}"><source src="{{video.portrait.webm}}" type="video/webm"><source src="{{video.portrait.mp4}}" type="video/mp4"></video></div>
+        <img class="bez" src="{{dev.frame_p}}" width="900" height="1840" alt="" decoding="async">
+      </div>
+      <button class="vid-ctl" type="button" id="motion-ctl" data-pause="{{nav.motion_pause}}" data-play="{{nav.motion_play}}" aria-label="{{nav.motion_pause}}" aria-pressed="false"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect class="i-pause" x="5" y="4" width="3.4" height="12" rx="1" fill="currentColor"/><rect class="i-pause" x="11.6" y="4" width="3.4" height="12" rx="1" fill="currentColor"/><path class="i-play" d="M6 4l10 6-10 6z" fill="currentColor"/></svg></button>
     </div>
   </div>
 </section>
@@ -70,55 +80,48 @@
       </ul>
       <a class="store" href="{{store.url_devices}}"><img src="{{store.badge}}" alt="{{store.badge_alt}}" width="156" height="52" loading="lazy"></a>
     </div>
-    <div class="scene" aria-hidden="true">
-      <div class="dev mac">
-        <div class="screen">
-          <div class="call"><b>AM</b><b>JL</b><b>SK</b><b>RD</b></div>
-          <i class="notch-cut"></i>
-          <div class="panel" data-read>
-            <p class="cue">{{devices.kicker_cue}}</p>
-            {{#demo}}<p class="ln">{{line}}</p>
-            {{/demo}}
-          </div>
-        </div>
-      </div>
-      <div class="dev phone">
-        <div class="screen">
-          {{#phone.has}}<img src="{{phone.url}}" width="{{phone.w}}" height="{{phone.h}}" alt="" loading="lazy" decoding="async">{{/phone.has}}
-          <i class="island"></i>
-          <div class="lines" data-read>
-            {{#demo}}<p class="ln"><span class="plate">{{line}}</span></p>
-            {{/demo}}
-          </div>
-          <i class="rec"><b></b></i>
-        </div>
-      </div>
+    <div class="scene">
+      <img class="mac" src="{{dev.mac}}" width="2000" height="1316" alt="{{devices.mac_label}}" loading="lazy" decoding="async">
+      <img class="iph" src="{{dev.iph_p}}" width="900" height="1840" alt="{{devices.iphone_label}}" loading="lazy" decoding="async">
     </div>
   </div>
 </section>
 
 <section class="sec autosize" id="autosize">
-  <div class="wrap split">
-    <div class="sec-head">
-      <h2><span>{{autosize.title}}</span> <em>{{autosize.title_accent}}</em></h2>
-      <p>{{autosize.body}}</p>
-      <p class="note">{{autosize.mac_note}}</p>
-    </div>
-    <div class="dist" data-dist data-fmt="{{autosize.distance_fmt}}" data-readout="{{autosize.readout}}">
-      <div class="pf" aria-hidden="true">
-        {{#phone.has}}<img src="{{phone.url}}" width="{{phone.w}}" height="{{phone.h}}" alt="" loading="lazy" decoding="async">{{/phone.has}}
-        <i class="island"></i>
-        <p class="pf-text"><span class="plate">{{autosize.script}}</span></p>
-      </div>
-      <div class="dist-ctl">
-        <label for="dist-range">{{autosize.distance_label}}</label>
-        <input id="dist-range" type="range" min="30" max="100" step="5" value="40">
-        <p class="dist-out" aria-live="polite"><b data-cm></b><span data-readout-out></span></p>
-        <p class="note" data-cap hidden>{{autosize.cap_note}}</p>
-        <p class="note">{{autosize.caption}}</p>
+  <div class="as-track" data-dist data-fmt="{{autosize.distance_fmt}}" data-readout="{{autosize.readout}}">
+    <div class="as-pin">
+      <div class="wrap split">
+        <div class="sec-head">
+          <h2><span>{{autosize.title}}</span> <em>{{autosize.title_accent}}</em></h2>
+          <p>{{autosize.body}}</p>
+          <p class="note">{{autosize.caption}}</p>
+        </div>
+        <div class="dist">
+          <div class="as-unit">
+            <div class="pf dev p" aria-hidden="true">
+              <div class="scr">
+                {{#wide.has}}<div class="pf-photo"><img src="{{wide.url}}" srcset="{{wide.srcset}}" sizes="1000px" width="{{wide.w}}" height="{{wide.h}}" alt="" decoding="async"></div>{{/wide.has}}
+                <img class="pf-sb" src="{{dev.statusbar}}" width="1320" height="160" alt="" decoding="async">
+                <p class="pf-text"><span class="plate">{{autosize.script}}</span></p>
+              </div>
+              <img class="bez" src="{{dev.frame_p}}" width="900" height="1840" alt="" loading="lazy" decoding="async">
+            </div>
+            <div class="ruler">
+              <i class="ruler-ticks" aria-hidden="true"><b style="--v:0%">35</b><b style="--v:7.69%">40</b><b style="--v:38.46%">60</b><b style="--v:69.23%">80</b><b style="--v:100%">100</b></i>
+              <i class="ruler-needle" aria-hidden="true"></i>
+              <input id="dist-range" type="range" min="35" max="100" step="1" value="35">
+            </div>
+            <div class="as-out">
+              <label for="dist-range">{{autosize.distance_label}}</label>
+              <p class="as-read"><b data-cm></b><span data-readout-out></span></p>
+              <p class="note" data-cap hidden>{{autosize.cap_note}}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+  <div class="wrap as-after"><p class="note">{{autosize.mac_note}}</p></div>
 </section>
 
 <section class="sec cases" id="cases">
@@ -132,7 +135,7 @@
     </div>
     {{#cases.items}}<div class="case" role="tabpanel" id="panel-{{id}}" aria-labelledby="tab-{{id}}" tabindex="0"{{hidden}}>
       <div class="stage">
-        {{#img.has}}<img src="{{img.url}}" width="{{img.w}}" height="{{img.h}}" alt="{{alt}}" loading="lazy" decoding="async">{{/img.has}}
+        {{#img.has}}{{#orient.p}}<div class="dev p"><div class="scr"><img src="{{img.url}}" srcset="{{img.srcset}}" sizes="260px" width="{{img.w}}" height="{{img.h}}" alt="{{alt}}" loading="lazy" decoding="async"></div><img class="bez" src="{{dev.frame_p}}" width="900" height="1840" alt="" loading="lazy" decoding="async"></div>{{/orient.p}}{{#orient.l}}<div class="dev l"><div class="scr"><img src="{{img.url}}" srcset="{{img.srcset}}" sizes="(max-width:900px) 100vw, 680px" width="{{img.w}}" height="{{img.h}}" alt="{{alt}}" loading="lazy" decoding="async"></div><img class="bez" src="{{dev.frame_l}}" width="1840" height="900" alt="" loading="lazy" decoding="async"></div>{{/orient.l}}{{#orient.photo}}<img class="photo" src="{{img.url}}" srcset="{{img.srcset}}" sizes="(max-width:900px) 100vw, 640px" width="{{img.w}}" height="{{img.h}}" alt="{{alt}}" loading="lazy" decoding="async">{{/orient.photo}}{{/img.has}}
         {{^img.has}}<div class="ph" role="img" aria-label="{{alt}}"></div>{{/img.has}}
       </div>
       <div class="case-copy">
@@ -145,7 +148,7 @@
   </div>
 </section>
 
-<section class="sec crop" id="crop">
+<section class="sec crop" id="iphone">
   <div class="wrap split">
     <div class="sec-head">
       <h2><span>{{crop.title}}</span> <em>{{crop.title_accent}}</em></h2>
@@ -155,13 +158,11 @@
         {{/crop.tags}}
       </ul>
     </div>
-    <div class="vf" aria-hidden="true">
-      <div class="cropbox">
-        <i class="g gv1"></i><i class="g gv2"></i><i class="g gh1"></i><i class="g gh2"></i>
-        <p class="vf-text">{{hero.lines.1}}</p>
+    <div class="crop-dev">
+      <div class="dev l">
+        <div class="scr"><video data-loop muted loop playsinline preload="none" poster="{{video.landscape.poster}}" width="1600" height="736" aria-label="{{devices.iphone_label}}"><source src="{{video.landscape.webm}}" type="video/webm"><source src="{{video.landscape.mp4}}" type="video/mp4"></video></div>
+        <img class="bez" src="{{dev.frame_l}}" width="1840" height="900" alt="" loading="lazy" decoding="async">
       </div>
-      <i class="level"></i>
-      <i class="rec"><b></b></i>
     </div>
   </div>
 </section>
@@ -186,15 +187,7 @@
       <p>{{library.body}}</p>
       <p class="note">{{library.cue_note}}</p>
     </div>
-    <div class="doc win">
-      <div class="bar"><i></i><i></i><i></i><span>{{library.window_title}}</span></div>
-      <div class="doc-body">
-      {{#demo}}<p class="ln{{#first}} r{{/first}}">{{line}}</p>
-      {{#cue_after}}<p class="cue">{{library.cue_example}}</p>
-      {{/cue_after}}{{/demo}}
-      <p class="formats">{{library.formats_label}}</p>
-      </div>
-    </div>
+    {{#maclib.has}}<img class="maclib" src="{{maclib.url}}" srcset="{{maclib.srcset}}" sizes="(max-width:900px) 100vw, 640px" width="{{maclib.w}}" height="{{maclib.h}}" alt="{{library.window_title}}: {{library.cue_example}}" loading="lazy" decoding="async">{{/maclib.has}}
   </div>
 </section>
 
@@ -218,6 +211,7 @@
       </div>
     </div>
     <p class="note">{{pro.note}}</p>
+    <a class="store" href="{{store.url_pro}}"><img src="{{store.badge}}" alt="{{store.badge_alt}}" width="156" height="52" loading="lazy"></a>
   </div>
 </section>
 

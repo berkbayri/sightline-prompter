@@ -1,0 +1,4 @@
+{
+  "prompt": "Origin: real iOS Simulator screen recording of Sightline Prompter 1.0.3 Debug (iPhone 17 Pro Max, -ScreenshotScene recording -ScreenshotLanguage ko-KR -ScreenshotAutoAdvanceWPM 150, localized demo script from site/i18n/ko.json) over the AI-generated still ../../img/src/backdrop-portrait.png (top crop of raw-iphone-preview-person.png, AI-generated still, Figma generate_image gpt-image-2.5-flare). The photo is an AI-generated still, not footage; the prompter UI and word-by-word advance are the real app. A real iOS status bar (9:41, signal, Wi-Fi, battery) captured from the same simulator is composited over the top of every frame, because the app hides it while recording. No AI video generation was used. Poster is frame 0 of the loop. Encoded 2026-11-19.",
+  "createdAt": "2026-11-19T20:36:49.335Z"
+}

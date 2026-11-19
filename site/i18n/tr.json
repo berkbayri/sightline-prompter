@@ -1,9 +1,9 @@
 {
   "meta": {
-    "title": "Sesini Takip Eden Teleprompter | Sightline Prompter",
-    "description": "Sightline Prompter, iPhone ve Mac için sesini kelime kelime takip eden bir teleprompter uygulaması. Gözün yukarıda, kameraya oku. Ücretsiz dene.",
+    "title": "Sesini takip eden teleprompter uygulaması | Sightline Prompter",
+    "description": "iPhone ve Mac için sesini kelime kelime takip eden teleprompter uygulaması. Öksürsen ya da doğaçlama konuşsan metin yerinden oynamaz. Ücretsiz dene.",
     "og_title": "Sightline Prompter: seni dinleyen teleprompter",
-    "og_description": "iPhone ve Mac için sesini takip eden bir teleprompter. Konuştukça metnin ilerler, duraksayınca bekler. Ücretsiz dene.",
+    "og_description": "iPhone ve Mac için sesini takip eden bir teleprompter uygulaması. Konuştukça metin ilerler, duraksayınca ya da öksürünce bekler. Ücretsiz dene.",
     "og_image_alt": "iPhone ve Mac'te Sightline Prompter, metin kameranın hemen altında"
   },
   "nav": {
@@ -12,31 +12,35 @@
     "languages": "Diller",
     "faq": "SSS",
     "download": "İndir",
-    "language_menu": "Dil"
+    "language_menu": "Dil",
+    "lang_offer": "Bu sayfa Türkçe olarak da okunabilir.",
+    "lang_dismiss": "Kapat",
+    "motion_pause": "Animasyonu duraklat",
+    "motion_play": "Animasyonu oynat"
   },
   "hero": {
     "lines": [
-      "Kameraya bak.",
-      "Metin sesini takip eder.",
-      "Duraksa, o bekler."
+      "Objektife bak.",
+      "Metin yalnız sözünle akar.",
+      "Öksürsen yerinden oynamaz."
     ],
     "cue": "[[gülümse]]",
-    "sub": "Sightline Prompter, iPhone ve Mac için bir teleprompter. Seni dinler, kelimeni nerede bıraktığını bulur ve metni tam kameranın altında tutar.",
-    "cta_secondary": "iPhone ve Mac'te gör"
+    "sub": "Sightline Prompter, iPhone ve Mac için bir teleprompter uygulaması. Sesini yalnızca ekrandaki kelimelerle eşleştirerek takip eder, bu yüzden öksürük, doğaçlama bir cümle ya da atladığın satır onu şaşırtmaz. Metin tam kameranın altında durur. Ücretsiz dene.",
+    "cta_secondary": "Nasıl çalıştığını gör"
   },
   "devices": {
     "kicker_cue": "[[tek metin]]",
-    "title": "TEK METİN.",
-    "title_accent": "İKİ CİHAZ.",
-    "body": "Mac'te yaz, iPhone'da kaydet. İki uygulama tek bir iCloud metin kütüphanesini paylaşır. Kayda basmadan önce yazdığın metin telefonunda zaten hazırdır. App Store'da tek uygulama, tek satın alma iki cihaz için de geçerli.",
+    "title": "Tek metin.",
+    "title_accent": "İki cihaz.",
+    "body": "Mac'te yaz, iPhone'da kaydet. İki uygulama tek bir iCloud metin kitaplığını paylaşır, o yüzden kayda bastığında yazdığın metin telefonunda zaten hazırdır. App Store'da tek bir uygulama var ve tek satın alma ikisinde de geçerli.",
     "mac_label": "Mac, çentiğin altında",
     "iphone_label": "iPhone, canlı önizlemenin üstünde",
-    "demo_script": "Kanala hoş geldiniz. Bugün bu metni doğrudan kameraya okuyorum. Kelimeler bana yetişiyor, yerimi hiç kaybetmiyorum."
+    "demo_script": "Kanala hoş geldiniz. Bugün bu metni doğrudan kameraya okuyorum. Kelimeler bana yetişiyor, ben de gözümü objektiften ayırmıyorum."
   },
   "autosize": {
-    "title": "YAZI BOYUTU",
-    "title_accent": "MESAFENE UYAR.",
-    "body": "iPhone'da uygulama yüzünün kameraya ne kadar uzak olduğunu tahmin eder, yazı boyutunu, satır uzunluğunu ve satır sayısını buna göre ayarlar. Böylece gözlerin objektife yakın kalırken rahatça okursun.",
+    "title": "Yazı boyutu",
+    "title_accent": "mesafene uyar.",
+    "body": "iPhone'da uygulama yüzünün kameraya ne kadar uzak olduğunu tahmin eder, yazı boyutunu, satır uzunluğunu ve satır sayısını buna göre ayarlar. Uzaklaşırsan yazı büyür, yaklaşırsan küçülür. Gözlerin objektife yakın kalırken rahatça okursun.",
     "mac_note": "Mac'te ne kadar uzakta oturduğunu sen seçersin ya da yerleşik kameranın ölçmesine izin verirsin. Kamera sen açana kadar kapalı kalır. Hiçbir şey kaydedilmez veya gönderilmez.",
     "script": "Objektife bak, nefes al ve bunu bir arkadaşına anlatır gibi söyle.",
     "distance_label": "Ekrana uzaklık",
@@ -46,43 +50,43 @@
     "caption": "iPhone 16 Pro için örnek boyutlar."
   },
   "cases": {
-    "title": "KAMERA İÇİN",
-    "title_accent": "TASARLANDI",
+    "title": "Kamera için",
+    "title_accent": "bir teleprompter",
     "items": [
       {
         "id": "youtube",
         "tab": "YouTube",
         "title": "Girişi tek çekimde kaydet",
-        "body": "Metni ön kameranın altına koy ve notlarına değil, izleyicilerine konuş. Sightline Prompter temponu takip eder. Nefes almak için yaptığın duraklama yerini kaybettirmez.",
+        "body": "Metni ön kameranın altına koy ve notlarına değil izleyicilerine konuş. Metin yalnızca gerçekten söylediğin kelimelerle ilerler, bu yüzden nefes almak, öksürmek ya da araya bir şey eklemek yerini kaybettirmez.",
         "alt": "Örnek sahne: iPhone'da Sightline Prompter ile YouTube girişi kaydeden bir içerik üreticisi"
       },
       {
         "id": "reels",
         "tab": "Reels ve Shorts",
         "title": "Kısa videolar, sıkı metinler",
-        "body": "Yatay çek ama ekranda canlı bir 9:16 kırpma kılavuzu tut. Şimdi kadrajladığın şey dikey kesimde de kalır. Metin, dikey ve yatay modda objektifin yanında durur.",
+        "body": "Yatay çek ve ekranda canlı bir 9:16 kırpma kılavuzu açık kalsın. Tek çekim hem yatay hem dikey kurguya yeter. Metin, dikey ve yatay modda objektifin yanında durur.",
         "alt": "Örnek sahne: iPhone'da kısa bir dikey video çeken biri, metin önizlemenin üstünde süzülüyor"
       },
       {
         "id": "course",
         "tab": "Kurslar",
-        "title": "Uzun dersler, dengeli anlatım",
-        "body": "Tam bir dersi elle kaydırmadan oku. Hatırlatma olarak çift köşeli parantez içinde sahne notları ekle. Ekranda kalırlar, asla okunmazlar ve kelime sayılmazlar. Dakikadaki kelime sayısı ve kalan süre Pro'da.",
-        "alt": "Örnek sahne: masasında, ekranında metin olan bir eğitmen çevrim içi ders kaydediyor"
+        "title": "Uzun dersler, dengeli tempo",
+        "body": "Bir dersi baştan sona elle kaydırmadan oku. Hatırlatma olarak çift köşeli parantez içine anlatım notları ekle. Ekranda kalırlar, asla okunmazlar ve kelime sayılmazlar. Dakikadaki kelime sayısı ve kalan süre Pro'da yer alır.",
+        "alt": "Örnek sahne: masasında, ekranında metin olan bir eğitmen çevrimiçi ders kaydediyor"
       },
       {
         "id": "meeting",
-        "tab": "Görüşmeler ve konuşmalar",
+        "tab": "Görüşme ve sunum",
         "title": "Mac'te çentiğin altında",
-        "body": "Çentikli bir MacBook'ta panel hemen altında, kameranın yanında durur. Okurken görüşmedeki kişilere bakabilirsin. Çentiksiz Mac'lerde panel ekranın üst ortasında açılır.",
-        "alt": "Örnek sahne: MacBook'ta görüntülü görüşmede, metin paneli kameranın çentiğinin altında"
+        "body": "Çentikli bir MacBook'ta panel hemen çentiğin altında, kameranın yanında durur ve okurken görüşmedeki kişilere bakabilirsin. Çentiksiz Mac'lerde panel ekranın üst ortasında açılır.",
+        "alt": "Örnek sahne: MacBook'ta görüntülü görüşmede, metin paneli kamera çentiğinin altında"
       }
     ]
   },
   "crop": {
-    "title": "KADRAJDA",
-    "title_accent": "KAL",
-    "body": "Dikey bir platform için yatay mı çekiyorsun? iPhone kamerası çekim sırasında canlı 9:16 kırpma kılavuzu, üçte bir kuralı ve seviye çizgisi gösterir. Son kırpmada başın kesilmez.",
+    "title": "Kadrajda",
+    "title_accent": "kal",
+    "body": "Dikey bir platform için yatay mı çekiyorsun? iPhone kamerası çekim sırasında canlı 9:16 kırpma kılavuzu, üçte bir kuralı ve seviye çizgisi gösterir. Yatay tek çekim hem yatay videoyu hem de kafanı kesmeyen dikey bir kurguyu verir.",
     "tags": [
       "9:16 kırpma kılavuzu",
       "Üçte bir kuralı",
@@ -90,32 +94,32 @@
     ]
   },
   "languages": {
-    "title": "HER DİLİ",
-    "title_accent": "KONUŞ",
+    "title": "Sesle takip",
+    "title_accent": "31 dilde",
     "body": "Sesle takip 31 dilde ve bölgesel varyantta çalışır: İngilizce, Almanca, Fransızca, İspanyolca, İtalyanca, Portekizce, Japonca, Korece, Mandarin, Kantonca ve Türkçe dahil. Birçoğu cihaz üzerinde, bağlantı olmadan tanınır.",
-    "note": "Ücretsiz sürüm sesini İngilizce, Türkçe ve İspanyolca'da takip eder. Sightline Pro gerisini ekler."
+    "note": "Ücretsiz sürümde sesle takip İngilizce, Türkçe ve İspanyolca'da çalışır, gerisini Sightline Pro ekler. Çince, Japonca ve Kantonca bölümler halinde eşleştirildiği için doğruluk boşlukla yazılan dillere göre daha düşüktür."
   },
   "library": {
     "window_title": "Metinler",
-    "title": "MAC'TE YAZ.",
-    "title_accent": "iPHONE'DA KAYDET.",
-    "body": "Metinleri iki cihazın birinde de yaz, ara ve düzenle. iCloud üzerinden senkronize olurlar, bir şeyi elle kopyalaman gerekmez. Elindekileri Word, PDF, Markdown, RTF, HTML, OpenDocument ya da düz metin olarak içe aktar.",
+    "title": "Mac'te yaz.",
+    "title_accent": "iPhone'da kaydet.",
+    "body": "Metinleri iki cihazda da yaz, ara ve düzenle. iCloud üzerinden senkronize olurlar, elle kopyalamana gerek kalmaz. Senkronizasyon iCloud hesabını kullanır, Sightline hesabı diye bir şey yoktur. Elindeki dosyaları Word, PDF, Markdown gibi biçimlerde içe aktarabilirsin.",
     "cue_example": "[[yavaşla, yukarı bak]]",
-    "cue_note": "Çift köşeli parantez içindeki notlar ekranda küçük hatırlatmalar olarak görünür. Sightline Prompter bunları okumaz ve söylemen gereken kelimeler arasında saymaz.",
+    "cue_note": "Çift köşeli parantez içindeki notlar ekranda küçük hatırlatmalar olarak görünür. Asla sesli okunmaz, kelime olarak da sayılmaz.",
     "formats_label": "İçe aktar: Word, PDF, Markdown, RTF, HTML, OpenDocument, metin"
   },
   "pro": {
-    "title": "BEDAVA BAŞLA",
+    "title": "Ücretsiz başla",
     "free_title": "Ücretsiz",
     "free_items": [
-      "Çalıştırma başına 2 dakikaya kadar sesle takip",
+      "Her seferinde 2 dakikaya kadar sesle takip",
       "iPhone'da 2 dakikaya kadar kayıt",
       "1080p, 30 fps",
       "İngilizce, Türkçe ve İspanyolca"
     ],
     "pro_title": "Sightline Pro",
     "pro_items": [
-      "Süre sınırı yok",
+      "Her seferdeki 2 dakika sınırı yok",
       "4K 60 fps, HDR ve ProRes",
       "31 dilin tamamı",
       "Dakikadaki kelime sayısı ve kalan süre",
@@ -125,19 +129,27 @@
     "note": "Fiyatlar ve ücretsiz deneme, App Store'da yerel para biriminde gösterilir."
   },
   "faq": {
-    "title": "SORULAR",
+    "title": "Teleprompter soruları",
     "items": [
       {
         "q": "Sesini takip eden bir teleprompter nasıl çalışır?",
-        "a": "Sightline Prompter sen okurken dinler ve duyduklarını ekrandaki kelimelerle eşleştirir. Konuştukça metin ilerler, duraksayınca durur. Yani kaydırma hızını değil, temponu sen belirlersin."
+        "a": "Sightline Prompter sen okurken dinler ve duyduklarını ekrandaki kelimelerle eşleştirir. Konuştukça metin ilerler, duraksayınca bekler. Kaydırma hızını değil temponu sen belirlersin. Yalnızca metindeki kelimeleri eşleştirdiği için öksürük, doğaçlama bir cümle ya da atladığın satır metni zıplatmaz."
       },
       {
-        "q": "Sesle takip çevrim dışı çalışır mı?",
-        "a": "Birçok dil cihaz üzerinde tanındığı için bağlantı olmadan çalışır. Dilin çevrim dışı modeli yüklü değilse ses Apple'ın konuşma servisine gider ve uygulama bunu ekranda belirtir. Türkçe için cihaz üzerinde tanıma, iOS Dikte modelini gerektirir."
+        "q": "Sesini takip eden ücretsiz bir teleprompter uygulaması var mı?",
+        "a": "Evet. Ücretsiz sürüm İngilizce, Türkçe ve İspanyolca'da her seferinde 2 dakikaya kadar sesini takip eder ve iPhone'da 2 dakikaya kadar 1080p video kaydeder. Sightline Pro sınırları kaldırır."
+      },
+      {
+        "q": "Sesle takip çevrimdışı çalışır mı?",
+        "a": "Birçok dil cihaz üzerinde tanındığı için bağlantı olmadan çalışır. Dilin çevrimdışı modeli yüklü değilse ses Apple'ın konuşma servisine gider ve uygulama bunu ekranda belirtir. Türkçe için cihaz üzerinde tanıma, iOS Dikte modelini gerektirir."
       },
       {
         "q": "Hangi dilleri destekliyor?",
-        "a": "İngilizce, Almanca, Fransızca, İspanyolca, İtalyanca, Portekizce, Japonca, Korece, Mandarin, Kantonca ve Türkçe dahil 31 dil ve bölgesel varyant. Ücretsiz sürüm İngilizce, Türkçe ve İspanyolca'yı kapsar."
+        "a": "İngilizce, Almanca, Fransızca, İspanyolca, İtalyanca, Portekizce, Japonca, Korece, Mandarin, Kantonca ve Türkçe dahil 31 dil ve bölgesel varyant. Ücretsiz sürüm İngilizce, Türkçe ve İspanyolca'yı kapsar. Çince, Japonca ve Kantonca bölümler halinde eşleştirilir, bu yüzden doğruluk boşlukla yazılan dillere göre daha düşüktür."
+      },
+      {
+        "q": "Metinden ayrılırsam ne olur?",
+        "a": "Olduğun yerde kalır. Öksürük, doğaçlama bir cümle ya da atladığın satır metni zıplatmaz. Metin yalnızca ekrandaki kelimeleri söylediğinde ilerler."
       },
       {
         "q": "Çentikli bir MacBook'a ihtiyacım var mı?",
@@ -149,11 +161,15 @@
       },
       {
         "q": "Video kaydediyor mu?",
-        "a": "Evet, iPhone'da. Uygulama, metin canlı önizlemenin üstünde süzülürken kaydeder ve videoyu Fotoğraflar kitaplığına kaydeder. Mac uygulaması, diğer araçlarla yaptığın görüşme ve kayıtlar için bir teleprompter paneli."
+        "a": "Evet, iPhone'da. Metin canlı önizlemenin üstünde süzülürken kayıt alır ve videoyu Fotoğraflar kitaplığına kaydeder. Mac uygulaması, diğer araçlarla yaptığın görüşme ve kayıtlar için teleprompter paneli olarak çalışır."
       },
       {
         "q": "Tek satın alma iPhone ve Mac'i kapsar mı?",
-        "a": "Evet. App Store'da tek bir uygulama var ve Sightline Pro hem iPhone hem Mac sürümünün kilidini açar."
+        "a": "Evet. App Store'da tek bir uygulama var ve Sightline Pro hem iPhone hem Mac sürümünün kilidini açar. İkisi de aynı iCloud metin kitaplığını kullanır."
+      },
+      {
+        "q": "Sightline Pro ne kadar?",
+        "a": "Sightline Pro abonelik (deneme süresiyle) ya da tek seferlik satın alma olarak sunulur. Güncel fiyatlar App Store'da yerel para biriminde gösterilir."
       },
       {
         "q": "Hangi dosyaları içe aktarabilirim?",
@@ -161,18 +177,18 @@
       },
       {
         "q": "Oyun kumandası kullanabilir miyim?",
-        "a": "Evet. DualSense kumanda, Bluetooth ya da USB üzerinden Mac uygulamasıyla çalışır: analog çubuk kaydırır, tuşlar hızı değiştirir ve paragraflar arasında atlar. Kumanda desteği Sightline Pro'nun parçası."
+        "a": "Evet. DualSense kumanda, Bluetooth ya da USB üzerinden Mac uygulamasıyla çalışır. Analog çubuk kaydırır, tuşlar hızı değiştirir ve paragraflar arasında atlar. Kumanda desteği Sightline Pro'ya dahildir."
       },
       {
         "q": "Verilerime ne oluyor?",
-        "a": "Metinler kendi iCloud Drive'ında kalır. Reklam yok, hesap yok, uygulamalar arası takip yok. Anonim kullanım sayımı Ayarlar'dan kapatılabilir. Cihazda bir iCloud girişi gerekir."
+        "a": "Metinler kendi iCloud Drive'ında kalır. Reklam yok, Sightline hesabı yok, uygulamalar arası takip yok. Senkronizasyon iCloud hesabını kullandığı için cihazda iCloud'a giriş yapmış olman gerekir. Anonim kullanım istatistikleri Ayarlar'dan kapatılabilir."
       }
     ]
   },
   "close": {
     "title": "YUKARI BAK.",
     "title_accent": "KONUŞMAYA DEVAM ET.",
-    "sub": "Sightline Prompter'ı iPhone ve Mac için indir, bir sonraki metninde dene."
+    "sub": "iPhone ve Mac'te ücretsiz dene. Bir sonraki metnini yapıştır ve objektife oku."
   },
   "footer": {
     "privacy": "Gizlilik",
@@ -181,7 +197,7 @@
     "rights": "Tüm hakları saklıdır."
   },
   "consent": {
-    "text": "Bu site ziyaretleri saymak için Google Analytics kullanır. Kabul etmezsen kapalı kalır.",
+    "text": "Bu site ziyaretleri Google Analytics ile sayar. Kabul etmezsen analiz çerezi kullanılmaz.",
     "accept": "Kabul et",
     "decline": "Reddet",
     "settings": "Çerez ayarları"

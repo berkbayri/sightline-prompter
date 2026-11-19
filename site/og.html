@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="{{lang}}"><head><meta charset="utf-8">
+<style>
+*{box-sizing:border-box;margin:0}
+html,body{width:1200px;height:630px;overflow:hidden;background:#07080C;color:#F4F4F6;font-family:-apple-system,"SF Pro Text","Hiragino Sans","PingFang SC","PingFang TC","Apple SD Gothic Neo",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{position:relative}
+body::before{content:"";position:absolute;right:-60px;top:50%;width:760px;height:560px;transform:translateY(-50%);background:radial-gradient(ellipse at center,rgba(255,214,10,.16),rgba(255,214,10,0) 68%)}
+.brand{position:absolute;left:72px;top:56px;display:flex;align-items:center;gap:14px;font-weight:600;font-size:26px}
+.mark{display:grid;gap:4px;width:30px}.mark i{display:block;height:7px;border-radius:4px;background:#F5D77A}.mark i:nth-child(2){background:#C9CBD2;width:80%}.mark i:nth-child(3){background:#4A4D57;width:60%}
+.lines{position:absolute;left:72px;top:50%;width:640px;transform:translateY(-44%);font-weight:600;line-height:1.28;white-space:nowrap}
+.lines p{margin:0}
+.l0,.l2{font-size:{{fs_dim}}px;color:rgba(244,244,246,.42)}
+.l1{font-size:{{fs}}px;margin:8px 0}
+.l1 span{color:#FFDB66;background:rgba(255,214,10,.16);border-radius:10px;padding:0 12px;margin:0 -12px}
+.cue{margin-left:12px;padding:2px 10px;border-radius:8px;font-size:22px;font-weight:500;color:#7DB8FF;background:rgba(125,184,255,.14);vertical-align:8px}
+.dev{position:absolute;right:92px;top:35px;height:560px;aspect-ratio:1350/2760}
+.scr{position:absolute;left:5.333%;top:2.5%;width:89.333%;height:95%;border-radius:17.2%/7.9%;overflow:hidden}
+.scr img,.bez{display:block;width:100%;height:100%;object-fit:cover}
+.bez{position:absolute;inset:0}
+</style></head><body>
+<div class="brand"><span class="mark"><i></i><i></i><i></i></span>Sightline Prompter</div>
+<div class="lines"><p class="l0">{{l0}}{{#cue}}<span class="cue">{{cue}}</span>{{/cue}}</p><p class="l1"><span>{{l1}}</span></p><p class="l2">{{l2}}</p></div>
+<div class="dev"><div class="scr"><img src="{{poster}}" alt=""></div><img class="bez" src="{{frame}}" alt=""></div>
+</body></html>

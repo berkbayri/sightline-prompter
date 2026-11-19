@@ -3,14 +3,15 @@
   const store = (k, v) => { try { return v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v); } catch (e) {} };
   const track = (...a) => window.gtag && gtag(...a);
 
-  // (c) first-visit language redirect: root only, no saved choice, never for bots
-  if (location.pathname === '/' && !store('sp-lang') && !/bot|crawl|spider|lighthouse/i.test(navigator.userAgent)) {
-    const have = (root.dataset.locales || '').split(',');
+  // (c) first visit to the root: send the visitor to their language once (user decision); bots and saved choices stay put
+  const offer = d.getElementById('langbar');
+  if (offer && location.pathname === '/' && !store('sp-lang') && !/bot|crawl|spider|slurp|lighthouse|preview/i.test(navigator.userAgent)) {
+    const offers = JSON.parse(offer.dataset.offers || '{}');
     for (const l of navigator.languages || []) {
       const s = l.toLowerCase();
       const c = s.startsWith('zh') ? (/hant|tw|hk|mo/.test(s) ? 'zh-hant' : 'zh-hans') : s.startsWith('pt') ? 'pt-br' : s.slice(0, 2);
       if (c === 'en') break;
-      if (have.includes(c)) { location.replace('/' + c + '/' + location.search + location.hash); break; }
+      if (offers[c]) { store('sp-lang', c); location.replace(offers[c][1] + location.search + location.hash); break; }
     }
   }
 
@@ -39,18 +40,20 @@
     }
     return [...el.querySelectorAll('.w')];
   };
+  const rm = matchMedia('(prefers-reduced-motion: reduce)');
+  let paused = rm.matches, run = () => {};
   const sets = [...d.querySelectorAll('[data-read]')].map(el => ({ el, w: words(el), i: -1 }));
   const paint = (s, i) => {
     if (s.i === i) return;
     s.i = i;
     s.w.forEach((e, k) => { e.classList.toggle('r', k < i); e.classList.toggle('c', k === i); });
   };
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (rm.matches) {
     sets.forEach(s => paint(s, Math.floor(s.w.length / 3)));
   } else if (sets.length) {
     let t = 0, timer = 0;
-    const run = () => {
-      const on = sets.some(s => s.vis) && !d.hidden;
+    run = () => {
+      const on = sets.some(s => s.vis) && !d.hidden && !paused;
       if (on && !timer) timer = setInterval(tick, 420);
       else if (!on && timer) { clearInterval(timer); timer = 0; }
     };
@@ -60,21 +63,82 @@
     d.addEventListener('visibilitychange', run);
   }
 
-  // (e) distance demo: prompter-typography.md formula for an iPhone 16 Pro (ppmm 6.037, xr .526, alpha .40 deg)
-  const dist = d.querySelector('[data-dist]');
-  if (dist) {
-    const range = dist.querySelector('input'), pf = dist.querySelector('.pf'), tan = x => Math.tan(x * Math.PI / 180);
-    const render = () => {
-      const cm = +range.value, mm = cm * 10, ideal = mm * tan(.4) * 6.037 / .526;
+  // real-app loops: play only while on screen and not paused; under reduced motion they rest on the poster
+  const vids = [...d.querySelectorAll('video[data-loop]')], seen = new Map();
+  const sync = () => vids.forEach(v => (!paused && seen.get(v) && !d.hidden ? v.play().catch(() => {}) : v.pause()));
+  if (vids.length) {
+    if (rm.matches) vids.forEach(v => { v.removeAttribute('autoplay'); v.pause(); });
+    else {
+      const vio = new IntersectionObserver(es => { es.forEach(e => seen.set(e.target, e.isIntersecting)); sync(); }, { rootMargin: '120px' });
+      vids.forEach(v => vio.observe(v));
+      d.addEventListener('visibilitychange', sync);
+    }
+  }
+  const ctl = d.getElementById('motion-ctl');
+  if (ctl) {
+    if (rm.matches) ctl.hidden = true;
+    ctl.onclick = () => {
+      paused = !paused;
+      ctl.setAttribute('aria-pressed', paused);
+      ctl.setAttribute('aria-label', paused ? ctl.dataset.play : ctl.dataset.pause);
+      sync(); run();
+    };
+  }
+
+  // (e) distance scene: scroll progress -> 35 -> 100 -> 45 cm; text size from prompter-typography.md (iPhone 16 Pro: ppmm 6.037, xr .526, alpha .40 deg)
+  const scene = d.querySelector('[data-dist]');
+  if (scene) {
+    const pin = scene.querySelector('.as-pin'), unit = scene.querySelector('.as-unit'), range = unit.querySelector('input'), tan = x => Math.tan(x * Math.PI / 180);
+    const KEYS = [[0, 35], [.1, 35], [.55, 100], [.66, 100], [.92, 45], [1, 45]]; // same key points as @keyframes as-photo
+    const at = p => {
+      let i = 1;
+      while (i < KEYS.length - 1 && p > KEYS[i][0]) i++;
+      const [a, x] = KEYS[i - 1], [b, y] = KEYS[i];
+      return x + (y - x) * Math.min(1, Math.max(0, (p - a) / (b - a)));
+    };
+    const render = (u, cm) => {
+      const mm = cm * 10, ideal = mm * tan(.4) * 6.037 / .526;
       const pt = Math.round(Math.min(ideal, 370 / (.5 * 13))), alpha = Math.atan(pt * .526 / 6.037 / mm) * 180 / Math.PI;
       const n = Math.max(2, Math.min(3, Math.floor((tan(3) - 4 / mm) / (1.3 * tan(alpha) / .526) + .55)));
+      u.style.setProperty('--d', ((cm - 35) / 65).toFixed(4));
+      const key = pt + '/' + n + '/' + Math.round(cm);
+      if (u.k === key) return;
+      u.k = key;
+      const pf = u.querySelector('.pf'), a = scene.dataset.fmt.replace('{cm}', Math.round(cm)), b = scene.dataset.readout.replace('{pt}', pt).replace('{n}', n);
       pf.style.setProperty('--s', pt); pf.style.setProperty('--n', n);
-      dist.querySelector('[data-cm]').textContent = dist.dataset.fmt.replace('{cm}', cm);
-      dist.querySelector('[data-readout-out]').textContent = dist.dataset.readout.replace('{pt}', pt).replace('{n}', n);
-      dist.querySelector('[data-cap]').hidden = ideal <= pt + .5;
-      range.setAttribute('aria-valuetext', dist.dataset.fmt.replace('{cm}', cm));
+      u.querySelector('[data-cm]').textContent = a;
+      u.querySelector('[data-readout-out]').textContent = b;
+      u.querySelector('[data-cap]').hidden = ideal <= pt + .5;
+      const inp = u.querySelector('input');
+      if (inp) inp.setAttribute('aria-valuetext', a + ', ' + b);
     };
-    range.addEventListener('input', render); render();
+    rm.addEventListener('change', () => location.reload());
+    if (rm.matches) {
+      const row = d.createElement('div');
+      row.className = 'as-static';
+      [40, 70, 100].forEach(cm => {
+        const u = unit.cloneNode(true);
+        u.querySelector('.ruler').remove(); u.querySelector('label').remove();
+        render(u, cm); row.append(u);
+      });
+      unit.hidden = true; unit.parentNode.append(row);
+    } else {
+      let vis = false, raf = 0;
+      const frame = () => {
+        raf = 0;
+        const r = scene.getBoundingClientRect(), span = r.height - pin.offsetHeight;
+        const cm = at(span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 0);
+        render(unit, cm); range.value = Math.round(cm);
+      };
+      const tick = () => { if (!raf) raf = requestAnimationFrame(frame); };
+      // the slider overrides the scroll-linked animation until the next scroll
+      let used = 0;
+      range.addEventListener('input', () => { scene.dataset.manual = ''; render(unit, +range.value); if (!used) { used = 1; track('event', 'demo_distance', { language: root.lang }); } });
+      addEventListener('scroll', () => { if (vis) { scene.removeAttribute('data-manual'); tick(); } }, { passive: true });
+      addEventListener('resize', tick);
+      new IntersectionObserver(([e]) => { vis = e.isIntersecting; if (vis) tick(); }).observe(scene);
+      frame();
+    }
   }
 
   // (b) case tabs
@@ -85,7 +149,7 @@
       t.tabIndex = k === i ? 0 : -1;
       d.getElementById(t.getAttribute('aria-controls')).hidden = k !== i;
     });
-    if (user) { tabs[i].focus(); track('event', 'case_tab', { case: tabs[i].dataset.case }); }
+    if (user) { tabs[i].focus(); tabs[i].scrollIntoView({ inline: 'center', block: 'nearest' }); track('event', 'case_tab', { case: tabs[i].dataset.case }); }
   };
   tabs.forEach((t, i) => {
     t.onclick = () => pick(i, 1);
@@ -101,10 +165,14 @@
     const a = e.target.closest('a[data-lang]');
     if (a) { store('sp-lang', a.dataset.lang); track('event', 'language_switch', { language: a.dataset.lang }); }
     const s = e.target.closest('a[href*="apps.apple.com"]');
-    if (s) track('event', 'app_store_click', { placement: (new URL(s.href).searchParams.get('ct') || '').replace('site-', '') });
+    if (s) track('event', 'app_store_click', { placement: (new URL(s.href).searchParams.get('ct') || '').replace('site-', ''), language: root.lang, transport_type: 'beacon' });
+    if (e.target.closest('.hero .link')) track('event', 'cta_secondary', { language: root.lang });
     if (menu && !menu.contains(e.target)) menu.open = false;
   });
   d.addEventListener('keydown', e => { if (e.key === 'Escape' && menu) menu.open = false; });
+  d.addEventListener('toggle', e => { if (e.target.matches && e.target.matches('.qa[open]')) track('event', 'faq_open', { question: [...d.querySelectorAll('.qa')].indexOf(e.target) + 1 }); }, true);
+  const pro = d.getElementById('pro');
+  if (pro && window.IntersectionObserver) new IntersectionObserver(([e], o) => { if (e.isIntersecting) { track('event', 'pro_section_view', { language: root.lang }); o.disconnect(); } }).observe(pro);
 
   // (d) Consent Mode v2: the head snippet sets every signal to denied; only analytics can be granted
   const bar = d.getElementById('consent');

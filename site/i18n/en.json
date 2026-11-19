@@ -1,9 +1,9 @@
 {
   "meta": {
-    "title": "Teleprompter That Follows Your Voice | Sightline Prompter",
-    "description": "Sightline Prompter is a teleprompter app for iPhone and Mac that follows your voice word by word. Read to the camera with your eyes up. Free to try.",
+    "title": "Voice teleprompter app for iPhone and Mac | Sightline Prompter",
+    "description": "Teleprompter app for iPhone and Mac that follows your voice word by word and ignores a cough. The text sits under the camera. Free to try.",
     "og_title": "Sightline Prompter: the teleprompter that hears you",
-    "og_description": "A voice-following teleprompter for iPhone and Mac. Your script moves when you speak and waits when you pause. Free to try.",
+    "og_description": "A voice-following teleprompter app for iPhone and Mac. The text moves when you read your script and waits when you pause or cough. Free to try.",
     "og_image_alt": "Sightline Prompter on iPhone and Mac, with the script text just below the camera"
   },
   "nav": {
@@ -12,31 +12,35 @@
     "languages": "Languages",
     "faq": "FAQ",
     "download": "Download",
-    "language_menu": "Language"
+    "language_menu": "Language",
+    "lang_offer": "This page is also available in English.",
+    "lang_dismiss": "Close",
+    "motion_pause": "Pause animation",
+    "motion_play": "Play animation"
   },
   "hero": {
     "lines": [
       "Look at the lens.",
-      "Your script follows your voice.",
-      "Pause, and it waits."
+      "Only your words move it.",
+      "A cough won't make it jump."
     ],
     "cue": "[[smile]]",
-    "sub": "Sightline Prompter is a teleprompter for iPhone and Mac. It listens, finds your place word by word, and keeps the text right under the camera.",
-    "cta_secondary": "See it on iPhone and Mac"
+    "sub": "Sightline Prompter is a teleprompter app for iPhone and Mac. It follows your voice by matching only the words on screen, so a cough, an ad-lib or a skipped line does not throw it. The text stays right under the camera. Free to try.",
+    "cta_secondary": "See how it works"
   },
   "devices": {
     "kicker_cue": "[[one script]]",
-    "title": "ONE SCRIPT.",
-    "title_accent": "TWO DEVICES.",
-    "body": "Write on your Mac, record on your iPhone. Both apps share one iCloud script library, so the script you wrote is already on your phone when you press record. It is one app on the App Store, and one purchase covers both.",
+    "title": "One script.",
+    "title_accent": "Two devices.",
+    "body": "Write on your Mac, record on your iPhone. Both apps share one iCloud script library, so the script is already on your phone when you press record. It is one app on the App Store, and one purchase covers both.",
     "mac_label": "Mac, under the notch",
     "iphone_label": "iPhone, over the live preview",
-    "demo_script": "Welcome back to the channel. Today I am reading this script straight to the camera. The words keep up with me, and I never lose my place."
+    "demo_script": "Welcome back to the channel. Today I am reading this script straight to the camera. The words keep up with me, so my eyes can stay on the lens."
   },
   "autosize": {
-    "title": "SIZED TO",
-    "title_accent": "YOUR DISTANCE.",
-    "body": "On iPhone, the app estimates how far your face is from the camera, then sets the text size, line length and number of lines to match. You read comfortably while your eyes stay near the lens.",
+    "title": "Sized to",
+    "title_accent": "your distance.",
+    "body": "On iPhone, the app estimates how far your face is from the camera, then sets the text size, line length and number of lines to match. Move back and the text grows, lean in and it shrinks. You read comfortably while your eyes stay near the lens.",
     "mac_note": "On Mac, you pick how far you sit, or let the built-in camera measure it. The camera stays off until you turn it on, and nothing is saved or sent.",
     "script": "Look at the lens, take a breath, and say it the way you would say it to a friend.",
     "distance_label": "Distance from the screen",
@@ -46,27 +50,27 @@
     "caption": "Example sizes for an iPhone 16 Pro."
   },
   "cases": {
-    "title": "BUILT FOR",
-    "title_accent": "THE CAMERA",
+    "title": "A teleprompter",
+    "title_accent": "for the camera",
     "items": [
       {
         "id": "youtube",
         "tab": "YouTube",
         "title": "Record the intro in one take",
-        "body": "Put the script under the front camera and talk to your viewers instead of to your notes. Sightline Prompter follows your pace, so a pause to breathe does not cost you your place.",
+        "body": "Put the script under the front camera and talk to your viewers instead of your notes. The text only moves on the words you actually say, so a breath, a cough or an ad-lib does not cost you your place.",
         "alt": "Illustrative scene: a creator recording a YouTube intro with Sightline Prompter on iPhone"
       },
       {
         "id": "reels",
         "tab": "Reels and Shorts",
         "title": "Short videos, tight scripts",
-        "body": "Shoot in landscape and keep a live 9:16 crop guide on screen, so what you frame now is what the vertical cut keeps. The text stays next to the lens in portrait and landscape.",
+        "body": "Shoot in landscape with a live 9:16 crop guide on screen, so one take works for the horizontal and the vertical cut. The text stays next to the lens in portrait and landscape.",
         "alt": "Illustrative scene: a person filming a short vertical video on iPhone with the script floating over the preview"
       },
       {
         "id": "course",
         "tab": "Courses",
-        "title": "Long lessons, steady delivery",
+        "title": "Long lessons, steady pace",
         "body": "Read a full lesson without scrolling by hand. Add delivery cues in double brackets as reminders. They stay on screen and are never read or counted as words. Words per minute and time left are in Pro.",
         "alt": "Illustrative scene: an instructor recording an online lesson at a desk with a script on screen"
       },
@@ -80,9 +84,9 @@
     ]
   },
   "crop": {
-    "title": "STAY IN",
-    "title_accent": "THE FRAME",
-    "body": "Filming landscape for a vertical platform? The iPhone camera shows a live 9:16 crop guide while you shoot, with the rule of thirds and a level line, so the final crop does not cut off your head.",
+    "title": "Stay in",
+    "title_accent": "the frame",
+    "body": "Filming landscape for a vertical platform? The iPhone camera shows a live 9:16 crop guide while you shoot, with the rule of thirds and a level line. One landscape take gives you the horizontal video and a vertical cut that keeps your head in frame.",
     "tags": [
       "9:16 crop guide",
       "Rule of thirds",
@@ -90,22 +94,22 @@
     ]
   },
   "languages": {
-    "title": "SPEAK ANY",
-    "title_accent": "LANGUAGE",
-    "body": "Voice following works in 31 languages and regional variants, including English, German, French, Spanish, Italian, Portuguese, Japanese, Korean, Mandarin, Cantonese and Turkish. Many of them are recognized on the device, with no connection.",
-    "note": "The free version follows your voice in English, Turkish and Spanish. Sightline Pro adds the rest."
+    "title": "Voice following in",
+    "title_accent": "31 languages",
+    "body": "Voice following works in 31 languages and regional variants, including English, German, French, Spanish, Italian, Portuguese, Japanese, Korean, Mandarin, Cantonese and Turkish. Many are recognized on the device, with no connection.",
+    "note": "The free version follows your voice in English, Turkish and Spanish, and Sightline Pro adds the rest. Chinese, Japanese and Cantonese are matched in segments, so accuracy is lower than in languages written with spaces."
   },
   "library": {
     "window_title": "Scripts",
-    "title": "WRITE ON MAC.",
-    "title_accent": "RECORD ON IPHONE.",
-    "body": "Write, search and edit scripts on either device. They sync through iCloud, so nothing needs copying over. Bring in what you already have from Word, PDF, Markdown, RTF, HTML, OpenDocument or plain text.",
+    "title": "Write on Mac.",
+    "title_accent": "Record on iPhone.",
+    "body": "Write, search and edit scripts on either device. They sync through iCloud, so nothing needs copying over. Sync uses your iCloud account, and there is no Sightline account. Import what you already have as Word, PDF, Markdown and more.",
     "cue_example": "[[slow down, look up]]",
-    "cue_note": "Cues in double brackets show on screen as small reminders. Sightline Prompter does not read them and does not count them as words you have to say.",
+    "cue_note": "Cues in double brackets show on screen as small reminders. They are never read aloud and never counted as words.",
     "formats_label": "Import: Word, PDF, Markdown, RTF, HTML, OpenDocument, text"
   },
   "pro": {
-    "title": "FREE TO START",
+    "title": "Free to start",
     "free_title": "Free",
     "free_items": [
       "Voice following up to 2 minutes per run",
@@ -115,7 +119,7 @@
     ],
     "pro_title": "Sightline Pro",
     "pro_items": [
-      "No time limit",
+      "No 2-minute limit per run",
       "4K at 60 fps, HDR and ProRes",
       "All 31 languages",
       "Words per minute and time left",
@@ -125,11 +129,15 @@
     "note": "Prices and the free trial are shown in the App Store, in your local currency."
   },
   "faq": {
-    "title": "QUESTIONS",
+    "title": "Teleprompter questions",
     "items": [
       {
         "q": "How does a teleprompter that follows your voice work?",
-        "a": "Sightline Prompter listens while you read and matches what it hears to the words on screen. The text moves when you speak and stops when you pause, so you set the pace instead of a scroll speed."
+        "a": "Sightline Prompter listens while you read and matches what it hears to the words on screen. The text moves when you speak and waits when you pause, so you set the pace instead of a scroll speed. It only matches words that are in your script, so a cough, an ad-lib or a skipped line does not make it jump."
+      },
+      {
+        "q": "Is there a free teleprompter app that follows your voice?",
+        "a": "Yes. The free version follows your voice for up to 2 minutes per run in English, Turkish and Spanish, and records up to 2 minutes of 1080p video on iPhone. Sightline Pro removes the limits."
       },
       {
         "q": "Does voice following work offline?",
@@ -137,7 +145,11 @@
       },
       {
         "q": "Which languages does it support?",
-        "a": "31 languages and regional variants, including English, German, French, Spanish, Italian, Portuguese, Japanese, Korean, Mandarin, Cantonese and Turkish. The free version covers English, Turkish and Spanish."
+        "a": "31 languages and regional variants, including English, German, French, Spanish, Italian, Portuguese, Japanese, Korean, Mandarin, Cantonese and Turkish. The free version covers English, Turkish and Spanish. Chinese, Japanese and Cantonese are matched in segments, so accuracy is lower than in languages written with spaces."
+      },
+      {
+        "q": "What if I go off script?",
+        "a": "It stays where you are. A cough, an ad-lib or a skipped line does not make the text jump. It only moves when you say words that are on screen."
       },
       {
         "q": "Do I need a MacBook with a notch?",
@@ -153,7 +165,11 @@
       },
       {
         "q": "Does one purchase cover iPhone and Mac?",
-        "a": "Yes. It is one app on the App Store, and Sightline Pro unlocks both the iPhone and the Mac version."
+        "a": "Yes. It is one app on the App Store, and Sightline Pro unlocks both the iPhone and the Mac version. Both use the same iCloud script library."
+      },
+      {
+        "q": "What does Sightline Pro cost?",
+        "a": "Sightline Pro is available as a subscription (with a free trial) or as a one-time purchase. The App Store shows current prices in your local currency."
       },
       {
         "q": "Which files can I import?",
@@ -165,14 +181,14 @@
       },
       {
         "q": "What happens to my data?",
-        "a": "Scripts stay in your own iCloud Drive. There are no ads and no account, and no tracking across apps. Anonymous usage counts can be switched off in Settings. An iCloud sign-in on the device is required."
+        "a": "Your scripts stay in your own iCloud Drive. There are no ads, no Sightline account and no tracking across apps. Sync uses your iCloud account, so you need to be signed in to iCloud on the device. Anonymous usage counts can be switched off in Settings."
       }
     ]
   },
   "close": {
     "title": "LOOK UP.",
     "title_accent": "KEEP TALKING.",
-    "sub": "Download Sightline Prompter for iPhone and Mac and try it on your next script."
+    "sub": "Free to try on iPhone and Mac. Paste your next script and read it to the lens."
   },
   "footer": {
     "privacy": "Privacy",
@@ -181,7 +197,7 @@
     "rights": "All rights reserved."
   },
   "consent": {
-    "text": "This site uses Google Analytics to count visits. It stays off unless you accept.",
+    "text": "This site counts visits with Google Analytics. It sets no analytics cookies unless you accept.",
     "accept": "Accept",
     "decline": "Decline",
     "settings": "Cookie settings"

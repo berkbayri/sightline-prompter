@@ -7,14 +7,19 @@
       <li><a href="/support.html">{{footer.support}}</a></li>
       {{#analytics}}<li><button type="button" id="cookie-settings">{{consent.settings}}</button></li>{{/analytics}}
     </ul>
+    <ul class="foot-langs" aria-label="{{nav.language_menu}}">
+      {{#switcher}}<li><a href="{{path}}" hreflang="{{lang}}" lang="{{lang}}" data-lang="{{code}}">{{name}}</a></li>
+      {{/switcher}}
+    </ul>
     <p>&copy; {{year}} Sightline Prompter. {{footer.rights}}</p>
+    <p class="legal">iPhone and MacBook Pro are trademarks of Apple Inc. App Store is a service mark of Apple Inc.</p>
   </div>
 </footer>
 
 {{#analytics}}<div class="consent" id="consent" role="region" aria-label="{{consent.settings}}" hidden>
   <p>{{consent.text}}</p>
   <div class="consent-btns">
-    <button type="button" class="btn sm" data-c="granted">{{consent.accept}}</button>
+    <button type="button" class="btn sm ghost" data-c="granted">{{consent.accept}}</button>
     <button type="button" class="btn sm ghost" data-c="denied">{{consent.decline}}</button>
   </div>
 </div>{{/analytics}}

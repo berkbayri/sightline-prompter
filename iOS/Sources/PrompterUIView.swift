@@ -151,9 +151,12 @@ final class PrompterUIView: UIView {
             drawPlates(in: context, lines: lineRects(glyphs: glyphs, origin: origin))
         }
 
-        // Text is clipped to the band between the camera area and the controls.
+        // Text is clipped to the band between the camera area and the controls, but never hard-cut mid-glyph:
+        // a 0.6 em alpha feather at both edges, and the bottom edge sits 0.3 em lower so descenders survive.
+        let clipRect = CGRect(x: 0, y: textFrame.minY, width: bounds.width, height: textFrame.height + 0.3 * fontSize)
         context.saveGState()
-        context.clip(to: CGRect(x: 0, y: textFrame.minY, width: bounds.width, height: textFrame.height))
+        context.clip(to: clipRect)
+        context.beginTransparencyLayer(auxiliaryInfo: nil)
 
         // The reading line only ticks in the margins, so it never crosses the text.
         Self.readingLineColor.setFill()
@@ -182,6 +185,17 @@ final class PrompterUIView: UIView {
                               color: UIColor.black.withAlphaComponent(0.9).cgColor)
         }
         layoutManager.drawGlyphs(forGlyphRange: glyphs, at: origin)
+
+        // Feather mask: keeps the layer's alpha only where the gradient is opaque, so the video behind stays visible.
+        context.setShadow(offset: .zero, blur: 0, color: nil)
+        context.setBlendMode(.destinationIn)
+        let feather = min(0.6 * fontSize / clipRect.height, 0.5)
+        let clear = UIColor.clear.cgColor, opaque = UIColor.black.cgColor
+        if let mask = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: [clear, opaque, opaque, clear] as CFArray,
+                                 locations: [0, feather, 1 - feather, 1]) {
+            context.drawLinearGradient(mask, start: CGPoint(x: 0, y: clipRect.minY), end: CGPoint(x: 0, y: clipRect.maxY), options: [])
+        }
+        context.endTransparencyLayer()
         context.restoreGState()
     }
 

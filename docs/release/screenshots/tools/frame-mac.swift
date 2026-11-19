@@ -145,7 +145,7 @@ func render(_ it: Item, base: String, out dir: String) {
         let contentTop: CGFloat = 690
         switch it.id {
         case "notch":
-            let panel = load("panel_hover")
+            let panel = load("panel_desk")
             let sw: CGFloat = 2220
             macScreenTop(ctx, x: (W - sw) / 2, top: contentTop, w: sw, h: H - contentTop + 120) { c, under in
                 let pw: CGFloat = 1500, ph = pw * 520 / 1280
@@ -155,10 +155,10 @@ func render(_ it: Item, base: String, out dir: String) {
             }
         case "calls":
             let photo = load("scene1")
-            let pw: CGFloat = 2300, ph = pw * 864 / 1536
+            let pw: CGFloat = 2080, ph = pw * 864 / 1536
             card(ctx, photo, CGRect(x: (W - pw) / 2, y: H - 640 - ph, width: pw, height: ph), radius: 60)
         case "hidden":
-            let panel = load("panel_clean")
+            let panel = load("panel_desk")
             let cw: CGFloat = 1260, gap: CGFloat = 100
             let x0 = (W - 2 * cw - gap) / 2
             for (i, title) in ["YOU SEE", "THEY SEE"].enumerated() {
@@ -180,7 +180,7 @@ func render(_ it: Item, base: String, out dir: String) {
                 }
             }
         case "languages":
-            let panel = load("panel_hover")
+            let panel = load("panel_desk")
             let pw: CGFloat = 1500, ph = pw * 520 / 1280
             card(ctx, panel, CGRect(x: 130, y: H - contentTop - 40 - ph, width: pw, height: ph), radius: 40)
             let lines = ["ENGLISH · ESPAÑOL", "DEUTSCH · FRANÇAIS", "ITALIANO · PORTUGUÊS", "日本語 · 한국어", "普通话 · 粵語", "TÜRKÇE · +20 MORE"]
@@ -200,8 +200,8 @@ func render(_ it: Item, base: String, out dir: String) {
             pills(ctx, ["WORD", "PDF", "MARKDOWN", "RTF", "HTML", "ODT"], x: cx, top: 1050, size: 40, maxWidth: 700)
             _ = drawTop(para("Add [[delivery cues]] you see but never read.", size: 46, align: .left), x: cx, top: 1320, width: 660)
         case "tune":
-            let set = load("settings_b")
-            let sw: CGFloat = 1180, sh = sw * 1416 / 1080
+            let set = load("settings_pace")
+            let sw: CGFloat = 1180, sh = sw * set.size.height / set.size.width
             card(ctx, set, CGRect(x: W - 130 - sw, y: H - 700 - sh, width: sw, height: sh), radius: 32)
             let lines = [("148 WPM", true), ("2:14 LEFT", false), ("DUALSENSE", false), ("[[PAUSE]]", true)]
             var top: CGFloat = contentTop + 20
@@ -210,6 +210,16 @@ func render(_ it: Item, base: String, out dir: String) {
                 top += 215
             }
             _ = drawTop(para("Available with Sightline Pro", size: 44, align: .left, alpha: 0.55), x: 130, top: top + 40, width: 1500)
+        case "distance":
+            let pw: CGFloat = 1120, ph = pw * 520 / 1280
+            for (i, (raw, title)) in [("panel_close", "CLOSE · 45 CM"), ("panel_back", "BACK · 80 CM")].enumerated() {
+                let top = contentTop - 50 + CGFloat(i) * (56 + ph + 60)
+                _ = drawTop(headline(title, size: 56, align: .left, color: i == 0 ? yellow : .white), x: 240, top: top, width: 900)
+                card(ctx, load(raw), CGRect(x: 240, y: H - top - 56 - ph, width: pw, height: ph), radius: 30)
+            }
+            let set = load("settings_b")
+            let sw: CGFloat = 1000, sh = sw * set.size.height / set.size.width
+            card(ctx, set, CGRect(x: W - 240 - sw, y: H - contentTop + 50 - sh, width: sw, height: sh), radius: 32)
         default: break
         }
     }
@@ -223,6 +233,9 @@ let items = [
     Item(id: "hidden", head: "INVISIBLE TO\n*EVERYONE ELSE.*", sub: "Hide the prompter from screen sharing and recording. Only you see your script.", chips: ["HIDDEN FROM SHARING", "HIDDEN FROM RECORDING"], out: "3-hidden.png"),
     Item(id: "languages", head: "SPEAK ANY\n*LANGUAGE.*", sub: "Voice following in 31 languages, many of them on-device.", chips: ["VOICE FOLLOWING", "31 LANGUAGES"], out: "4-languages.png"),
     Item(id: "sync", head: "WRITE ON MAC.\n*RECORD ON IPHONE.*", sub: "Scripts sync through iCloud. Import Word, PDF, Markdown and more.", chips: ["ICLOUD", "MAC + IPHONE"], out: "5-sync.png"),
+    Item(id: "distance", head: "TEXT SIZED TO\n*YOUR DISTANCE.*", sub: "Pick how far you sit. The words grow as you lean back and tighten as you move in.", chips: ["4 DISTANCE PRESETS", "AUTO TEXT SIZE"], out: "7-distance.png"),
     Item(id: "tune", head: "DIAL IN\n*YOUR PACE.*", sub: "Live words per minute and time left. Drive it with a DualSense controller.", chips: ["WORDS PER MINUTE", "DUALSENSE"], out: "6-pace.png"),
 ]
-for it in items { render(it, base: a[1], out: a[2]) }
+// optional 3rd argument: comma-separated ids to render (e.g. notch,hidden), for when only some raw captures changed
+let only = a.count > 3 ? Set(a[3].split(separator: ",").map(String.init)) : nil
+for it in items where only?.contains(it.id) ?? true { render(it, base: a[1], out: a[2]) }

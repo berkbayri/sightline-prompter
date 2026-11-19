@@ -1,0 +1,1 @@
+Origin: photographic backdrop generated on 2026-11-19 with Figma generate_image (gpt-image-2.5-flare), rendered through the iPhone simulator screenshot mode and framed with tools/frame-iphone.swift. The original generation prompt was not recorded at the time; embedded here as provenance gap, not re-generated because the audit verdict was KEEP.

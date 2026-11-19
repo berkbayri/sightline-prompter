@@ -41,6 +41,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
         observeSettings()
         loadActiveScript()
         refreshTotalWords()
+        #if DEBUG || SIGHTLINE_DEV
+        // Site screenshots: open the library window at launch (with SIGHTLINE_LIBRARY_DIR pointing at sample scripts).
+        if ProcessInfo.processInfo.environment["SIGHTLINE_SHOW_LIBRARY"] != nil { libraryWindow.show() }
+        #endif
 
         // Manual scrolling moves the reading position; speech tracking continues from there.
         prompter.onManualScrollEnded = { [weak self] index in

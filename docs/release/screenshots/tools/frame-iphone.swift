@@ -83,7 +83,7 @@ func device(_ ctx: CGContext, _ shot: NSImage, _ rect: CGRect, radius: CGFloat) 
     ctx.setStrokeColor(NSColor(white: 1, alpha: 0.28).cgColor); ctx.setLineWidth(8); ctx.strokePath()
 }
 
-enum Kind { case phone(String), landscape(String), languages, specs, sync }
+enum Kind { case phone(String), landscape(String), languages, specs, sync, distance }
 struct Item { let kind: Kind; var headSize: CGFloat = 215; let head: String; let sub: String; let chips: [String]; let out: String }
 
 func render(_ it: Item, base: String, out dir: String) {
@@ -137,6 +137,15 @@ func render(_ it: Item, base: String, out dir: String) {
                 let phone = NSImage(contentsOfFile: "\(base)/raw/picker.png")!
                 let pw: CGFloat = 620, ph = pw * 2868 / 1320
                 device(ctx, phone, CGRect(x: W - pw - 50, y: -ph * 0.16, width: pw, height: ph), radius: 80)
+            case .distance:
+                let pw: CGFloat = 600, ph = pw * 2868 / 1320, gap: CGFloat = 40
+                let x0 = (W - 2 * pw - gap) / 2, y: CGFloat = 190
+                for (i, (raw, tag)) in [("distfar", "75 CM AWAY"), ("distnear", "30 CM CLOSE")].enumerated() {
+                    let x = x0 + CGFloat(i) * (pw + gap)
+                    let shot = NSImage(contentsOfFile: "\(base)/raw/\(raw).png")!
+                    device(ctx, shot, CGRect(x: x, y: y, width: pw, height: ph), radius: 80)
+                    headline(tag, size: 84, align: .center, color: i == 0 ? yellow : .white).draw(in: CGRect(x: x, y: y + ph + 36, width: pw, height: 110))
+                }
             default: break
             }
         }
@@ -153,6 +162,7 @@ let items: [Item] = [
     Item(kind: .languages, head: "SPEAK ANY\n*LANGUAGE.*", sub: "31 languages. Many recognize speech on your device, no connection needed.", chips: ["ON-DEVICE", "31 LANGUAGES"], out: "5-languages.png"),
     Item(kind: .sync, headSize: 128, head: "WRITE ON MAC.\n*RECORD ON IPHONE.*", sub: "Scripts sync through iCloud. Import Word, PDF, Markdown, RTF and more.", chips: ["ICLOUD", "MAC + IPHONE"], out: "6-sync.png"),
     Item(kind: .phone("camera"), head: "TUNE IT TO\n*YOUR EYES.*", sub: "Size, spacing, speed, microphone. Add [[delivery cues]] you see but never read.", chips: ["USB MIC", "WORDS PER MINUTE", "CUES"], out: "7-tune.png"),
+    Item(kind: .distance, headSize: 150, head: "TEXT SIZED TO\n*YOUR DISTANCE.*", sub: "Lean back and the words grow. Move in and they tighten. Easy to read at any distance.", chips: ["AUTO TEXT SIZE", "FRONT CAMERA"], out: "9-distance.png"),
     Item(kind: .specs, head: "STUDIO\n*QUALITY.*", sub: "Record straight to Photos in the quality your channel deserves.", chips: ["UP TO 4K", "PRO CODECS"], out: "8-studio.png"),
 ]
 for it in items { render(it, base: a[1], out: a[2]) }

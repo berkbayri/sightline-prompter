@@ -29,7 +29,7 @@
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>The camera records your video while you read the script.</string>
+	<string>The camera records your video while you read the script, and measures how far you sit from the screen so the text stays readable. Nothing is saved or sent except your recording.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>The microphone is used to follow your speech and scroll the script automatically.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

@@ -55,8 +55,9 @@ public enum PrompterText {
         script: String,
         language: ScriptLanguage,
         fontSize: CGFloat,
-        lineSpacing: CGFloat = 1.35,
+        lineSpacing: CGFloat = CGFloat(PrompterTypography.lineHeightMultiple),
         letterSpacing: CGFloat = 0,
+        wordSpacing: CGFloat = CGFloat(PrompterTypography.wordSpacingEm),
         cursor: Int,
         wordColor: (Int) -> PrompterColor
     ) -> Result {
@@ -82,9 +83,12 @@ public enum PrompterText {
         let separatorAttributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .paragraphStyle: style,
-            .foregroundColor: PrompterColor(white: 1, alpha: 0.95),
+            .foregroundColor: PrompterColor(white: 1, alpha: 1),
         ]
         let spacer = language.spaced ? " " : ""
+        // Word spacing is the gap after the space character; the halo shrinks the visual gap, so it is a little wider.
+        var spacerAttributes = separatorAttributes
+        spacerAttributes[.kern] = wordSpacing * fontSize
 
         let text = NSMutableAttributedString()
         var words: [Word] = []
@@ -110,7 +114,7 @@ public enum PrompterText {
                         text.append(NSAttributedString(string: "\n", attributes: separatorAttributes))
                     }
                 } else if !spacer.isEmpty, !endsWithNewline() {
-                    text.append(NSAttributedString(string: spacer, attributes: separatorAttributes))
+                    text.append(NSAttributedString(string: spacer, attributes: spacerAttributes))
                 }
                 let range = NSRange(location: text.length, length: token.display.utf16.count)
                 text.append(NSAttributedString(string: token.display, attributes: [
@@ -146,7 +150,7 @@ public enum PrompterText {
                     // The cue opens a new paragraph that its words continue.
                     text.append(NSAttributedString(string: "\n", attributes: separatorAttributes))
                 } else if openParagraph != nil, !spacer.isEmpty, !endsWithNewline() {
-                    text.append(NSAttributedString(string: spacer, attributes: separatorAttributes))
+                    text.append(NSAttributedString(string: spacer, attributes: spacerAttributes))
                 }
                 let range = NSRange(location: text.length, length: cue.text.utf16.count + 2)
                 text.append(NSAttributedString(string: "\u{00A0}\(cue.text)\u{00A0}", attributes: [

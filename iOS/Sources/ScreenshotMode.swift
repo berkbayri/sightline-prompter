@@ -9,6 +9,8 @@ import UIKit
 enum ScreenshotMode {
     static var scene: String? { UserDefaults.standard.string(forKey: "ScreenshotScene") }
     static var isActive: Bool { scene != nil }
+    /// Store screenshots always show the text as sized for this viewing distance, whatever is saved on the device.
+    static let simulatedDistanceCm = 45.0
 
     static var backdrop: UIImage? {
         guard let path = UserDefaults.standard.string(forKey: "ScreenshotBackdrop") else { return nil }

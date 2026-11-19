@@ -23,7 +23,7 @@ final class PhoneSettings: ObservableObject {
     static let shared = PhoneSettings()
 
     private enum Key: String {
-        case activeScriptID, fontSize, lineSpacing, letterSpacing, autoSpeed, showPace, readingDistanceCm, landscapeColumnWidth
+        case activeScriptID, fontSize, lineSpacing, letterSpacing, wordSpacing, autoTextSize, personalGain, autoSpeed, showPace, readingDistanceCm, landscapeColumnWidth
         case portraitWidthPercent, portraitLines, landscapeLines
         case arrangementPortrait, arrangementLandscape
         case cameraSide, stickCurve, stickMaxSpeed, stickDeadzone, gamepadLight
@@ -48,6 +48,18 @@ final class PhoneSettings: ObservableObject {
     /// Extra space between letters, in em (a fraction of the font size).
     @Published var letterSpacing: Double {
         didSet { defaults.set(letterSpacing, forKey: Key.letterSpacing.rawValue) }
+    }
+    /// Extra space between words, in em.
+    @Published var wordSpacing: Double {
+        didSet { defaults.set(wordSpacing, forKey: Key.wordSpacing.rawValue) }
+    }
+    /// Camera mode: text size follows how far you sit from the phone (measured with the front camera).
+    @Published var autoTextSize: Bool {
+        didSet { defaults.set(autoTextSize, forKey: Key.autoTextSize.rawValue) }
+    }
+    /// Learned from manual size changes while auto size is on: your size divided by the model's (0.8 ... 1.25).
+    @Published var personalGain: Double {
+        didSet { defaults.set(personalGain, forKey: Key.personalGain.rawValue) }
     }
     /// Auto-scroll speed in points per second.
     @Published var autoSpeed: Double {
@@ -130,10 +142,15 @@ final class PhoneSettings: ObservableObject {
     }
 
     private init() {
+        // 1.0.3 defaults: a setting never changed reads the new value; a stored one is the user's own choice.
+        TypographyDefaults.migrate(defaults, oldDefaults: ["fontSize": 34, "lineSpacing": 1.35, "letterSpacing": 0])
         activeScriptID = defaults.string(forKey: Key.activeScriptID.rawValue) ?? ""
-        fontSize = defaults.object(forKey: Key.fontSize.rawValue) as? Double ?? 34
-        lineSpacing = defaults.object(forKey: Key.lineSpacing.rawValue) as? Double ?? 1.35
+        fontSize = defaults.object(forKey: Key.fontSize.rawValue) as? Double ?? 36
+        lineSpacing = defaults.object(forKey: Key.lineSpacing.rawValue) as? Double ?? PrompterTypography.lineHeightMultiple
         letterSpacing = defaults.object(forKey: Key.letterSpacing.rawValue) as? Double ?? 0
+        wordSpacing = defaults.object(forKey: Key.wordSpacing.rawValue) as? Double ?? PrompterTypography.wordSpacingEm
+        autoTextSize = defaults.object(forKey: Key.autoTextSize.rawValue) as? Bool ?? true
+        personalGain = defaults.object(forKey: Key.personalGain.rawValue) as? Double ?? 1
         autoSpeed = defaults.object(forKey: Key.autoSpeed.rawValue) as? Double ?? 40
         showPace = defaults.object(forKey: Key.showPace.rawValue) as? Bool ?? true
         readingDistanceCm = defaults.object(forKey: Key.readingDistanceCm.rawValue) as? Double ?? 0.5
@@ -154,5 +171,12 @@ final class PhoneSettings: ObservableObject {
         stickMaxSpeed = defaults.object(forKey: Key.stickMaxSpeed.rawValue) as? Double ?? 400
         stickDeadzone = defaults.object(forKey: Key.stickDeadzone.rawValue) as? Double ?? 0.12
         gamepadLight = defaults.object(forKey: Key.gamepadLight.rawValue) as? Bool ?? true
+        #if DEBUG
+        if ScreenshotMode.isActive {
+            // Store screenshots render the shipped defaults, not whatever a test device has saved.
+            fontSize = 36; lineSpacing = PrompterTypography.lineHeightMultiple; letterSpacing = 0
+            wordSpacing = PrompterTypography.wordSpacingEm; autoTextSize = false; personalGain = 1
+        }
+        #endif
     }
 }

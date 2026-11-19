@@ -6,6 +6,7 @@ struct SettingsView: View {
     @ObservedObject private var settings = Settings.shared
     @StateObject private var catalog = LanguageCatalog()
     @ObservedObject private var pro = ProStore.shared
+    @ObservedObject private var sizer = TextSizer.shared
     @AppStorage(Analytics.enabledKey) private var shareUsage = true
 
     /// Offered languages, plus the current one even when this Mac cannot recognize it, so the picker keeps its value.
@@ -101,13 +102,39 @@ struct SettingsView: View {
             }
 
             Section {
-                slider("Font size", value: $settings.fontSize, range: 12...72, step: 1, unit: "pt")
+                Toggle("Size text for my distance", isOn: $settings.autoTextSize)
+                if settings.autoTextSize {
+                    Picker("I sit", selection: $settings.distancePreset) {
+                        ForEach(PrompterTypography.Preset.allCases) { preset in
+                            Text("\(preset.name) \(Int(preset.centimeters)) cm").tag(preset.rawValue)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    LabeledContent("Text size") {
+                        Text("\(Int(sizer.size.rounded())) pt").monospacedDigit().foregroundStyle(.secondary)
+                    }
+                    Toggle("Follow my distance with the camera", isOn: $settings.liveDistance)
+                    if settings.liveDistance {
+                        Label("The camera and its green light are on while this is on. Nothing is recorded, saved or sent.", systemImage: "camera.fill")
+                            .foregroundStyle(.orange)
+                        if !sizer.status.isEmpty {
+                            Text(sizer.status).foregroundStyle(.secondary)
+                        }
+                        Button("Set my distance") { sizer.calibrate() }
+                    }
+                } else {
+                    slider("Font size", value: $settings.fontSize, range: 12...72, step: 1, unit: "pt")
+                }
                 slider("Auto-scroll speed", value: $settings.autoSpeed, range: 0...300, step: 5, unit: "pt/s")
                 Toggle("Show words per minute and time left", isOn: $settings.showPace)
                     .disabled(!pro.isUnlocked)
                 if !pro.isUnlocked { lockRow("Pace readout is part of Sightline Pro") }
             } header: {
                 Text("Reading")
+            } footer: {
+                Text(settings.autoTextSize
+                     ? "The size comes from the viewing angle of the letters at the distance you pick, on this screen. The camera option is off by default: it uses the built-in camera briefly and only on this Mac to measure how far you sit, relative to where you sat when it started. It cannot tell a Center Stage crop, so turn Center Stage off while it runs."
+                     : "Turn on distance sizing to let the text size follow how far you sit.")
             }
 
             if !pro.isUnlocked {

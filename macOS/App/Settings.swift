@@ -9,6 +9,7 @@ final class Settings: ObservableObject {
     private enum Key: String {
         case script, scriptLanguage, panelWidth, panelHeight, xOffset, fontSize, autoSpeed, hideFromCapture
         case stickCurve, stickMaxSpeed, stickDeadzone, activeScriptID, showPace, gamepadLight
+        case distancePreset, autoTextSize, liveDistance, liveReferencePx
     }
 
     private let defaults = UserDefaults.standard
@@ -41,6 +42,26 @@ final class Settings: ObservableObject {
     /// Text font size in points.
     @Published var fontSize: Double {
         didSet { defaults.set(fontSize, forKey: Key.fontSize.rawValue) }
+    }
+
+    /// Where you sit, as one of the Close / Desk / Back / Standing presets (raw value of PrompterTypography.Preset).
+    @Published var distancePreset: String {
+        didSet { defaults.set(distancePreset, forKey: Key.distancePreset.rawValue) }
+    }
+
+    /// Text size follows the distance preset (and the camera, when on) instead of the Font size.
+    @Published var autoTextSize: Bool {
+        didSet { defaults.set(autoTextSize, forKey: Key.autoTextSize.rawValue) }
+    }
+
+    /// Optional: the built-in camera measures how far you sit. Off by default; the camera light turns on while it runs.
+    @Published var liveDistance: Bool {
+        didSet { defaults.set(liveDistance, forKey: Key.liveDistance.rawValue) }
+    }
+
+    /// Face width in camera pixels where you said you sit ("Set my distance"); 0 when never set.
+    @Published var liveReferencePx: Double {
+        didSet { defaults.set(liveReferencePx, forKey: Key.liveReferencePx.rawValue) }
     }
 
     /// Auto-scroll speed in points per second.
@@ -84,12 +105,14 @@ final class Settings: ObservableObject {
     }
 
     private init() {
+        // 1.0.3 defaults: a setting never changed reads the new value; a stored one is the user's own choice.
+        TypographyDefaults.migrate(defaults, oldDefaults: ["fontSize": 26])
         script = defaults.string(forKey: Key.script.rawValue) ?? ""
         scriptLanguage = defaults.string(forKey: Key.scriptLanguage.rawValue) ?? "tr-TR"
         panelWidth = defaults.object(forKey: Key.panelWidth.rawValue) as? Double ?? 520
         panelHeight = defaults.object(forKey: Key.panelHeight.rawValue) as? Double ?? 220
         xOffset = defaults.object(forKey: Key.xOffset.rawValue) as? Double ?? 0
-        fontSize = defaults.object(forKey: Key.fontSize.rawValue) as? Double ?? 26
+        fontSize = defaults.object(forKey: Key.fontSize.rawValue) as? Double ?? 40
         autoSpeed = defaults.object(forKey: Key.autoSpeed.rawValue) as? Double ?? 40
         hideFromCapture = defaults.object(forKey: Key.hideFromCapture.rawValue) as? Bool ?? true
         stickCurve = StickCurve(rawValue: defaults.string(forKey: Key.stickCurve.rawValue) ?? "") ?? .cubic
@@ -98,5 +121,10 @@ final class Settings: ObservableObject {
         activeScriptID = defaults.string(forKey: Key.activeScriptID.rawValue) ?? ""
         showPace = defaults.object(forKey: Key.showPace.rawValue) as? Bool ?? true
         gamepadLight = defaults.object(forKey: Key.gamepadLight.rawValue) as? Bool ?? true
+        distancePreset = defaults.string(forKey: Key.distancePreset.rawValue) ?? PrompterTypography.Preset.desk.rawValue
+        // Someone who picked their own font size keeps it until they switch distance sizing on.
+        autoTextSize = defaults.object(forKey: Key.autoTextSize.rawValue) as? Bool ?? (defaults.object(forKey: Key.fontSize.rawValue) == nil)
+        liveDistance = defaults.object(forKey: Key.liveDistance.rawValue) as? Bool ?? false
+        liveReferencePx = defaults.object(forKey: Key.liveReferencePx.rawValue) as? Double ?? 0
     }
 }

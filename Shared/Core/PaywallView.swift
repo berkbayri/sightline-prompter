@@ -52,8 +52,8 @@ public struct PaywallView: View {
 
                 HStack(spacing: 20) {
                     Button("Restore Purchases") { Task { await store.restore() } }
-                    Link("Privacy Policy", destination: URL(string: "https://berkbayri.github.io/sightline-prompter/privacy.html")!)
-                    Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                    Link("Privacy Policy", destination: URL(string: "https://sightlineprompter.app/privacy.html")!)
+                    Link("Terms of Use", destination: URL(string: "https://sightlineprompter.app/terms.html")!)
                 }
                 .font(.footnote)
 

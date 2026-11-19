@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3
+
+- Prompter typography from the research spec (`docs/prompter-typography.md`): text sized from the viewing angle of the letters, new defaults on iPhone (36 pt) and Mac (40 pt), line height 1.30, word spacing +0.04 em, upcoming text pure white, read text 0.55 white. A setting you changed yourself keeps your value; only settings you never touched get the new defaults.
+- iPhone: Auto text size (on by default, free). While you record, the front camera measures how far you sit and the text follows, in small steps, at a pause in your speech. A size you set by hand always wins and teaches the app your preference. If you are too far for the screen it says so. One small extra camera output runs next to the recording; the recording itself is unchanged, nothing is saved or sent, and it is off when the camera is off.
+- iPhone: over the camera picture, the full-width dark veil is replaced by a soft plate behind each line of text, as dark as the picture behind that line needs (12% to 65%), plus an em-based halo. The video stays visible everywhere else.
+- Mac: distance presets Close / Desk / Back / Standing (45 / 60 / 80 / 120 cm) set the text size for this screen. Optional, off by default: follow your distance with the built-in camera (the camera light turns on while it runs).
+
 ## Unreleased
 
 - iPhone camera view: the whole recorded picture is shown, never cropped, as large as the screen allows in portrait and landscape. The rest of the screen is not left empty: the same live picture is drawn behind it, dimmed and blurred. The prompter text and the controls sit on top; the controls have a dark plate so they stay visible on bright scenes. The layout previously counted the safe area twice and left empty strips at the top and bottom; that is fixed. Placements saved by earlier versions are reset once.

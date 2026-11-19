@@ -23,13 +23,13 @@ The prompter that follows the voice, word by word, instead of scrolling at a fix
 - iPhone: a camera mode that records with the prompter text floating over the live preview, portrait and landscape, with the reading line placed under the camera lens.
 - Mac: a floating panel near the camera notch for reading while on a call or recording.
 - Scripts live in one shared iCloud library, so the same files appear on both devices. An iCloud sign-in is required to use the app.
-- Optional DualSense controller for scrolling.
+- Optional DualSense controller for scrolling (Sightline Pro on Mac).
 - Delivery cues written as `[[...]]` blocks are shown but never read aloud or counted as words.
 
 ## Capabilities and Constraints
 
 - Free tier: voice following and recording up to 2 minutes, 1080p at 30 fps, languages English, Turkish and Spanish. Limits come from `FreeTier`.
-- Sightline Pro: no limits, 4K at 60 fps, HDR, ProRes, 31 languages, adjustable prompter size, pace readout, controller tuning. One purchase covers iPhone and Mac. Prices: $4.99 monthly, $29.99 yearly with a 7-day trial, $59.99 lifetime.
+- Sightline Pro: no limits, 4K at 60 fps, HDR, ProRes, 31 languages, adjustable prompter size, pace readout, DualSense controller on Mac. One purchase covers iPhone and Mac. Prices: $4.99 monthly, $29.99 yearly with a 7-day trial, $59.99 lifetime.
 - Developer and debug builds unlock Pro and skip the sign-in gate.
 - In camera mode the preview and text must never overlap (`ArrangementGeometry`).
 - Undecided: App Store listing screenshots and final marketing copy.

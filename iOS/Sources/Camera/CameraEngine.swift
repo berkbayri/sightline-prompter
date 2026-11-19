@@ -218,6 +218,16 @@ final class CameraEngine: NSObject, ObservableObject {
     private var configured = false
     private var movieDelegate: MovieDelegate?
     private let metadataOutput = AVCaptureMetadataOutput()
+    /// Small frames for the viewing distance and the text backing. See FrameAnalyzer.
+    private let analysisOutput = AVCaptureVideoDataOutput()
+    private let analysisQueue = DispatchQueue(label: "sightline.camera.analysis")
+    private let analyzer = FrameAnalyzer()
+    /// The layer showing the picture, so a place on the screen can be turned into a place in the frame.
+    weak var previewLayer: AVCaptureVideoPreviewLayer?
+    /// Viewing distance in millimetres, about 5 times a second while measuring. Called on the main actor.
+    var onDistance: ((Double) -> Void)?
+    /// Brightness (0...1) of the picture behind each requested place. Called on the main actor.
+    var onBackdropLuma: (([Int: Double]) -> Void)?
     private var faceDelegate: FaceDelegate?
     private var subjectAreaObserver: NSObjectProtocol?
 
@@ -308,6 +318,18 @@ final class CameraEngine: NSObject, ObservableObject {
         }
         if session.canAddOutput(movieOutput) {
             session.addOutput(movieOutput)
+        }
+        // One extra small output beside the recording (the movie output and the formats stay as they are).
+        analysisOutput.alwaysDiscardsLateVideoFrames = true
+        analysisOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange]
+        analysisOutput.setSampleBufferDelegate(analyzer, queue: analysisQueue)
+        analyzer.onDistance = { [weak self] mm in Task { @MainActor in self?.onDistance?(mm) } }
+        analyzer.onLuma = { [weak self] luma in Task { @MainActor in self?.onBackdropLuma?(luma) } }
+        if session.canAddOutput(analysisOutput) {
+            session.addOutput(analysisOutput)
+            if let connection = analysisOutput.connection(with: .video), connection.isCameraIntrinsicMatrixDeliverySupported {
+                connection.isCameraIntrinsicMatrixDeliveryEnabled = true
+            }
         }
         // Face detection: the preview outlines the faces, and focus and exposure follow them.
         if session.canAddOutput(metadataOutput) {
@@ -495,6 +517,41 @@ final class CameraEngine: NSObject, ObservableObject {
         exposureRange = device.minExposureTargetBias...device.maxExposureTargetBias
         exposureBias = device.exposureTargetBias
         updateOrientation(UIDevice.current.orientation)
+        updateAnalysis()
+    }
+
+    /// Keeps the analysis frames small (about 640 px on the long side, same shape as the recording format)
+    /// and tells the analyzer which way up they are and how wide the lens sees.
+    private func updateAnalysis() {
+        guard let device else { return }
+        let dimensions = CMVideoFormatDescriptionGetDimensions(device.activeFormat.formatDescription)
+        let scale = 640 / Double(max(dimensions.width, dimensions.height))
+        if scale < 1 {
+            analysisOutput.videoSettings = [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
+                kCVPixelBufferWidthKey as String: Int((Double(dimensions.width) * scale / 2).rounded()) * 2,
+                kCVPixelBufferHeightKey as String: Int((Double(dimensions.height) * scale / 2).rounded()) * 2,
+            ]
+        }
+        analyzer.configure(
+            orientation: FrameAnalyzer.visionOrientation(for: UIDevice.current.orientation, front: position == .front),
+            fallbackFOV: .some(Double(device.activeFormat.videoFieldOfView)),
+            zoom: Double(device.videoZoomFactor)
+        )
+        analyzer.configure(measuring: wantsDistance && position == .front)
+    }
+
+    private var wantsDistance = false
+
+    /// Measuring the viewing distance runs only on the front camera, while the session runs.
+    func setDistanceMeasuring(_ on: Bool) {
+        wantsDistance = on
+        analyzer.configure(measuring: on && position == .front)
+    }
+
+    /// Where on the screen to read the picture's brightness, as places in the frame. Empty stops it.
+    func setBackdropTargets(_ targets: [(key: Int, rect: CGRect)]) {
+        analyzer.configure(targets: targets.map { FrameAnalyzer.LumaTarget(key: $0.key, rect: $0.rect) })
     }
 
     /// Zoom stops for the buttons: the ultra-wide 0.5x when the virtual camera has it, then 1x, the
@@ -639,6 +696,7 @@ final class CameraEngine: NSObject, ObservableObject {
             }
             device.unlockForConfiguration()
             zoomFactor = target
+            analyzer.configure(zoom: Double(target))
         } catch {
             message = "Could not zoom."
         }
@@ -756,6 +814,7 @@ final class CameraEngine: NSObject, ObservableObject {
     /// Keeps the recording upright.
     func updateOrientation(_ orientation: UIDeviceOrientation) {
         guard let angle = Self.rotationAngle(for: orientation) else { return }
+        analyzer.configure(orientation: FrameAnalyzer.visionOrientation(for: orientation, front: position == .front))
         if let connection = movieOutput.connection(with: .video), connection.isVideoRotationAngleSupported(angle) {
             connection.videoRotationAngle = angle
         }

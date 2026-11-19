@@ -70,4 +70,16 @@ final class PrompterTextTests: XCTestCase {
         XCTAssertEqual(attributes[.kern] as? CGFloat, 2)
         XCTAssertEqual((attributes[.paragraphStyle] as? NSParagraphStyle)?.lineHeightMultiple, 1.8)
     }
+
+    func testNewDefaultsAndWordSpacing() {
+        let built = build("Hello there.")
+        let style = built.attributed.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
+        XCTAssertEqual(style?.lineHeightMultiple, 1.30)
+        // The gap between words is the kern of the space between them: 0.04 em of a 20 pt font.
+        let space = (built.attributed.string as NSString).range(of: " ").location
+        XCTAssertEqual(built.attributed.attribute(.kern, at: space, effectiveRange: nil) as? CGFloat ?? 0, 0.8, accuracy: 0.001)
+        XCTAssertEqual(built.words.count, 2) // word indices untouched
+        let wide = PrompterText.build(script: "Hello there.", language: english, fontSize: 20, wordSpacing: 0, cursor: 0) { _ in PrompterColor.white }
+        XCTAssertEqual(wide.attributed.attribute(.kern, at: space, effectiveRange: nil) as? CGFloat ?? 0, 0, accuracy: 0.001)
+    }
 }

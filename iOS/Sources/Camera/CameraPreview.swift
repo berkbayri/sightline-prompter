@@ -23,6 +23,7 @@ struct CameraPreview: UIViewRepresentable {
         hold.minimumPressDuration = 0.5
         view.addGestureRecognizer(hold)
         engine.onFaces = { [weak view] faces in view?.showFaces(faces) }
+        engine.previewLayer = view.previewLayer
         context.coordinator.view = view
         return view
     }

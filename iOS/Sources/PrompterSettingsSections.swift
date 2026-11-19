@@ -32,12 +32,16 @@ struct PrompterSettingsSections: View {
                         slider("Font size", value: $settings.fontSize, range: 20...72, step: 1, unit: "pt")
                         slider("Line spacing", value: $settings.lineSpacing, range: 1.0...2.0, step: 0.05, unit: "×", decimals: 2)
                         slider("Letter spacing", value: $settings.letterSpacing, range: -0.02...0.2, step: 0.01, unit: "em", decimals: 2)
+                        slider("Word spacing", value: $settings.wordSpacing, range: 0...0.08, step: 0.01, unit: "em", decimals: 2)
+                        AutoSizeRows(settings: settings, sizer: model.sizer)
                         slider("Auto-scroll speed", value: $settings.autoSpeed, range: 0...300, step: 5, unit: "pt/s")
                         Toggle("Show words per minute and time left", isOn: $settings.showPace)
                             .disabled(!pro.isUnlocked)
                         if !pro.isUnlocked { lockRow("Pace readout is part of Sightline Pro") }
                     } header: {
                         Label("Reading", systemImage: "textformat.size")
+                    } footer: {
+                        Text("Auto text size uses the front camera while you record to keep the text readable from where you sit. Frames are read on the phone and never saved or sent.")
                     }
 
                     Section {
@@ -136,6 +140,29 @@ struct PrompterSettingsSections: View {
         LabeledContent(action) {
             Text(input)
                 .foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// Auto text size: the switch, what the camera sees, and the hint when the screen is too far away.
+private struct AutoSizeRows: View {
+    @ObservedObject var settings: PhoneSettings
+    @ObservedObject var sizer: DistanceSizer
+
+    var body: some View {
+        Toggle("Auto text size", isOn: $settings.autoTextSize)
+        if settings.autoTextSize {
+            LabeledContent("Distance") {
+                Text(sizer.distanceCm.map { "About \(Int($0)) cm" } ?? "Waiting for a face")
+                    .foregroundStyle(.secondary)
+            }
+            if sizer.tooFar {
+                Label("Move closer or use landscape", systemImage: "arrow.left.and.right")
+                    .foregroundStyle(.orange)
+            }
+            if abs(settings.personalGain - 1) > 0.005 {
+                Button("Reset size adjustment") { settings.personalGain = 1 }
+            }
         }
     }
 }

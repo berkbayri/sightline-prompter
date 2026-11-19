@@ -23,6 +23,8 @@ final class AppModel: ObservableObject {
     let library: LibraryStore
     let catalog = LanguageCatalog()
     let prompter = PrompterUIView(settings: PhoneSettings.shared)
+    /// Text size from the viewing distance (Auto text size) or the Font size setting.
+    let sizer = DistanceSizer(settings: PhoneSettings.shared)
     let tracker = SpeechTracker(script: "", language: "en-US")
     let camera = CameraEngine()
     let pro = ProStore.shared
@@ -83,6 +85,7 @@ final class AppModel: ObservableObject {
         }
         camera.onTakeSaved = { [weak self] in self?.takeSaved() }
         camera.takeTitle = { [weak self] in self?.activeScript?.title }
+        configureSizing()
         tracker.sessionLimit = { [pro] in pro.isUnlocked ? nil : FreeTier.maxTrackingSeconds }
         tracker.onLimitNear = { [weak self] seconds in
             self?.receiveStatus("\(seconds) seconds of free voice following left. Sightline Pro removes the limit.")
@@ -159,6 +162,67 @@ final class AppModel: ObservableObject {
                 self.refreshControls()
             }
             .store(in: &cancellables)
+    }
+
+    // MARK: - Text size and backing plates
+
+    private var hadBackdropTargets = false
+
+    /// Wires the distance sizer to the camera and the prompter, and the picture's brightness to the text plates.
+    private func configureSizing() {
+        prompter.setTextSize(CGFloat(sizer.appliedSize), animated: false)
+        sizer.usableWidth = { [prompter] in prompter.textWidth > 0 ? Double(prompter.textWidth) : 370 }
+        sizer.speechPause = { [prompter] in prompter.secondsSinceCursorMove }
+        sizer.isInteracting = { [prompter] in prompter.isDragging }
+        sizer.$appliedSize
+            .dropFirst()
+            .removeDuplicates()
+            .sink { [weak self] size in
+                guard let self else { return }
+                self.prompter.setTextSize(CGFloat(size), animated: self.sizer.lastChangeWasAuto)
+            }
+            .store(in: &cancellables)
+        camera.onDistance = { [sizer] mm in sizer.ingest(distanceMm: mm) }
+        camera.onBackdropLuma = { [prompter] luma in prompter.receiveBackdrop(luma) }
+
+        // The camera measures only while it runs on the front lens with Auto text size on.
+        Publishers.CombineLatest4($cameraOn, camera.$status, camera.$position, settings.$autoTextSize)
+            .sink { [weak self] on, status, position, auto in
+                #if DEBUG
+                if ScreenshotMode.isActive { return }
+                #endif
+                guard let self else { return }
+                let run = on && status == .running && position == .front && auto
+                self.camera.setDistanceMeasuring(run)
+                if run { self.sizer.start() } else { self.sizer.stop() }
+            }
+            .store(in: &cancellables)
+        settings.$autoTextSize
+            .dropFirst()
+            .filter { !$0 }
+            .sink { [weak self] _ in self?.sizer.autoTurnedOff() }
+            .store(in: &cancellables)
+
+        Timer.publish(every: 0.1, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in self?.sampleBackdrop() }
+            .store(in: &cancellables)
+    }
+
+    /// About 10 times a second while the camera shows: where the text lines are, in the camera's own frame.
+    private func sampleBackdrop() {
+        guard cameraOn, camera.status == .running, let layer = camera.previewLayer, let frame = prompter.cameraPreviewFrame else {
+            if hadBackdropTargets {
+                camera.setBackdropTargets([])
+                hadBackdropTargets = false
+            }
+            return
+        }
+        let targets = prompter.backdropLines().map { line in
+            (key: line.key, rect: layer.metadataOutputRectConverted(fromLayerRect: line.rect.offsetBy(dx: -frame.minX, dy: -frame.minY)))
+        }
+        camera.setBackdropTargets(targets)
+        hadBackdropTargets = !targets.isEmpty
     }
 
     // MARK: - Library and active script

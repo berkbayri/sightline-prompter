@@ -15,8 +15,9 @@ final class PrompterUIView: UIView {
         var rect: CGRect = .zero
     }
 
-    private static let dimColor = UIColor(white: 1, alpha: 0.6)
-    private static let normalColor = UIColor(white: 1, alpha: 0.95)
+    // Colour order (spec 8.1): the text the eyes work on is brightest, what is read is clearly done.
+    private static let dimColor = UIColor(white: 1, alpha: CGFloat(PrompterTypography.colorReadAlpha))
+    private static let normalColor = UIColor(white: 1, alpha: 1)
     private static let currentColor = UIColor(red: 1, green: 0.86, blue: 0.4, alpha: 1)
     private static let highlightFill = UIColor(red: 1, green: 0.86, blue: 0.4, alpha: 0.16)
     private static let readingLineColor = UIColor(white: 1, alpha: 0.18)
@@ -42,8 +43,23 @@ final class PrompterUIView: UIView {
     private var textFrame: CGRect = .zero
     private var readingLineY: CGFloat = 0
     private var cameraMode = false
+    private var previewFrame: CGRect?
+    /// Backing-plate opacity per text line (keyed by the line's first glyph), eased towards what the picture behind needs.
+    private var lineAlpha: [Int: CGFloat] = [:]
+    private var lastBackdrop: CFTimeInterval = 0
+    private var cursorMoved: CFTimeInterval = 0
+    private var dragging = false
+    /// Plate opacity for a line nobody has measured yet (no camera picture, store screenshots).
+    private static let defaultPlateAlpha: CGFloat = 0.35
 
     var currentWordIndex: Int { cursorIndex }
+    /// Width the text column has, in points.
+    var textWidth: CGFloat { textFrame.width }
+    /// Where the camera picture is on screen, for mapping text lines onto it. nil without a camera.
+    var cameraPreviewFrame: CGRect? { previewFrame }
+    /// Seconds since the reading position last moved on.
+    var secondsSinceCursorMove: Double { CACurrentMediaTime() - cursorMoved }
+    var isDragging: Bool { dragging }
     var isPlaying: Bool { scroll.isPlaying }
 
     /// Called once manual scrolling settles, with the word now on the reading line.
@@ -68,6 +84,7 @@ final class PrompterUIView: UIView {
         layoutManager.addTextContainer(textContainer)
         textStorage.addLayoutManager(layoutManager)
 
+        cursorMoved = CACurrentMediaTime()
         scroll.onChange = { [weak self] in self?.invalidateText() }
         scroll.autoSpeed = CGFloat(settings.autoSpeed)
         scroll.stickMaxSpeed = CGFloat(settings.stickMaxSpeed)
@@ -133,6 +150,9 @@ final class PrompterUIView: UIView {
         context.saveGState()
         context.clip(to: CGRect(x: 0, y: textFrame.minY, width: bounds.width, height: textFrame.height))
 
+        if cameraMode {
+            drawPlates(in: context, lines: lineRects(glyphs: glyphs, origin: origin))
+        }
         Self.readingLineColor.setFill()
         UIRectFill(CGRect(x: textFrame.minX - 12, y: readingLineY, width: textFrame.width + 24, height: 1))
 
@@ -144,20 +164,85 @@ final class PrompterUIView: UIView {
 
         layoutManager.drawBackground(forGlyphRange: glyphs, at: origin)
         if cameraMode {
-            // Over the camera picture: a feathered dark veil under the text band and a two-layer halo on every
-            // glyph keep it readable on white, black and mid-grey scenes while the video stays untouched elsewhere.
-            let band = CGRect(x: 0, y: textFrame.minY, width: bounds.width, height: textFrame.height)
-            let veil = [UIColor.black.withAlphaComponent(0).cgColor, UIColor.black.withAlphaComponent(0.3).cgColor,
-                        UIColor.black.withAlphaComponent(0.3).cgColor, UIColor.black.withAlphaComponent(0).cgColor]
-            if let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: veil as CFArray, locations: [0, 0.18, 0.82, 1]) {
-                context.drawLinearGradient(gradient, start: band.origin, end: CGPoint(x: band.minX, y: band.maxY), options: [])
-            }
-            context.setShadow(offset: .zero, blur: 10, color: UIColor.black.withAlphaComponent(0.7).cgColor)
+            // Over the camera picture the text is backed by the plates drawn above, and every glyph gets a
+            // two-layer halo in em, so it scales with the text size (spec 8.3).
+            context.setShadow(offset: .zero, blur: 0.28 * fontSize, color: UIColor.black.withAlphaComponent(0.55).cgColor)
             layoutManager.drawGlyphs(forGlyphRange: glyphs, at: origin)
-            context.setShadow(offset: CGSize(width: 0, height: 1), blur: 2.5, color: UIColor.black.withAlphaComponent(0.95).cgColor)
+            context.setShadow(offset: CGSize(width: 0, height: 0.03 * fontSize), blur: 0.07 * fontSize,
+                              color: UIColor.black.withAlphaComponent(0.9).cgColor)
         }
         layoutManager.drawGlyphs(forGlyphRange: glyphs, at: origin)
         context.restoreGState()
+    }
+
+    // MARK: - Backing plates
+
+    /// The line boxes in `glyphs`, in view coordinates, inflated to the plate size (0.6 em across, 0.22 em up and down).
+    private func lineRects(glyphs: NSRange, origin: CGPoint) -> [(key: Int, rect: CGRect)] {
+        var lines: [(key: Int, rect: CGRect)] = []
+        layoutManager.enumerateLineFragments(forGlyphRange: glyphs) { _, used, _, range, _ in
+            let rect = used.offsetBy(dx: origin.x, dy: origin.y).insetBy(dx: -0.6 * self.fontSize, dy: -0.22 * self.fontSize)
+            lines.append((range.location, rect))
+        }
+        return lines
+    }
+
+    /// A soft black plate behind each line, only as dark as the picture behind that line needs. Lines are close,
+    /// so the plates merge into one shape that follows the ragged right edge; the video stays visible around it.
+    /// The shape is drawn in a few growing steps for a feathered edge (about 0.3 em), then its opacity is set
+    /// per line by a vertical ramp between the lines' own values.
+    private func drawPlates(in context: CGContext, lines: [(key: Int, rect: CGRect)]) {
+        guard let first = lines.first, let last = lines.last else { return }
+        let sigma = 0.3 * fontSize, radius = 0.5 * fontSize
+        let steps = 5
+        let top = first.rect.minY - 2 * sigma, bottom = max(last.rect.maxY + 2 * sigma, top + 1)
+
+        context.beginTransparencyLayer(auxiliaryInfo: nil)
+        for step in 0..<steps {
+            let grow = 2 * sigma - CGFloat(step) * 4 * sigma / CGFloat(steps)
+            let shape = UIBezierPath()
+            for line in lines {
+                shape.append(UIBezierPath(roundedRect: line.rect.insetBy(dx: -grow, dy: -grow), cornerRadius: max(radius + grow, 0)))
+            }
+            // Outermost first; these opacities add up to an even ramp from 0 at the rim to 1 inside.
+            UIColor.black.withAlphaComponent(1 / CGFloat(steps - step)).setFill()
+            shape.fill()
+        }
+        context.setBlendMode(.destinationIn)
+        var colors = lines.map { UIColor.black.withAlphaComponent(lineAlpha[$0.key] ?? Self.defaultPlateAlpha).cgColor }
+        var places = lines.map { min(max(($0.rect.midY - top) / (bottom - top), 0), 1) }
+        colors = [colors[0]] + colors + [colors[colors.count - 1]]
+        places = [0] + places + [1]
+        if let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors as CFArray, locations: places) {
+            context.drawLinearGradient(gradient, start: CGPoint(x: 0, y: top), end: CGPoint(x: 0, y: bottom),
+                                       options: [.drawsBeforeStartLocation, .drawsAfterEndLocation])
+        }
+        context.endTransparencyLayer()
+        context.setBlendMode(.normal)
+    }
+
+    /// The places on the screen to read the camera picture's brightness at: one per visible line.
+    func backdropLines() -> [(key: Int, rect: CGRect)] {
+        guard cameraMode, !words.isEmpty, !textFrame.isEmpty else { return [] }
+        let origin = CGPoint(x: textFrame.minX, y: contentTop - scroll.offset)
+        let visible = CGRect(x: 0, y: scroll.offset - contentTop, width: textFrame.width, height: textFrame.height)
+        let glyphs = layoutManager.glyphRange(forBoundingRect: visible, in: textContainer)
+        return lineRects(glyphs: glyphs, origin: origin).filter { $0.rect.intersects(textFrame) }
+    }
+
+    /// The picture's brightness (encoded luma) behind each requested line. Eased over about half a second so a
+    /// cut or an exposure change does not make the plates flicker.
+    func receiveBackdrop(_ luma: [Int: Double]) {
+        let now = CACurrentMediaTime()
+        let ease = 1 - exp(-min(now - lastBackdrop, 1) / 0.5)
+        lastBackdrop = now
+        var next: [Int: CGFloat] = [:]
+        for (key, value) in luma {
+            let wanted = CGFloat(PrompterTypography.scrimAlpha(backgroundLuma: value))
+            next[key] = lineAlpha[key].map { $0 + ease * (wanted - $0) } ?? wanted
+        }
+        lineAlpha = next
+        invalidateText()
     }
 
     private func drawPlaceholder() {
@@ -196,6 +281,7 @@ final class PrompterUIView: UIView {
     @objc private func handlePan(_ pan: UIPanGestureRecognizer) {
         switch pan.state {
         case .began:
+            dragging = true
             scroll.halt()
             settleTask?.cancel()
             pan.setTranslation(.zero, in: self)
@@ -204,6 +290,7 @@ final class PrompterUIView: UIView {
             pan.setTranslation(.zero, in: self)
             scroll.scroll(by: -dy)
         case .ended, .cancelled:
+            dragging = false
             scroll.fling(velocity: -pan.velocity(in: self).y)
             scheduleSettle()
         default:
@@ -241,6 +328,7 @@ final class PrompterUIView: UIView {
 
     /// Applies the camera layout. Re-flows the text and keeps the current word on the reading line.
     func apply(_ layout: CameraLayout) {
+        previewFrame = layout.previewFrame
         guard layout.textFrame != textFrame || layout.readingLineY != readingLineY else { return }
         textFrame = layout.textFrame
         readingLineY = layout.readingLineY
@@ -309,13 +397,9 @@ final class PrompterUIView: UIView {
     // MARK: - Settings
 
     private func observeSettings() {
-        settings.$fontSize
+        Publishers.CombineLatest3(settings.$lineSpacing, settings.$letterSpacing, settings.$wordSpacing)
             .dropFirst()
-            .sink { [weak self] size in self?.setFontSize(CGFloat(size)) }
-            .store(in: &cancellables)
-        Publishers.CombineLatest(settings.$lineSpacing, settings.$letterSpacing)
-            .dropFirst()
-            .sink { [weak self] _, _ in self?.buildText() }
+            .sink { [weak self] _, _, _ in self?.buildText() }
             .store(in: &cancellables)
         settings.$autoSpeed
             .sink { [weak self] speed in self?.scroll.autoSpeed = CGFloat(speed) }
@@ -325,9 +409,24 @@ final class PrompterUIView: UIView {
             .store(in: &cancellables)
     }
 
-    private func setFontSize(_ size: CGFloat) {
-        fontSize = size
-        buildText()
+    /// A new text size, from the Font size setting or from Auto. The word on the reading line stays on it; an
+    /// automatic change is eased in with a short cross-fade.
+    func setTextSize(_ size: CGFloat, animated: Bool) {
+        guard abs(size - fontSize) > 0.01 else { return }
+        let change = {
+            let anchor = self.words.isEmpty ? nil : self.wordIndexAtReadingLine()
+            self.fontSize = size
+            self.buildText()
+            if let anchor {
+                self.scroll.offset = min(max(self.targetOffset(for: anchor), 0), self.scroll.maxOffset)
+                if self.scroll.followTarget != nil { self.scroll.followTarget = self.targetOffset(for: self.cursorIndex) }
+            }
+        }
+        if animated, window != nil {
+            UIView.transition(with: self, duration: 0.3, options: [.transitionCrossDissolve, .allowUserInteraction], animations: change)
+        } else {
+            change()
+        }
     }
 
     // MARK: - Text building
@@ -339,6 +438,7 @@ final class PrompterUIView: UIView {
             fontSize: fontSize,
             lineSpacing: CGFloat(settings.lineSpacing),
             letterSpacing: CGFloat(settings.letterSpacing),
+            wordSpacing: CGFloat(settings.wordSpacing),
             cursor: cursorIndex,
             wordColor: { [cursorIndex] in Self.color(for: $0, cursor: cursorIndex) }
         )
@@ -398,6 +498,7 @@ final class PrompterUIView: UIView {
 
         let previous = cursorIndex
         cursorIndex = target
+        cursorMoved = CACurrentMediaTime()
         recolor(previous, target)
         scroll.followTarget = targetOffset(for: target)
         updateDisplayLink()

@@ -18,8 +18,9 @@ final class PrompterView: NSView {
     private static let insetTop: CGFloat = 12
     private static let readingLineRatio: CGFloat = 0.35
 
-    private static let dimColor = NSColor(white: 1, alpha: 0.35)
-    private static let normalColor = NSColor(white: 1, alpha: 0.95)
+    // Colour order (spec 8.1): the text the eyes work on is brightest, what is read is clearly done.
+    private static let dimColor = NSColor(white: 1, alpha: CGFloat(PrompterTypography.colorReadAlpha))
+    private static let normalColor = NSColor(white: 1, alpha: 1)
     private static let currentColor = NSColor(srgbRed: 1, green: 0.86, blue: 0.4, alpha: 1)
     private static let highlightFill = NSColor(srgbRed: 1, green: 0.86, blue: 0.4, alpha: 0.16)
 
@@ -41,6 +42,7 @@ final class PrompterView: NSView {
     private var paragraphStarts: [Int] = []
     private var cursorIndex = 0
     private var settleTask: Task<Void, Never>?
+    private var cursorMoved: CFTimeInterval = CACurrentMediaTime()
 
     var currentWordIndex: Int { cursorIndex }
     var isPlaying: Bool { scroll.isPlaying }
@@ -49,7 +51,7 @@ final class PrompterView: NSView {
 
     init(settings: Settings) {
         self.settings = settings
-        self.fontSize = CGFloat(settings.fontSize)
+        self.fontSize = CGFloat(TextSizer.shared.size)
         self.language = .named(settings.scriptLanguage)
         super.init(frame: .zero)
 
@@ -70,9 +72,10 @@ final class PrompterView: NSView {
             .dropFirst()
             .sink { [weak self] text in self?.setScript(text) }
             .store(in: &cancellables)
-        settings.$fontSize
+        TextSizer.shared.speechPause = { [weak self] in self.map { CACurrentMediaTime() - $0.cursorMoved } ?? 1 }
+        TextSizer.shared.$size
             .dropFirst()
-            .sink { [weak self] size in self?.setFontSize(CGFloat(size)) }
+            .sink { [weak self] size in self?.setFontSize(CGFloat(size), animated: TextSizer.shared.lastChangeWasAuto) }
             .store(in: &cancellables)
         settings.$autoSpeed
             .sink { [weak self] speed in self?.scroll.autoSpeed = CGFloat(speed) }
@@ -205,9 +208,22 @@ final class PrompterView: NSView {
 
     // MARK: - Text building
 
-    private func setFontSize(_ size: CGFloat) {
+    /// A new text size, from the settings or from the camera. The word on the reading line stays on it.
+    private func setFontSize(_ size: CGFloat, animated: Bool) {
+        guard abs(size - fontSize) > 0.01 else { return }
+        let anchor = words.isEmpty ? nil : wordIndexAtReadingLine()
+        if animated, let layer {
+            let fade = CATransition()
+            fade.type = .fade
+            fade.duration = 0.3
+            layer.add(fade, forKey: "textSize")
+        }
         fontSize = size
         buildText()
+        if let anchor {
+            scroll.offset = min(max(Self.insetTop + words[anchor].rect.midY - readingLineY, 0), scroll.maxOffset)
+            if scroll.followTarget != nil { scroll.followTarget = Self.insetTop + words[cursorIndex].rect.midY - readingLineY }
+        }
     }
 
     private func buildText() {
@@ -271,6 +287,7 @@ final class PrompterView: NSView {
 
         let previous = cursorIndex
         cursorIndex = target
+        cursorMoved = CACurrentMediaTime()
         recolor(previous, target)
         scroll.followTarget = Self.insetTop + words[target].rect.midY - readingLineY
         updateDisplayLink()

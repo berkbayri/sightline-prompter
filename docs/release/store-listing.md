@@ -56,8 +56,8 @@ Monthly $4.99, yearly $29.99 with a 7-day free trial, or lifetime $59.99 (prices
 PRIVATE BY DESIGN
 No ads, no account, no tracking across apps; anonymous usage counts can be switched off in Settings. Scripts live in your own iCloud Drive. An iCloud sign-in on the device is required.
 
-Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Privacy Policy: https://berkbayri.github.io/sightline-prompter/privacy.html
+Terms of Use: https://sightlineprompter.app/terms.html
+Privacy Policy: https://sightlineprompter.app/privacy.html
 ```
 
 ## Açıklama: Mac
@@ -84,8 +84,8 @@ Monthly $4.99, yearly $29.99 with a 7-day free trial, or lifetime $59.99 (prices
 
 No ads, no account, no tracking across apps; anonymous usage counts can be switched off in Settings. An iCloud sign-in on the Mac is required.
 
-Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Privacy Policy: https://berkbayri.github.io/sightline-prompter/privacy.html
+Terms of Use: https://sightlineprompter.app/terms.html
+Privacy Policy: https://sightlineprompter.app/privacy.html
 ```
 
 ## Türkçe metin (ikinci dil, Türkiye mağazası)
@@ -128,15 +128,15 @@ Aylık, yıllık (7 gün ücretsiz deneme) ya da ömür boyu seçenekleri vardı
 TASARIMI GEREĞİ GİZLİ
 Analiz, takip ve reklam yok. Metinlerin kendi iCloud Drive'ında durur. Cihazda iCloud girişi gerekir.
 
-Kullanım Koşulları: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Gizlilik Politikası: https://berkbayri.github.io/sightline-prompter/privacy.html
+Kullanım Koşulları: https://sightlineprompter.app/terms.html
+Gizlilik Politikası: https://sightlineprompter.app/privacy.html
 ```
 
 ## URL'ler
 
-- **Destek URL'si:** `https://berkbayri.github.io/sightline-prompter/`
-- **Pazarlama URL'si:** `https://berkbayri.github.io/sightline-prompter/`
-- **Gizlilik Politikası URL'si:** `https://berkbayri.github.io/sightline-prompter/privacy.html`
+- **Destek URL'si:** `https://sightlineprompter.app/support.html`
+- **Pazarlama URL'si:** `https://sightlineprompter.app/`
+- **Gizlilik Politikası URL'si:** `https://sightlineprompter.app/privacy.html`
 
 (Bu üç adresin yayında olması gerekir; yayında değilse inceleme reddedilir. Adresler henüz doğrulanmadı.)
 

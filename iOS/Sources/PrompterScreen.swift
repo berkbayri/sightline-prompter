@@ -8,6 +8,7 @@ struct PrompterScreen: View {
     @ObservedObject private var camera: CameraEngine
     @ObservedObject private var pro = ProStore.shared
     @ObservedObject private var settings = PhoneSettings.shared
+    @ObservedObject private var sizer: DistanceSizer
     let onExit: () -> Void
     let onCameraSettings: () -> Void
 
@@ -20,6 +21,7 @@ struct PrompterScreen: View {
     init(model: AppModel, onExit: @escaping () -> Void, onCameraSettings: @escaping () -> Void) {
         self.model = model
         _camera = ObservedObject(wrappedValue: model.camera)
+        _sizer = ObservedObject(wrappedValue: model.sizer)
         self.onExit = onExit
         self.onCameraSettings = onCameraSettings
     }
@@ -35,7 +37,7 @@ struct PrompterScreen: View {
 
     /// Height of one text line, matching the paragraph style the prompter view draws with.
     private var lineHeight: CGFloat {
-        UIFont.systemFont(ofSize: CGFloat(settings.fontSize), weight: .semibold).lineHeight * CGFloat(settings.lineSpacing)
+        UIFont.systemFont(ofSize: CGFloat(sizer.appliedSize), weight: .semibold).lineHeight * CGFloat(settings.lineSpacing)
     }
 
     @ViewBuilder
@@ -195,6 +197,7 @@ struct PrompterScreen: View {
                 ControlsPane(
                     model: model,
                     camera: model.camera,
+                    sizer: model.sizer,
                     layout: layout,
                     onExit: onExit,
                     onCameraSettings: onCameraSettings
@@ -233,6 +236,7 @@ private struct PrompterSurface: UIViewRepresentable {
 private struct ControlsPane: View {
     @ObservedObject var model: AppModel
     @ObservedObject var camera: CameraEngine
+    @ObservedObject var sizer: DistanceSizer
     let layout: CameraLayout
     let onExit: () -> Void
     let onCameraSettings: () -> Void
@@ -324,6 +328,7 @@ private struct ControlsPane: View {
 
     private var idleStatus: String? {
         if let message = camera.message { return message }
+        if sizer.tooFar { return "Move closer or use landscape" }
         return model.statusText.isEmpty ? nil : model.statusText
     }
 }

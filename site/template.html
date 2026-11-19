@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="{{lang}}" class="no-js" data-locales="{{locales}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{meta.title}}</title>
+<meta name="description" content="{{meta.description}}">
+<link rel="canonical" href="{{canonical}}">
+{{#alternates}}<link rel="alternate" hreflang="{{hreflang}}" href="{{url}}">
+{{/alternates}}<link rel="alternate" hreflang="x-default" href="{{x_default}}">
+<meta name="apple-itunes-app" content="app-id=6833947315">
+{{{gsc}}}<meta name="theme-color" content="#07080C">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sightline Prompter">
+<meta property="og:title" content="{{meta.og_title}}">
+<meta property="og:description" content="{{meta.og_description}}">
+<meta property="og:url" content="{{canonical}}">
+<meta property="og:image" content="{{og_image}}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:alt" content="{{meta.og_image_alt}}">
+<meta property="og:locale" content="{{og_locale}}">
+{{#og_alternates}}<meta property="og:locale:alternate" content="{{og}}">
+{{/og_alternates}}<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{meta.og_title}}">
+<meta name="twitter:description" content="{{meta.og_description}}">
+<meta name="twitter:image" content="{{og_image}}">
+<meta name="twitter:image:alt" content="{{meta.og_image_alt}}">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/assets/fonts/bc-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css?v={{v.css}}">
+<script>document.documentElement.classList.remove('no-js')</script>
+{{{ga}}}
+<script type="application/ld+json">{{{jsonld}}}</script>
+<script src="/assets/site.js?v={{v.js}}" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">{{skip}}</a>
+
+{{{chrome_top}}}
+
+<main id="main">
+
+<section class="hero">
+  <div class="wrap">
+    <h1 class="reading">
+      <span class="ln dim">{{hero.lines.0}} <span class="cue" aria-hidden="true">{{hero.cue}}</span></span>
+      <span class="ln" data-read style="--w:{{hero_w}}">{{hero.lines.1}}</span>
+      <span class="ln dim">{{hero.lines.2}}</span>
+    </h1>
+    <p class="sub">{{hero.sub}}</p>
+    <div class="actions">
+      <a class="store" href="{{store.url_hero}}"><img src="{{store.badge}}" alt="{{store.badge_alt}}" width="156" height="52"></a>
+      <a class="link" href="#devices">{{hero.cta_secondary}}</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec devices" id="devices">
+  <div class="wrap devices-grid">
+    <div class="sec-head">
+      <h2><span>{{devices.title}}</span> <em>{{devices.title_accent}}</em></h2>
+      <p>{{devices.body}}</p>
+      <ul class="tags">
+        <li class="tag">{{devices.mac_label}}</li>
+        <li class="tag">{{devices.iphone_label}}</li>
+      </ul>
+      <a class="store" href="{{store.url_devices}}"><img src="{{store.badge}}" alt="{{store.badge_alt}}" width="156" height="52" loading="lazy"></a>
+    </div>
+    <div class="scene" aria-hidden="true">
+      <div class="dev mac">
+        <div class="screen">
+          <div class="call"><b>AM</b><b>JL</b><b>SK</b><b>RD</b></div>
+          <i class="notch-cut"></i>
+          <div class="panel" data-read>
+            <p class="cue">{{devices.kicker_cue}}</p>
+            {{#demo}}<p class="ln">{{line}}</p>
+            {{/demo}}
+          </div>
+        </div>
+      </div>
+      <div class="dev phone">
+        <div class="screen">
+          {{#phone.has}}<img src="{{phone.url}}" width="{{phone.w}}" height="{{phone.h}}" alt="" loading="lazy" decoding="async">{{/phone.has}}
+          <i class="island"></i>
+          <div class="lines" data-read>
+            {{#demo}}<p class="ln"><span class="plate">{{line}}</span></p>
+            {{/demo}}
+          </div>
+          <i class="rec"><b></b></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec autosize" id="autosize">
+  <div class="wrap split">
+    <div class="sec-head">
+      <h2><span>{{autosize.title}}</span> <em>{{autosize.title_accent}}</em></h2>
+      <p>{{autosize.body}}</p>
+      <p class="note">{{autosize.mac_note}}</p>
+    </div>
+    <div class="dist" data-dist data-fmt="{{autosize.distance_fmt}}" data-readout="{{autosize.readout}}">
+      <div class="pf" aria-hidden="true">
+        {{#phone.has}}<img src="{{phone.url}}" width="{{phone.w}}" height="{{phone.h}}" alt="" loading="lazy" decoding="async">{{/phone.has}}
+        <i class="island"></i>
+        <p class="pf-text"><span class="plate">{{autosize.script}}</span></p>
+      </div>
+      <div class="dist-ctl">
+        <label for="dist-range">{{autosize.distance_label}}</label>
+        <input id="dist-range" type="range" min="30" max="100" step="5" value="40">
+        <p class="dist-out" aria-live="polite"><b data-cm></b><span data-readout-out></span></p>
+        <p class="note" data-cap hidden>{{autosize.cap_note}}</p>
+        <p class="note">{{autosize.caption}}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec cases" id="cases">
+  <div class="wrap">
+    <div class="cases-head">
+      <h2><span>{{cases.title}}</span> <em>{{cases.title_accent}}</em></h2>
+      <div class="tablist" role="tablist" aria-label="{{cases.title}} {{cases.title_accent}}">
+        {{#cases.items}}<button class="tab" type="button" role="tab" id="tab-{{id}}" aria-controls="panel-{{id}}" aria-selected="{{selected}}" tabindex="{{tabindex}}" data-case="{{id}}">{{tab}}</button>
+        {{/cases.items}}
+      </div>
+    </div>
+    {{#cases.items}}<div class="case" role="tabpanel" id="panel-{{id}}" aria-labelledby="tab-{{id}}" tabindex="0"{{hidden}}>
+      <div class="stage">
+        {{#img.has}}<img src="{{img.url}}" width="{{img.w}}" height="{{img.h}}" alt="{{alt}}" loading="lazy" decoding="async">{{/img.has}}
+        {{^img.has}}<div class="ph" role="img" aria-label="{{alt}}"></div>{{/img.has}}
+      </div>
+      <div class="case-copy">
+        <h3>{{title}}</h3>
+        <p>{{body}}</p>
+        <a class="store" href="{{store.url_cases}}"><img src="{{store.badge}}" alt="{{store.badge_alt}}" width="156" height="52" loading="lazy"></a>
+      </div>
+    </div>
+    {{/cases.items}}
+  </div>
+</section>
+
+<section class="sec crop" id="crop">
+  <div class="wrap split">
+    <div class="sec-head">
+      <h2><span>{{crop.title}}</span> <em>{{crop.title_accent}}</em></h2>
+      <p>{{crop.body}}</p>
+      <ul class="tags">
+        {{#crop.tags}}<li class="tag">{{.}}</li>
+        {{/crop.tags}}
+      </ul>
+    </div>
+    <div class="vf" aria-hidden="true">
+      <div class="cropbox">
+        <i class="g gv1"></i><i class="g gv2"></i><i class="g gh1"></i><i class="g gh2"></i>
+        <p class="vf-text">{{hero.lines.1}}</p>
+      </div>
+      <i class="level"></i>
+      <i class="rec"><b></b></i>
+    </div>
+  </div>
+</section>
+
+<section class="sec languages" id="languages">
+  <div class="wrap">
+    <div class="split-head">
+      <h2><span>{{languages.title}}</span> <em>{{languages.title_accent}}</em></h2>
+      <div>
+        <p>{{languages.body}}</p>
+        <p class="note">{{languages.note}}</p>
+      </div>
+    </div>
+    <p class="wall" data-read aria-hidden="true">{{#wall}}<span class="w" lang="{{lang}}">{{name}}</span> {{/wall}}</p>
+  </div>
+</section>
+
+<section class="sec library" id="library">
+  <div class="wrap split">
+    <div class="sec-head">
+      <h2><span>{{library.title}}</span> <em>{{library.title_accent}}</em></h2>
+      <p>{{library.body}}</p>
+      <p class="note">{{library.cue_note}}</p>
+    </div>
+    <div class="doc win">
+      <div class="bar"><i></i><i></i><i></i><span>{{library.window_title}}</span></div>
+      <div class="doc-body">
+      {{#demo}}<p class="ln{{#first}} r{{/first}}">{{line}}</p>
+      {{#cue_after}}<p class="cue">{{library.cue_example}}</p>
+      {{/cue_after}}{{/demo}}
+      <p class="formats">{{library.formats_label}}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec pro" id="pro">
+  <div class="wrap">
+    <h2><span>{{pro.title}}</span></h2>
+    <div class="plans">
+      <div class="plan">
+        <h3>{{pro.free_title}}</h3>
+        <ul>
+          {{#pro.free_items}}<li>{{.}}</li>
+          {{/pro.free_items}}
+        </ul>
+      </div>
+      <div class="plan is-pro">
+        <h3>{{pro.pro_title}}</h3>
+        <ul>
+          {{#pro.pro_items}}<li>{{.}}</li>
+          {{/pro.pro_items}}
+        </ul>
+      </div>
+    </div>
+    <p class="note">{{pro.note}}</p>
+  </div>
+</section>
+
+<section class="sec faq" id="faq">
+  <div class="wrap split-head">
+    <h2><span>{{faq.title}}</span></h2>
+    <div class="qas">
+      {{#faq.items}}<details class="qa">
+        <summary>{{q}}</summary>
+        <p>{{a}}</p>
+      </details>
+      {{/faq.items}}
+    </div>
+  </div>
+</section>
+
+<section class="sec close" id="close">
+  <div class="wrap">
+    <h2><span>{{close.title}}</span> <em>{{close.title_accent}}</em></h2>
+    <p class="sub">{{close.sub}}</p>
+    <a class="store" href="{{store.url_close}}"><img src="{{store.badge}}" alt="{{store.badge_alt}}" width="156" height="52" loading="lazy"></a>
+  </div>
+</section>
+
+</main>
+
+{{{chrome_foot}}}
+</body>
+</html>

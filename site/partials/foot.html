@@ -1,0 +1,20 @@
+<footer class="foot">
+  <div class="wrap foot-in">
+    <a class="brand" href="{{home}}"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Sightline Prompter</a>
+    <ul>
+      <li><a href="/privacy.html">{{footer.privacy}}</a></li>
+      <li><a href="/terms.html">{{footer.terms}}</a></li>
+      <li><a href="/support.html">{{footer.support}}</a></li>
+      {{#analytics}}<li><button type="button" id="cookie-settings">{{consent.settings}}</button></li>{{/analytics}}
+    </ul>
+    <p>&copy; {{year}} Sightline Prompter. {{footer.rights}}</p>
+  </div>
+</footer>
+
+{{#analytics}}<div class="consent" id="consent" role="region" aria-label="{{consent.settings}}" hidden>
+  <p>{{consent.text}}</p>
+  <div class="consent-btns">
+    <button type="button" class="btn sm" data-c="granted">{{consent.accept}}</button>
+    <button type="button" class="btn sm ghost" data-c="denied">{{consent.decline}}</button>
+  </div>
+</div>{{/analytics}}

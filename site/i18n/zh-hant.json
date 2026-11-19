@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "title": "會跟聲音走的提詞機 | Sightline Prompter",
+    "description": "Sightline Prompter 是適用於 iPhone 和 Mac 的提詞機應用程式，會逐字跟著你的聲音走。眼睛看鏡頭，照稿子說。可免費試用。",
+    "og_title": "Sightline Prompter：會聽你說話的提詞機",
+    "og_description": "適用於 iPhone 和 Mac 的語音跟隨提詞機。你開口，稿子就捲動；你停頓，稿子就等你。可免費試用。",
+    "og_image_alt": "Sightline Prompter 在 iPhone 和 Mac 上執行，稿子文字就在鏡頭正下方"
+  },
+  "nav": {
+    "iphone": "iPhone",
+    "mac": "Mac",
+    "languages": "語言",
+    "faq": "常見問題",
+    "download": "下載",
+    "language_menu": "語言"
+  },
+  "hero": {
+    "lines": [
+      "看著鏡頭。",
+      "稿子跟著你的聲音走。",
+      "停頓時，它會等你。"
+    ],
+    "cue": "[[微笑]]",
+    "sub": "Sightline Prompter 是適用於 iPhone 和 Mac 的提詞機。它會聆聽、逐字找到你的位置，並讓文字始終保持在鏡頭正下方。",
+    "cta_secondary": "在 iPhone 和 Mac 上查看"
+  },
+  "devices": {
+    "kicker_cue": "[[一份稿子]]",
+    "title": "一份稿子，",
+    "title_accent": "兩台裝置。",
+    "body": "在 Mac 上寫稿，在 iPhone 上錄影。兩台裝置共用同一個 iCloud 稿件庫，所以按下錄影時，你寫好的稿子已經在手機上了。這是 App Store 上的同一款應用程式，一次購買兩端通用。",
+    "mac_label": "Mac，瀏海下方",
+    "iphone_label": "iPhone，疊在即時預覽上方",
+    "demo_script": "歡迎回到頻道。今天我要直接對著鏡頭唸這份稿子。文字會跟上我的節奏，我從來不會弄丟位置。"
+  },
+  "autosize": {
+    "title": "字級隨",
+    "title_accent": "距離調整。",
+    "body": "在 iPhone 上，App 會估算你的臉離相機有多遠，並據此調整字級、每行長度和行數，讓你讀起來輕鬆，視線也始終靠近鏡頭。",
+    "mac_note": "在 Mac 上，你可以選擇坐的距離，也可以讓內建相機來測量。相機在你開啟之前一直是關閉的，不會儲存或傳送任何內容。",
+    "script": "看著鏡頭，深呼吸，像對朋友說話一樣把它說出來。",
+    "distance_label": "與螢幕的距離",
+    "distance_fmt": "{cm} cm",
+    "readout": "字級 {pt} pt，{n} 行",
+    "cap_note": "從這裡開始文字不再變大，這樣每一行仍能完整顯示在螢幕上。",
+    "caption": "以 iPhone 16 Pro 為例的數值。"
+  },
+  "cases": {
+    "title": "專為",
+    "title_accent": "鏡頭而生",
+    "items": [
+      {
+        "id": "youtube",
+        "tab": "YouTube",
+        "title": "一鏡到底錄製片頭",
+        "body": "把稿子放在前置鏡頭下，直接面對觀眾說話，而不是盯著筆記。Sightline Prompter 會跟著你的節奏走，換氣停頓不會讓你弄丟位置。",
+        "alt": "示意場景：創作者用 iPhone 上的 Sightline Prompter 錄製 YouTube 片頭"
+      },
+      {
+        "id": "reels",
+        "tab": "Reels 與 Shorts",
+        "title": "短影片，稿子精簡",
+        "body": "橫向拍攝，螢幕上會保留即時 9:16 裁切參考線，你現在框的畫面，直式成片就保得住。文字不論直式或橫式，都緊貼鏡頭。",
+        "alt": "示意場景：一個人用 iPhone 拍攝直式短影片，稿子浮在預覽上方"
+      },
+      {
+        "id": "course",
+        "tab": "課程",
+        "title": "長課程，講述穩定",
+        "body": "不必手動捲動，就能唸完整堂課。可以用雙方括號加入講解提示，它們只會作為提醒顯示在螢幕上，不會被唸出，也不計入字數。每分鐘字數與剩餘時間屬於 Pro 功能。",
+        "alt": "示意場景：講師在書桌前錄製線上課程，螢幕上顯示稿子"
+      },
+      {
+        "id": "meeting",
+        "tab": "通話與演講",
+        "title": "Mac 瀏海下方",
+        "body": "在有瀏海的 MacBook 上，面板就位於瀏海正下方、鏡頭旁邊，你唸稿時也能看著通話中的人。沒有瀏海的 Mac，面板會出現在螢幕頂部中央。",
+        "alt": "示意場景：一個人在 MacBook 上視訊通話，稿子面板位於鏡頭瀏海下方"
+      }
+    ]
+  },
+  "crop": {
+    "title": "守住",
+    "title_accent": "畫面",
+    "body": "橫向拍攝，卻要發到直式平台？iPhone 相機拍攝時會顯示即時 9:16 裁切參考線，附三分構圖線與水平線，最後裁切就不會切掉你的頭。",
+    "tags": [
+      "9:16 裁切參考線",
+      "三分構圖",
+      "水平線"
+    ]
+  },
+  "languages": {
+    "title": "任何語言",
+    "title_accent": "都能唸",
+    "body": "語音跟隨支援 31 種語言及地區變體，包括英文、德文、法文、西班牙文、義大利文、葡萄牙文、日文、韓文、國語、粵語和土耳其文。其中許多可在裝置上辨識，不需連網。",
+    "note": "免費版支援英文、土耳其文和西班牙文的語音跟隨。Sightline Pro 解鎖其餘所有語言。"
+  },
+  "library": {
+    "window_title": "稿子",
+    "title": "Mac 寫稿。",
+    "title_accent": "iPhone 錄影。",
+    "body": "在任一裝置上撰寫、搜尋和編輯稿件。稿件透過 iCloud 同步，不必另外拷貝。可以直接匯入現有的 Word、PDF、Markdown、RTF、HTML、OpenDocument 或純文字檔案。",
+    "cue_example": "[[放慢，抬頭看]]",
+    "cue_note": "雙方括號中的提示會以小字提醒的形式顯示在螢幕上。Sightline Prompter 不會唸出它們，也不會把它們計為你需要說出的字數。",
+    "formats_label": "匯入：Word、PDF、Markdown、RTF、HTML、OpenDocument、文字"
+  },
+  "pro": {
+    "title": "免費開始",
+    "free_title": "免費",
+    "free_items": [
+      "語音跟隨每次最長 2 分鐘",
+      "iPhone 錄影最長 2 分鐘",
+      "1080p 30 fps",
+      "英文、土耳其文和西班牙文"
+    ],
+    "pro_title": "Sightline Pro",
+    "pro_items": [
+      "沒有時間限制",
+      "4K 60 fps、HDR 與 ProRes",
+      "全部 31 種語言",
+      "每分鐘字數與剩餘時間",
+      "Mac 支援 DualSense 控制器",
+      "一次購買，iPhone 和 Mac 通用"
+    ],
+    "note": "價格與免費試用資訊以 App Store 顯示為準，並以你所在地的幣別為準。"
+  },
+  "faq": {
+    "title": "常見問題",
+    "items": [
+      {
+        "q": "跟隨聲音的提詞機是怎麼運作的？",
+        "a": "Sightline Prompter 在你唸稿時持續聆聽，並把聽到的內容和螢幕上的文字比對。你說話時文字捲動，停頓時文字停止。節奏由你決定，不必設定捲動速度。"
+      },
+      {
+        "q": "語音跟隨可以離線使用嗎？",
+        "a": "許多語言可在裝置上辨識，因此不必連網也能使用。若某種語言尚未安裝離線模型，音訊會傳送至 Apple 的語音服務，應用程式會在螢幕上說明。土耳其文需要 iOS 聽寫模型才能在裝置上辨識。"
+      },
+      {
+        "q": "支援哪些語言？",
+        "a": "31 種語言及地區變體，包括英文、德文、法文、西班牙文、義大利文、葡萄牙文、日文、韓文、國語、粵語和土耳其文。免費版涵蓋英文、土耳其文和西班牙文。"
+      },
+      {
+        "q": "一定要用有瀏海的 MacBook 嗎？",
+        "a": "不一定。在有瀏海的 MacBook 上，面板位於瀏海正下方；沒有瀏海的 Mac 則位於螢幕頂部中央。"
+      },
+      {
+        "q": "自動字級是怎麼運作的？",
+        "a": "在 iPhone 上，前置相機會估算你的臉與螢幕的距離，並調整字級，讓文字保持相同的視角，在這個距離下閱讀起來舒適。它還會限制每行長度和行數，讓你的視線停留在鏡頭附近。在 Mac 上，你可以選擇一個距離預設，或開啟選用的相機測量。所有測量都在你的裝置上完成，影片和臉部資料不會離開裝置。"
+      },
+      {
+        "q": "它可以錄影嗎？",
+        "a": "可以，在 iPhone 上。應用程式會在即時預覽上方顯示稿子進行錄影，並把影片存進你的照片圖庫。Mac 版是提詞面板，用於搭配其他工具進行通話或錄影。"
+      },
+      {
+        "q": "一次購買能同時涵蓋 iPhone 和 Mac 嗎？",
+        "a": "可以。這是 App Store 上的同一款應用程式，Sightline Pro 同時解鎖 iPhone 版和 Mac 版。"
+      },
+      {
+        "q": "可以匯入哪些檔案？",
+        "a": "純文字、Markdown、Word、PDF、RTF、HTML 和 OpenDocument 檔案。稿件透過 iCloud 在 iPhone 和 Mac 之間同步。"
+      },
+      {
+        "q": "可以用遊戲控制器嗎？",
+        "a": "可以。DualSense 控制器可透過藍牙或 USB 搭配 Mac 版使用：類比搖桿負責捲動，按鍵可調整速度並在段落間跳轉。控制器支援是 Sightline Pro 的功能。"
+      },
+      {
+        "q": "我的資料會怎樣？",
+        "a": "稿件保存在你自己的 iCloud 雲碟中。沒有廣告，不需帳號，也不會跨應用程式追蹤。匿名使用統計可在設定中關閉。裝置上須登入 iCloud。"
+      }
+    ]
+  },
+  "close": {
+    "title": "抬頭看。",
+    "title_accent": "繼續說。",
+    "sub": "下載適用於 iPhone 和 Mac 的 Sightline Prompter，在你的下一份稿子上試試看。"
+  },
+  "footer": {
+    "privacy": "隱私權",
+    "terms": "條款",
+    "support": "支援",
+    "rights": "版權所有。"
+  },
+  "consent": {
+    "text": "本網站使用 Google Analytics 統計造訪次數。除非你接受，否則保持關閉。",
+    "accept": "接受",
+    "decline": "拒絕",
+    "settings": "Cookie 設定"
+  },
+  "store": {
+    "badge_alt": "在 App Store 下載",
+    "badge_lang": "zh-tw"
+  }
+}

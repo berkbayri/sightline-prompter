@@ -1,0 +1,193 @@
+{
+  "meta": {
+    "title": "Teleprompter, der deiner Stimme folgt | Sightline Prompter",
+    "description": "Sightline Prompter ist ein Teleprompter für iPhone und Mac, der deiner Stimme Wort für Wort folgt. Schau beim Lesen in die Kamera. Jetzt kostenlos testen.",
+    "og_title": "Sightline Prompter: der Teleprompter, der dir zuhört",
+    "og_description": "Ein Teleprompter für iPhone und Mac, der deiner Stimme folgt. Der Text läuft, wenn du sprichst, und wartet, wenn du pausierst. Kostenlos testen.",
+    "og_image_alt": "Sightline Prompter auf iPhone und Mac, der Skripttext direkt unter der Kamera"
+  },
+  "nav": {
+    "iphone": "iPhone",
+    "mac": "Mac",
+    "languages": "Sprachen",
+    "faq": "FAQ",
+    "download": "Download",
+    "language_menu": "Sprache"
+  },
+  "hero": {
+    "lines": [
+      "Schau in die Linse.",
+      "Dein Skript folgt deiner Stimme.",
+      "Pausier, und es wartet."
+    ],
+    "cue": "[[lächeln]]",
+    "sub": "Sightline Prompter ist ein Teleprompter für iPhone und Mac. Er hört zu, findet deine Stelle Wort für Wort und hält den Text direkt unter der Kamera.",
+    "cta_secondary": "Auf iPhone und Mac ansehen"
+  },
+  "devices": {
+    "kicker_cue": "[[ein Skript]]",
+    "title": "EIN SKRIPT.",
+    "title_accent": "ZWEI GERÄTE.",
+    "body": "Schreib am Mac, nimm auf dem iPhone auf. Beide Apps teilen sich eine iCloud-Skriptbibliothek, daher ist dein Skript schon auf dem Telefon, wenn du auf Aufnehmen tippst. Es ist eine App im App Store, und ein Kauf gilt für beide.",
+    "mac_label": "Mac, unter der Notch",
+    "iphone_label": "iPhone, über der Live-Vorschau",
+    "demo_script": "Willkommen zurück im Kanal. Heute lese ich dieses Skript direkt in die Kamera. Die Wörter halten mit mir Schritt, und ich verliere nie meine Stelle."
+  },
+  "autosize": {
+    "title": "ANGEPASST AN",
+    "title_accent": "DEINE ENTFERNUNG.",
+    "body": "Auf dem iPhone schätzt die App, wie weit dein Gesicht von der Kamera entfernt ist, und stellt Schriftgröße, Zeilenlänge und Zeilenzahl darauf ein. So liest du bequem, während deine Augen nah an der Linse bleiben.",
+    "mac_note": "Am Mac wählst du, wie weit du sitzt, oder lässt die eingebaute Kamera messen. Die Kamera bleibt aus, bis du sie einschaltest. Nichts wird gespeichert oder gesendet.",
+    "script": "Schau in die Linse, atme durch und sag es so, wie du es einem Freund sagen würdest.",
+    "distance_label": "Abstand zum Bildschirm",
+    "distance_fmt": "{cm} cm",
+    "readout": "Schriftgröße {pt} pt, {n} Zeilen",
+    "cap_note": "Ab hier wächst der Text nicht weiter, damit jede Zeile noch auf den Bildschirm passt.",
+    "caption": "Beispielwerte für ein iPhone 16 Pro."
+  },
+  "cases": {
+    "title": "GEMACHT FÜR",
+    "title_accent": "DIE KAMERA",
+    "items": [
+      {
+        "id": "youtube",
+        "tab": "YouTube",
+        "title": "Das Intro in einem Take aufnehmen",
+        "body": "Leg das Skript unter die Frontkamera und sprich zu deinen Zuschauern statt zu deinen Notizen. Sightline Prompter folgt deinem Tempo, eine Atempause kostet dich also nicht deine Stelle.",
+        "alt": "Beispielszene: Ein Creator nimmt mit Sightline Prompter auf dem iPhone ein YouTube-Intro auf"
+      },
+      {
+        "id": "reels",
+        "tab": "Reels und Shorts",
+        "title": "Kurze Videos, knappe Skripte",
+        "body": "Dreh quer und behalte eine Live-9:16-Zuschneidehilfe auf dem Bildschirm, damit das, was du jetzt im Bild hast, auch im vertikalen Schnitt bleibt. Der Text bleibt im Hoch- und Querformat neben der Linse.",
+        "alt": "Beispielszene: Eine Person filmt ein kurzes vertikales Video auf dem iPhone, das Skript schwebt über der Vorschau"
+      },
+      {
+        "id": "course",
+        "tab": "Kurse",
+        "title": "Lange Lektionen, gleichmäßiger Vortrag",
+        "body": "Lies eine ganze Lektion, ohne von Hand zu scrollen. Füge Vortragshinweise in doppelten eckigen Klammern als Erinnerungen hinzu. Sie bleiben auf dem Bildschirm und werden nie vorgelesen oder als Wörter gezählt. Wörter pro Minute und Restzeit gibt es in Pro.",
+        "alt": "Beispielszene: Eine Dozentin nimmt an ihrem Schreibtisch eine Online-Lektion mit einem Skript auf dem Bildschirm auf"
+      },
+      {
+        "id": "meeting",
+        "tab": "Calls und Vorträge",
+        "title": "Unter der Notch auf deinem Mac",
+        "body": "Auf einem MacBook mit Notch sitzt das Fenster direkt darunter, neben der Kamera, sodass du beim Lesen die Leute im Call ansiehst. Macs ohne Notch bekommen das Fenster oben mittig auf dem Bildschirm.",
+        "alt": "Beispielszene: Eine Person in einem Videocall auf einem MacBook, das Skriptfenster unter der Kamera-Notch"
+      }
+    ]
+  },
+  "crop": {
+    "title": "BLEIB IM",
+    "title_accent": "BILD",
+    "body": "Querformat für eine vertikale Plattform? Die iPhone-Kamera zeigt beim Filmen eine Live-9:16-Zuschneidehilfe mit Drittelregel und Horizontlinie, damit der finale Zuschnitt dir nicht den Kopf abschneidet.",
+    "tags": [
+      "9:16-Zuschneidehilfe",
+      "Drittelregel",
+      "Horizontlinie"
+    ]
+  },
+  "languages": {
+    "title": "SPRICH JEDE",
+    "title_accent": "SPRACHE",
+    "body": "Die Sprachsteuerung funktioniert in 31 Sprachen und regionalen Varianten, unter anderem Englisch, Deutsch, Französisch, Spanisch, Italienisch, Portugiesisch, Japanisch, Koreanisch, Mandarin, Kantonesisch und Türkisch. Viele davon werden auf dem Gerät erkannt, ohne Verbindung.",
+    "note": "Die kostenlose Version folgt deiner Stimme auf Englisch, Türkisch und Spanisch. Sightline Pro schaltet den Rest frei."
+  },
+  "library": {
+    "window_title": "Skripte",
+    "title": "SCHREIB AM MAC.",
+    "title_accent": "FILM AM iPHONE.",
+    "body": "Schreib, suche und bearbeite Skripte auf jedem Gerät. Sie synchronisieren sich über iCloud, also muss nichts kopiert werden. Übernimm, was du schon hast, aus Word, PDF, Markdown, RTF, HTML, OpenDocument oder Klartext.",
+    "cue_example": "[[langsamer, nach oben schauen]]",
+    "cue_note": "Hinweise in doppelten eckigen Klammern erscheinen als kleine Erinnerungen auf dem Bildschirm. Sightline Prompter liest sie nicht vor und zählt sie nicht als Wörter, die du sagen musst.",
+    "formats_label": "Import: Word, PDF, Markdown, RTF, HTML, OpenDocument, Text"
+  },
+  "pro": {
+    "title": "KOSTENLOS STARTEN",
+    "free_title": "Kostenlos",
+    "free_items": [
+      "Sprachsteuerung bis 2 Minuten pro Durchlauf",
+      "Aufnahme bis 2 Minuten auf dem iPhone",
+      "1080p mit 30 fps",
+      "Englisch, Türkisch und Spanisch"
+    ],
+    "pro_title": "Sightline Pro",
+    "pro_items": [
+      "Kein Zeitlimit",
+      "4K mit 60 fps, HDR und ProRes",
+      "Alle 31 Sprachen",
+      "Wörter pro Minute und Restzeit",
+      "DualSense-Controller am Mac",
+      "Ein Kauf für iPhone und Mac"
+    ],
+    "note": "Preise und die kostenlose Testphase werden im App Store in deiner Landeswährung angezeigt."
+  },
+  "faq": {
+    "title": "FRAGEN",
+    "items": [
+      {
+        "q": "Wie funktioniert ein Teleprompter, der deiner Stimme folgt?",
+        "a": "Sightline Prompter hört zu, während du liest, und gleicht das Gehörte mit den Wörtern auf dem Bildschirm ab. Der Text läuft, wenn du sprichst, und bleibt stehen, wenn du pausierst. Du bestimmst also das Tempo, nicht eine Scroll-Geschwindigkeit."
+      },
+      {
+        "q": "Funktioniert die Sprachsteuerung offline?",
+        "a": "Viele Sprachen werden auf dem Gerät erkannt und funktionieren daher ohne Verbindung. Ist für eine Sprache kein Offline-Modell installiert, geht das Audio an Apples Spracherkennung, und die App zeigt das auf dem Bildschirm an. Für Türkisch braucht die Erkennung auf dem Gerät das iOS-Diktatmodell."
+      },
+      {
+        "q": "Welche Sprachen werden unterstützt?",
+        "a": "31 Sprachen und regionale Varianten, unter anderem Englisch, Deutsch, Französisch, Spanisch, Italienisch, Portugiesisch, Japanisch, Koreanisch, Mandarin, Kantonesisch und Türkisch. Die kostenlose Version umfasst Englisch, Türkisch und Spanisch."
+      },
+      {
+        "q": "Brauche ich ein MacBook mit Notch?",
+        "a": "Nein. Auf einem MacBook mit Notch sitzt das Fenster direkt darunter. Auf einem Mac ohne Notch sitzt es oben mittig auf dem Bildschirm."
+      },
+      {
+        "q": "Wie funktioniert die automatische Textgröße?",
+        "a": "Auf dem iPhone schätzt die Frontkamera, wie weit dein Gesicht vom Bildschirm entfernt ist, und passt die Größe so an, dass die Buchstaben im gleichen Sehwinkel erscheinen und auf diesen Abstand angenehm lesbar bleiben. Außerdem begrenzt sie Zeilenlänge und Zeilenzahl, damit deine Augen nah an der Linse bleiben. Am Mac wählst du eine Abstandsvoreinstellung oder schaltest die optionale Kameramessung ein. Alles wird auf deinem Gerät gemessen, Video- und Gesichtsdaten verlassen es nicht."
+      },
+      {
+        "q": "Nimmt es Videos auf?",
+        "a": "Ja, auf dem iPhone. Die App nimmt auf, während das Skript über der Live-Vorschau schwebt, und speichert das Video in deiner Fotomediathek. Die Mac-App ist ein Teleprompter-Fenster für Calls und Aufnahmen, die du mit anderen Tools machst."
+      },
+      {
+        "q": "Gilt ein Kauf für iPhone und Mac?",
+        "a": "Ja. Es ist eine App im App Store, und Sightline Pro schaltet sowohl die iPhone- als auch die Mac-Version frei."
+      },
+      {
+        "q": "Welche Dateien kann ich importieren?",
+        "a": "Klartext, Markdown, Word, PDF, RTF, HTML und OpenDocument. Skripte synchronisieren sich über iCloud zwischen iPhone und Mac."
+      },
+      {
+        "q": "Kann ich einen Game-Controller verwenden?",
+        "a": "Ja. Ein DualSense-Controller funktioniert mit der Mac-App über Bluetooth oder USB: Der Analogstick scrollt, Tasten ändern die Geschwindigkeit und springen zwischen Absätzen. Die Controller-Unterstützung ist Teil von Sightline Pro."
+      },
+      {
+        "q": "Was passiert mit meinen Daten?",
+        "a": "Skripte bleiben in deinem eigenen iCloud Drive. Es gibt keine Werbung, kein Konto und kein Tracking über Apps hinweg. Anonyme Nutzungszahlen lassen sich in den Einstellungen abschalten. Auf dem Gerät ist eine iCloud-Anmeldung erforderlich."
+      }
+    ]
+  },
+  "close": {
+    "title": "SCHAU HOCH.",
+    "title_accent": "SPRICH WEITER.",
+    "sub": "Lade Sightline Prompter für iPhone und Mac herunter und probier es mit deinem nächsten Skript aus."
+  },
+  "footer": {
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "support": "Support",
+    "rights": "Alle Rechte vorbehalten."
+  },
+  "consent": {
+    "text": "Diese Seite nutzt Google Analytics, um Besuche zu zählen. Es bleibt aus, solange du nicht zustimmst.",
+    "accept": "Akzeptieren",
+    "decline": "Ablehnen",
+    "settings": "Cookie-Einstellungen"
+  },
+  "store": {
+    "badge_alt": "Laden im App Store",
+    "badge_lang": "de-de"
+  }
+}

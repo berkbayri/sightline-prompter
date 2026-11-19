@@ -1,0 +1,24 @@
+<header class="top">
+  <i class="notch" aria-hidden="true"></i>
+  <nav class="nav wrap" aria-label="Sightline Prompter">
+    <div class="nav-l">
+      <a class="brand" href="{{home}}"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Sightline Prompter</a>
+      <ul class="links">
+        <li><a href="{{home}}#crop">{{nav.iphone}}</a></li>
+        <li><a href="{{home}}#devices">{{nav.mac}}</a></li>
+        <li><a href="{{home}}#languages">{{nav.languages}}</a></li>
+        <li><a href="{{home}}#faq">{{nav.faq}}</a></li>
+      </ul>
+    </div>
+    <div class="nav-r">
+      <details class="lang" id="lang">
+        <summary aria-label="{{nav.language_menu}}"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8"/><ellipse cx="10" cy="10" rx="3.4" ry="8"/><path d="M2 10h16"/></svg><span class="lt">{{nav.language_menu}}</span></summary>
+        <ul>
+          {{#switcher}}<li><a href="{{path}}" hreflang="{{lang}}" lang="{{lang}}" data-lang="{{code}}"{{#current}} aria-current="true"{{/current}}>{{name}}</a></li>
+          {{/switcher}}
+        </ul>
+      </details>
+      <a class="btn sm ghost" href="{{store.url_nav}}">{{nav.download}}</a>
+    </div>
+  </nav>
+</header>

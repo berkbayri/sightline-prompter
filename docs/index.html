@@ -1,71 +1,411 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js" data-locales="en,tr,de,es,fr,it,pt-br,ja,ko,zh-hans,zh-hant">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sightline Prompter: free notch teleprompter for macOS</title>
-  <meta name="description" content="Free, open-source MacBook notch teleprompter for macOS. Voice-activated scrolling in 31 languages and variants, PS5 DualSense control, script library with iCloud, words per minute and time left.">
-  <link rel="canonical" href="https://berkbayri.github.io/sightline-prompter/">
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Sightline Prompter: free notch teleprompter for macOS">
-  <meta property="og:description" content="Voice-activated teleprompter under the MacBook notch. 31 languages and variants, PS5 controller, offline speech.">
-  <meta property="og:url" content="https://berkbayri.github.io/sightline-prompter/">
-  <meta property="og:image" content="https://raw.githubusercontent.com/berkbayri/sightline-prompter/main/docs/images/social-preview.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Sightline Prompter",
-    "operatingSystem": "macOS 14 or later",
-    "applicationCategory": "MultimediaApplication",
-    "license": "https://www.gnu.org/licenses/gpl-3.0.html",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "downloadUrl": "https://github.com/berkbayri/sightline-prompter/releases/latest",
-    "codeRepository": "https://github.com/berkbayri/sightline-prompter"
-  }
-  </script>
-  <style>
-    :root { color-scheme: dark; }
-    body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: #0b0b0e; color: #f2f2f5; line-height: 1.55; }
-    main { max-width: 960px; margin: 0 auto; padding: 56px 24px 72px; }
-    h1 { font-size: 44px; margin: 0 0 12px; letter-spacing: -0.02em; }
-    .lead { font-size: 20px; color: #b8b8c2; margin: 0 0 28px; }
-    .cta { display: inline-block; background: #ffd966; color: #111; font-weight: 600; padding: 12px 22px; border-radius: 10px; text-decoration: none; }
-    .cta:hover { background: #ffe38a; }
-    img { width: 100%; height: auto; border-radius: 14px; margin: 32px 0; display: block; }
-    h2 { font-size: 24px; margin: 44px 0 12px; }
-    ul { padding-left: 20px; }
-    li { margin: 6px 0; color: #d6d6de; }
-    a { color: #ffd966; }
-    footer { margin-top: 56px; color: #8a8a94; font-size: 14px; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teleprompter That Follows Your Voice | Sightline Prompter</title>
+<meta name="description" content="Sightline Prompter is a teleprompter app for iPhone and Mac that follows your voice word by word. Read to the camera with your eyes up. Free to try.">
+<link rel="canonical" href="https://sightlineprompter.app/">
+<link rel="alternate" hreflang="en" href="https://sightlineprompter.app/">
+<link rel="alternate" hreflang="tr" href="https://sightlineprompter.app/tr/">
+<link rel="alternate" hreflang="de" href="https://sightlineprompter.app/de/">
+<link rel="alternate" hreflang="es" href="https://sightlineprompter.app/es/">
+<link rel="alternate" hreflang="fr" href="https://sightlineprompter.app/fr/">
+<link rel="alternate" hreflang="it" href="https://sightlineprompter.app/it/">
+<link rel="alternate" hreflang="pt-BR" href="https://sightlineprompter.app/pt-br/">
+<link rel="alternate" hreflang="ja" href="https://sightlineprompter.app/ja/">
+<link rel="alternate" hreflang="ko" href="https://sightlineprompter.app/ko/">
+<link rel="alternate" hreflang="zh-Hans" href="https://sightlineprompter.app/zh-hans/">
+<link rel="alternate" hreflang="zh-Hant" href="https://sightlineprompter.app/zh-hant/">
+<link rel="alternate" hreflang="x-default" href="https://sightlineprompter.app/">
+<meta name="apple-itunes-app" content="app-id=6833947315">
+<meta name="theme-color" content="#07080C">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sightline Prompter">
+<meta property="og:title" content="Sightline Prompter: the teleprompter that hears you">
+<meta property="og:description" content="A voice-following teleprompter for iPhone and Mac. Your script moves when you speak and waits when you pause. Free to try.">
+<meta property="og:url" content="https://sightlineprompter.app/">
+<meta property="og:image" content="https://sightlineprompter.app/assets/img/og.png?v=47c0e4cd">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:alt" content="Sightline Prompter on iPhone and Mac, with the script text just below the camera">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="tr_TR">
+<meta property="og:locale:alternate" content="de_DE">
+<meta property="og:locale:alternate" content="es_ES">
+<meta property="og:locale:alternate" content="fr_FR">
+<meta property="og:locale:alternate" content="it_IT">
+<meta property="og:locale:alternate" content="pt_BR">
+<meta property="og:locale:alternate" content="ja_JP">
+<meta property="og:locale:alternate" content="ko_KR">
+<meta property="og:locale:alternate" content="zh_CN">
+<meta property="og:locale:alternate" content="zh_TW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Sightline Prompter: the teleprompter that hears you">
+<meta name="twitter:description" content="A voice-following teleprompter for iPhone and Mac. Your script moves when you speak and waits when you pause. Free to try.">
+<meta name="twitter:image" content="https://sightlineprompter.app/assets/img/og.png?v=47c0e4cd">
+<meta name="twitter:image:alt" content="Sightline Prompter on iPhone and Mac, with the script text just below the camera">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/assets/fonts/bc-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/site.css?v=0b301329">
+<script>document.documentElement.classList.remove('no-js')</script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500});try{localStorage.getItem('sp-consent')==='granted'&&gtag('consent','update',{analytics_storage:'granted'})}catch(e){}gtag('js',new Date());gtag('config','G-XKBWRN05GK')</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XKBWRN05GK"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":["SoftwareApplication","MobileApplication"],"@id":"https://sightlineprompter.app/#app","name":"Sightline Prompter","operatingSystem":"iOS 17, macOS 14","applicationCategory":"MultimediaApplication","description":"Sightline Prompter is a teleprompter app for iPhone and Mac that follows your voice word by word. Read to the camera with your eyes up. Free to try.","url":"https://sightlineprompter.app/","downloadUrl":"https://apps.apple.com/app/id6833947315","image":"https://sightlineprompter.app/icon-512.png","inLanguage":"en","publisher":{"@id":"https://sightlineprompter.app/#org"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","description":"Free to download. Sightline Pro is an in-app purchase."}},{"@type":"Organization","@id":"https://sightlineprompter.app/#org","name":"Sightline Prompter","url":"https://sightlineprompter.app/","logo":"https://sightlineprompter.app/icon-512.png","contactPoint":{"@type":"ContactPoint","contactType":"customer support","email":"hi@sightlineprompter.app"}},{"@type":"WebSite","@id":"https://sightlineprompter.app/#site","url":"https://sightlineprompter.app/","name":"Sightline Prompter","inLanguage":"en","publisher":{"@id":"https://sightlineprompter.app/#org"}},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How does a teleprompter that follows your voice work?","acceptedAnswer":{"@type":"Answer","text":"Sightline Prompter listens while you read and matches what it hears to the words on screen. The text moves when you speak and stops when you pause, so you set the pace instead of a scroll speed."}},{"@type":"Question","name":"Does voice following work offline?","acceptedAnswer":{"@type":"Answer","text":"Many languages are recognized on the device, so they work without a connection. If a language has no offline model installed, the audio goes to Apple's speech service, and the app says so on screen. Turkish needs the iOS Dictation model for on-device recognition."}},{"@type":"Question","name":"Which languages does it support?","acceptedAnswer":{"@type":"Answer","text":"31 languages and regional variants, including English, German, French, Spanish, Italian, Portuguese, Japanese, Korean, Mandarin, Cantonese and Turkish. The free version covers English, Turkish and Spanish."}},{"@type":"Question","name":"Do I need a MacBook with a notch?","acceptedAnswer":{"@type":"Answer","text":"No. On a MacBook with a notch, the panel sits right below it. On a Mac without one, the panel sits at the top center of the screen."}},{"@type":"Question","name":"How does auto text size work?","acceptedAnswer":{"@type":"Answer","text":"On iPhone, the front camera estimates how far your face is from the screen and sizes the text so the letters keep the same visual angle, which keeps them comfortable to read at that distance. It also limits line length and the number of lines, so your eyes stay near the lens. On Mac, you choose a distance preset or turn on the optional camera measurement. Everything is measured on your device, and no video or face data leaves it."}},{"@type":"Question","name":"Does it record video?","acceptedAnswer":{"@type":"Answer","text":"Yes, on iPhone. The app records with the script floating over the live preview and saves the video to your Photos library. The Mac app is a prompter panel for calls and recordings you make with other tools."}},{"@type":"Question","name":"Does one purchase cover iPhone and Mac?","acceptedAnswer":{"@type":"Answer","text":"Yes. It is one app on the App Store, and Sightline Pro unlocks both the iPhone and the Mac version."}},{"@type":"Question","name":"Which files can I import?","acceptedAnswer":{"@type":"Answer","text":"Plain text, Markdown, Word, PDF, RTF, HTML and OpenDocument files. Scripts sync between iPhone and Mac through iCloud."}},{"@type":"Question","name":"Can I use a game controller?","acceptedAnswer":{"@type":"Answer","text":"Yes. A DualSense controller works with the Mac app over Bluetooth or USB: the analog stick scrolls, and buttons change speed and jump between paragraphs. Controller support is part of Sightline Pro."}},{"@type":"Question","name":"What happens to my data?","acceptedAnswer":{"@type":"Answer","text":"Scripts stay in your own iCloud Drive. There are no ads and no account, and no tracking across apps. Anonymous usage counts can be switched off in Settings. An iCloud sign-in on the device is required."}}]}]}</script>
+<script src="/assets/site.js?v=0d085f9b" defer></script>
 </head>
 <body>
-  <main>
-    <h1>Sightline Prompter</h1>
-    <p class="lead">A free, open-source teleprompter under the MacBook notch. It follows your voice, so the script moves with you.</p>
-    <a class="cta" href="https://github.com/berkbayri/sightline-prompter/releases/latest">Download for macOS</a>
+<a class="skip" href="#main">Skip to content</a>
 
-    <img src="https://raw.githubusercontent.com/berkbayri/sightline-prompter/main/docs/images/social-preview.png" alt="Sightline Prompter under the MacBook notch, following the spoken word">
+<header class="top">
+  <i class="notch" aria-hidden="true"></i>
+  <nav class="nav wrap" aria-label="Sightline Prompter">
+    <div class="nav-l">
+      <a class="brand" href="/"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Sightline Prompter</a>
+      <ul class="links">
+        <li><a href="/#crop">iPhone</a></li>
+        <li><a href="/#devices">Mac</a></li>
+        <li><a href="/#languages">Languages</a></li>
+        <li><a href="/#faq">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="nav-r">
+      <details class="lang" id="lang">
+        <summary aria-label="Language"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="8"/><ellipse cx="10" cy="10" rx="3.4" ry="8"/><path d="M2 10h16"/></svg><span class="lt">Language</span></summary>
+        <ul>
+          <li><a href="/" hreflang="en" lang="en" data-lang="en" aria-current="true">English</a></li>
+          <li><a href="/tr/" hreflang="tr" lang="tr" data-lang="tr">Türkçe</a></li>
+          <li><a href="/de/" hreflang="de" lang="de" data-lang="de">Deutsch</a></li>
+          <li><a href="/es/" hreflang="es" lang="es" data-lang="es">Español</a></li>
+          <li><a href="/fr/" hreflang="fr" lang="fr" data-lang="fr">Français</a></li>
+          <li><a href="/it/" hreflang="it" lang="it" data-lang="it">Italiano</a></li>
+          <li><a href="/pt-br/" hreflang="pt-BR" lang="pt-BR" data-lang="pt-br">Português (Brasil)</a></li>
+          <li><a href="/ja/" hreflang="ja" lang="ja" data-lang="ja">日本語</a></li>
+          <li><a href="/ko/" hreflang="ko" lang="ko" data-lang="ko">한국어</a></li>
+          <li><a href="/zh-hans/" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh-hans">简体中文</a></li>
+          <li><a href="/zh-hant/" hreflang="zh-Hant" lang="zh-Hant" data-lang="zh-hant">繁體中文</a></li>
+          
+        </ul>
+      </details>
+      <a class="btn sm ghost" href="https://apps.apple.com/app/id6833947315?ct=site-nav">Download</a>
+    </div>
+  </nav>
+</header>
 
-    <h2>Why it is different</h2>
+
+<main id="main">
+
+<section class="hero">
+  <div class="wrap">
+    <h1 class="reading">
+      <span class="ln dim">Look at the lens. <span class="cue" aria-hidden="true">[[smile]]</span></span>
+      <span class="ln" data-read style="--w:16.1">Your script follows your voice.</span>
+      <span class="ln dim">Pause, and it waits.</span>
+    </h1>
+    <p class="sub">Sightline Prompter is a teleprompter for iPhone and Mac. It listens, finds your place word by word, and keeps the text right under the camera.</p>
+    <div class="actions">
+      <a class="store" href="https://apps.apple.com/app/id6833947315?ct=site-hero"><img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" width="156" height="52"></a>
+      <a class="link" href="#devices">See it on iPhone and Mac</a>
+    </div>
+  </div>
+</section>
+
+<section class="sec devices" id="devices">
+  <div class="wrap devices-grid">
+    <div class="sec-head">
+      <h2><span>ONE SCRIPT.</span> <em>TWO DEVICES.</em></h2>
+      <p>Write on your Mac, record on your iPhone. Both apps share one iCloud script library, so the script you wrote is already on your phone when you press record. It is one app on the App Store, and one purchase covers both.</p>
+      <ul class="tags">
+        <li class="tag">Mac, under the notch</li>
+        <li class="tag">iPhone, over the live preview</li>
+      </ul>
+      <a class="store" href="https://apps.apple.com/app/id6833947315?ct=site-devices"><img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" width="156" height="52" loading="lazy"></a>
+    </div>
+    <div class="scene" aria-hidden="true">
+      <div class="dev mac">
+        <div class="screen">
+          <div class="call"><b>AM</b><b>JL</b><b>SK</b><b>RD</b></div>
+          <i class="notch-cut"></i>
+          <div class="panel" data-read>
+            <p class="cue">[[one script]]</p>
+            <p class="ln">Welcome back to the channel.</p>
+            <p class="ln">Today I am reading this script straight to the camera.</p>
+            <p class="ln">The words keep up with me, and I never lose my place.</p>
+            
+          </div>
+        </div>
+      </div>
+      <div class="dev phone">
+        <div class="screen">
+          <img src="/assets/img/iphone-preview-person.webp?v=052e8bb3" width="1179" height="2556" alt="" loading="lazy" decoding="async">
+          <i class="island"></i>
+          <div class="lines" data-read>
+            <p class="ln"><span class="plate">Welcome back to the channel.</span></p>
+            <p class="ln"><span class="plate">Today I am reading this script straight to the camera.</span></p>
+            <p class="ln"><span class="plate">The words keep up with me, and I never lose my place.</span></p>
+            
+          </div>
+          <i class="rec"><b></b></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec autosize" id="autosize">
+  <div class="wrap split">
+    <div class="sec-head">
+      <h2><span>SIZED TO</span> <em>YOUR DISTANCE.</em></h2>
+      <p>On iPhone, the app estimates how far your face is from the camera, then sets the text size, line length and number of lines to match. You read comfortably while your eyes stay near the lens.</p>
+      <p class="note">On Mac, you pick how far you sit, or let the built-in camera measure it. The camera stays off until you turn it on, and nothing is saved or sent.</p>
+    </div>
+    <div class="dist" data-dist data-fmt="{cm} cm" data-readout="Text size {pt} pt, {n} lines">
+      <div class="pf" aria-hidden="true">
+        <img src="/assets/img/iphone-preview-person.webp?v=052e8bb3" width="1179" height="2556" alt="" loading="lazy" decoding="async">
+        <i class="island"></i>
+        <p class="pf-text"><span class="plate">Look at the lens, take a breath, and say it the way you would say it to a friend.</span></p>
+      </div>
+      <div class="dist-ctl">
+        <label for="dist-range">Distance from the screen</label>
+        <input id="dist-range" type="range" min="30" max="100" step="5" value="40">
+        <p class="dist-out" aria-live="polite"><b data-cm></b><span data-readout-out></span></p>
+        <p class="note" data-cap hidden>From here the text stops growing, so each line still fits on the screen.</p>
+        <p class="note">Example sizes for an iPhone 16 Pro.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec cases" id="cases">
+  <div class="wrap">
+    <div class="cases-head">
+      <h2><span>BUILT FOR</span> <em>THE CAMERA</em></h2>
+      <div class="tablist" role="tablist" aria-label="BUILT FOR THE CAMERA">
+        <button class="tab" type="button" role="tab" id="tab-youtube" aria-controls="panel-youtube" aria-selected="true" tabindex="0" data-case="youtube">YouTube</button>
+        <button class="tab" type="button" role="tab" id="tab-reels" aria-controls="panel-reels" aria-selected="false" tabindex="-1" data-case="reels">Reels and Shorts</button>
+        <button class="tab" type="button" role="tab" id="tab-course" aria-controls="panel-course" aria-selected="false" tabindex="-1" data-case="course">Courses</button>
+        <button class="tab" type="button" role="tab" id="tab-meeting" aria-controls="panel-meeting" aria-selected="false" tabindex="-1" data-case="meeting">Calls and talks</button>
+        
+      </div>
+    </div>
+    <div class="case" role="tabpanel" id="panel-youtube" aria-labelledby="tab-youtube" tabindex="0">
+      <div class="stage">
+        <img src="/assets/img/case-youtube.webp?v=49d90c08" width="2868" height="1320" alt="Illustrative scene: a creator recording a YouTube intro with Sightline Prompter on iPhone" loading="lazy" decoding="async">
+        
+      </div>
+      <div class="case-copy">
+        <h3>Record the intro in one take</h3>
+        <p>Put the script under the front camera and talk to your viewers instead of to your notes. Sightline Prompter follows your pace, so a pause to breathe does not cost you your place.</p>
+        <a class="store" href="https://apps.apple.com/app/id6833947315?ct=site-cases"><img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" width="156" height="52" loading="lazy"></a>
+      </div>
+    </div>
+    <div class="case" role="tabpanel" id="panel-reels" aria-labelledby="tab-reels" tabindex="0" hidden>
+      <div class="stage">
+        <img src="/assets/img/case-reels.webp?v=891ffcb1" width="1320" height="2868" alt="Illustrative scene: a person filming a short vertical video on iPhone with the script floating over the preview" loading="lazy" decoding="async">
+        
+      </div>
+      <div class="case-copy">
+        <h3>Short videos, tight scripts</h3>
+        <p>Shoot in landscape and keep a live 9:16 crop guide on screen, so what you frame now is what the vertical cut keeps. The text stays next to the lens in portrait and landscape.</p>
+        <a class="store" href="https://apps.apple.com/app/id6833947315?ct=site-cases"><img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" width="156" height="52" loading="lazy"></a>
+      </div>
+    </div>
+    <div class="case" role="tabpanel" id="panel-course" aria-labelledby="tab-course" tabindex="0" hidden>
+      <div class="stage">
+        <img src="/assets/img/case-course.webp?v=7bcfa5c3" width="1320" height="2868" alt="Illustrative scene: an instructor recording an online lesson at a desk with a script on screen" loading="lazy" decoding="async">
+        
+      </div>
+      <div class="case-copy">
+        <h3>Long lessons, steady delivery</h3>
+        <p>Read a full lesson without scrolling by hand. Add delivery cues in double brackets as reminders. They stay on screen and are never read or counted as words. Words per minute and time left are in Pro.</p>
+        <a class="store" href="https://apps.apple.com/app/id6833947315?ct=site-cases"><img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" width="156" height="52" loading="lazy"></a>
+      </div>
+    </div>
+    <div class="case" role="tabpanel" id="panel-meeting" aria-labelledby="tab-meeting" tabindex="0" hidden>
+      <div class="stage">
+        <img src="/assets/img/case-meeting.webp?v=d5c09662" width="1600" height="1000" alt="Illustrative scene: a person on a video call on a MacBook with the script panel below the camera notch" loading="lazy" decoding="async">
+        
+      </div>
+      <div class="case-copy">
+        <h3>Under the notch on your Mac</h3>
+        <p>On a MacBook with a notch, the panel sits right below it, next to the camera, so you look at the people on the call while you read. Macs without a notch get the panel at the top center of the screen.</p>
+        <a class="store" href="https://apps.apple.com/app/id6833947315?ct=site-cases"><img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" width="156" height="52" loading="lazy"></a>
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+<section class="sec crop" id="crop">
+  <div class="wrap split">
+    <div class="sec-head">
+      <h2><span>STAY IN</span> <em>THE FRAME</em></h2>
+      <p>Filming landscape for a vertical platform? The iPhone camera shows a live 9:16 crop guide while you shoot, with the rule of thirds and a level line, so the final crop does not cut off your head.</p>
+      <ul class="tags">
+        <li class="tag">9:16 crop guide</li>
+        <li class="tag">Rule of thirds</li>
+        <li class="tag">Level line</li>
+        
+      </ul>
+    </div>
+    <div class="vf" aria-hidden="true">
+      <div class="cropbox">
+        <i class="g gv1"></i><i class="g gv2"></i><i class="g gh1"></i><i class="g gh2"></i>
+        <p class="vf-text">Your script follows your voice.</p>
+      </div>
+      <i class="level"></i>
+      <i class="rec"><b></b></i>
+    </div>
+  </div>
+</section>
+
+<section class="sec languages" id="languages">
+  <div class="wrap">
+    <div class="split-head">
+      <h2><span>SPEAK ANY</span> <em>LANGUAGE</em></h2>
+      <div>
+        <p>Voice following works in 31 languages and regional variants, including English, German, French, Spanish, Italian, Portuguese, Japanese, Korean, Mandarin, Cantonese and Turkish. Many of them are recognized on the device, with no connection.</p>
+        <p class="note">The free version follows your voice in English, Turkish and Spanish. Sightline Pro adds the rest.</p>
+      </div>
+    </div>
+    <p class="wall" data-read aria-hidden="true"><span class="w" lang="en">English</span> <span class="w" lang="tr">Türkçe</span> <span class="w" lang="es">Español</span> <span class="w" lang="de">Deutsch</span> <span class="w" lang="fr">Français</span> <span class="w" lang="it">Italiano</span> <span class="w" lang="pt">Português</span> <span class="w" lang="ja">日本語</span> <span class="w" lang="ko">한국어</span> <span class="w" lang="zh-Hans">普通话</span> <span class="w" lang="yue">粵語</span> </p>
+  </div>
+</section>
+
+<section class="sec library" id="library">
+  <div class="wrap split">
+    <div class="sec-head">
+      <h2><span>WRITE ON MAC.</span> <em>RECORD ON IPHONE.</em></h2>
+      <p>Write, search and edit scripts on either device. They sync through iCloud, so nothing needs copying over. Bring in what you already have from Word, PDF, Markdown, RTF, HTML, OpenDocument or plain text.</p>
+      <p class="note">Cues in double brackets show on screen as small reminders. Sightline Prompter does not read them and does not count them as words you have to say.</p>
+    </div>
+    <div class="doc win">
+      <div class="bar"><i></i><i></i><i></i><span>Scripts</span></div>
+      <div class="doc-body">
+      <p class="ln r">Welcome back to the channel.</p>
+      <p class="cue">[[slow down, look up]]</p>
+      <p class="ln">Today I am reading this script straight to the camera.</p>
+      <p class="ln">The words keep up with me, and I never lose my place.</p>
+      
+      <p class="formats">Import: Word, PDF, Markdown, RTF, HTML, OpenDocument, text</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec pro" id="pro">
+  <div class="wrap">
+    <h2><span>FREE TO START</span></h2>
+    <div class="plans">
+      <div class="plan">
+        <h3>Free</h3>
+        <ul>
+          <li>Voice following up to 2 minutes per run</li>
+          <li>Recording up to 2 minutes on iPhone</li>
+          <li>1080p at 30 fps</li>
+          <li>English, Turkish and Spanish</li>
+          
+        </ul>
+      </div>
+      <div class="plan is-pro">
+        <h3>Sightline Pro</h3>
+        <ul>
+          <li>No time limit</li>
+          <li>4K at 60 fps, HDR and ProRes</li>
+          <li>All 31 languages</li>
+          <li>Words per minute and time left</li>
+          <li>DualSense controller on Mac</li>
+          <li>One purchase for iPhone and Mac</li>
+          
+        </ul>
+      </div>
+    </div>
+    <p class="note">Prices and the free trial are shown in the App Store, in your local currency.</p>
+  </div>
+</section>
+
+<section class="sec faq" id="faq">
+  <div class="wrap split-head">
+    <h2><span>QUESTIONS</span></h2>
+    <div class="qas">
+      <details class="qa">
+        <summary>How does a teleprompter that follows your voice work?</summary>
+        <p>Sightline Prompter listens while you read and matches what it hears to the words on screen. The text moves when you speak and stops when you pause, so you set the pace instead of a scroll speed.</p>
+      </details>
+      <details class="qa">
+        <summary>Does voice following work offline?</summary>
+        <p>Many languages are recognized on the device, so they work without a connection. If a language has no offline model installed, the audio goes to Apple&#x27;s speech service, and the app says so on screen. Turkish needs the iOS Dictation model for on-device recognition.</p>
+      </details>
+      <details class="qa">
+        <summary>Which languages does it support?</summary>
+        <p>31 languages and regional variants, including English, German, French, Spanish, Italian, Portuguese, Japanese, Korean, Mandarin, Cantonese and Turkish. The free version covers English, Turkish and Spanish.</p>
+      </details>
+      <details class="qa">
+        <summary>Do I need a MacBook with a notch?</summary>
+        <p>No. On a MacBook with a notch, the panel sits right below it. On a Mac without one, the panel sits at the top center of the screen.</p>
+      </details>
+      <details class="qa">
+        <summary>How does auto text size work?</summary>
+        <p>On iPhone, the front camera estimates how far your face is from the screen and sizes the text so the letters keep the same visual angle, which keeps them comfortable to read at that distance. It also limits line length and the number of lines, so your eyes stay near the lens. On Mac, you choose a distance preset or turn on the optional camera measurement. Everything is measured on your device, and no video or face data leaves it.</p>
+      </details>
+      <details class="qa">
+        <summary>Does it record video?</summary>
+        <p>Yes, on iPhone. The app records with the script floating over the live preview and saves the video to your Photos library. The Mac app is a prompter panel for calls and recordings you make with other tools.</p>
+      </details>
+      <details class="qa">
+        <summary>Does one purchase cover iPhone and Mac?</summary>
+        <p>Yes. It is one app on the App Store, and Sightline Pro unlocks both the iPhone and the Mac version.</p>
+      </details>
+      <details class="qa">
+        <summary>Which files can I import?</summary>
+        <p>Plain text, Markdown, Word, PDF, RTF, HTML and OpenDocument files. Scripts sync between iPhone and Mac through iCloud.</p>
+      </details>
+      <details class="qa">
+        <summary>Can I use a game controller?</summary>
+        <p>Yes. A DualSense controller works with the Mac app over Bluetooth or USB: the analog stick scrolls, and buttons change speed and jump between paragraphs. Controller support is part of Sightline Pro.</p>
+      </details>
+      <details class="qa">
+        <summary>What happens to my data?</summary>
+        <p>Scripts stay in your own iCloud Drive. There are no ads and no account, and no tracking across apps. Anonymous usage counts can be switched off in Settings. An iCloud sign-in on the device is required.</p>
+      </details>
+      
+    </div>
+  </div>
+</section>
+
+<section class="sec close" id="close">
+  <div class="wrap">
+    <h2><span>LOOK UP.</span> <em>KEEP TALKING.</em></h2>
+    <p class="sub">Download Sightline Prompter for iPhone and Mac and try it on your next script.</p>
+    <a class="store" href="https://apps.apple.com/app/id6833947315?ct=site-close"><img src="https://toolbox.marketingtools.apple.com/api/v2/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store" width="156" height="52" loading="lazy"></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <a class="brand" href="/"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>Sightline Prompter</a>
     <ul>
-      <li>Voice tracking that only matches the words on screen, so it never jumps to another part of the script.</li>
-      <li>Under the notch, right next to the camera, so you read while looking at the lens.</li>
-      <li>Speech in 31 languages and regional variants: every language Apple offers for one-click offline download, plus Turkish.</li>
-      <li>Offline speech for every language whose model is on the Mac, with downloads from Settings where Apple allows them.</li>
-      <li>PS5 DualSense control: analog stick scrolling with an adjustable curve, D-pad speed, and a light bar that shows the state.</li>
-      <li>Words per minute and time left, measured from your reading.</li>
-      <li>Script library in iCloud Drive, with import from text, Markdown, RTF, HTML, Word, OpenDocument and PDF.</li>
+      <li><a href="/privacy.html">Privacy</a></li>
+      <li><a href="/terms.html">Terms</a></li>
+      <li><a href="/support.html">Support</a></li>
+      <li><button type="button" id="cookie-settings">Cookie settings</button></li>
     </ul>
+    <p>&copy; 2026 Sightline Prompter. All rights reserved.</p>
+  </div>
+</footer>
 
-    <h2>Install</h2>
-    <p>Download the zip from the <a href="https://github.com/berkbayri/sightline-prompter/releases/latest">latest release</a>, move the app to Applications, and run <code>xattr -dr com.apple.quarantine "/Applications/Sightline Prompter.app"</code> once. The app is not notarized, so this step is needed.</p>
+<div class="consent" id="consent" role="region" aria-label="Cookie settings" hidden>
+  <p>This site uses Google Analytics to count visits. It stays off unless you accept.</p>
+  <div class="consent-btns">
+    <button type="button" class="btn sm" data-c="granted">Accept</button>
+    <button type="button" class="btn sm ghost" data-c="denied">Decline</button>
+  </div>
+</div>
 
-    <footer>
-      Source and issues: <a href="https://github.com/berkbayri/sightline-prompter">github.com/berkbayri/sightline-prompter</a> · GPL-3.0
-    </footer>
-  </main>
 </body>
 </html>

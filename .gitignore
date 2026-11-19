@@ -10,3 +10,6 @@ CLAUDE.md
 .omc/
 graphify-out/
 raw/
+
+# Raw image sources for site/assets/img (large, kept locally)
+site/assets/img/src/

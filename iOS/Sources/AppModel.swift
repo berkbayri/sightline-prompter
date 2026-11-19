@@ -1,6 +1,7 @@
 import Aligner
 import Combine
 import SightlineCore
+import StoreKit
 import UIKit
 
 /// Holds the teleprompter's state: the library, the active script, speech tracking, gamepad, pace and
@@ -26,7 +27,23 @@ final class AppModel: ObservableObject {
     let camera = CameraEngine()
     let pro = ProStore.shared
     /// Set when a free-version limit was hit or a Pro feature was tapped; the root view shows the paywall.
-    @Published var showPaywall = false
+    @Published var showPaywall = false {
+        didSet { if showPaywall { Analytics.track("paywall_shown") } }
+    }
+    /// Show the paywall as soon as the prompter screen closes, so it never covers a running take.
+    var paywallWhenDone = false
+
+    /// A recording reached Photos: offer Pro once after the first one, ask for a rating after the third.
+    private func takeSaved() {
+        let defaults = UserDefaults.standard
+        let takes = defaults.integer(forKey: "takesSaved") + 1
+        defaults.set(takes, forKey: "takesSaved")
+        Analytics.track("take_saved", ["number": "\(min(takes, 10))"])
+        if takes == 1, !pro.isUnlocked { paywallWhenDone = true }
+        if takes == 3, let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            SKStoreReviewController.requestReview(in: scene)
+        }
+    }
 
     private let controller = ControllerInput()
     private let light = GamepadLight()
@@ -59,12 +76,22 @@ final class AppModel: ObservableObject {
         tracker.onStatus = { [weak self] text in self?.receiveStatus(text) }
         camera.onAudioBuffer = { [weak self] buffer in self?.tracker.feed(buffer) }
         camera.isProUnlocked = { [pro] in pro.isUnlocked }
-        camera.onRecordingLimit = { [weak self] in self?.showPaywall = true }
+        // A limit never opens the paywall over a running take: it waits until the prompter screen closes.
+        camera.onRecordingLimit = { [weak self] in
+            Analytics.track("limit_reached", ["kind": "recording"])
+            self?.paywallWhenDone = true
+        }
+        camera.onTakeSaved = { [weak self] in self?.takeSaved() }
+        camera.takeTitle = { [weak self] in self?.activeScript?.title }
         tracker.sessionLimit = { [pro] in pro.isUnlocked ? nil : FreeTier.maxTrackingSeconds }
+        tracker.onLimitNear = { [weak self] seconds in
+            self?.receiveStatus("\(seconds) seconds of free voice following left. Sightline Pro removes the limit.")
+        }
         tracker.onLimitReached = { [weak self] in
             self?.receiveStatus("Free voice following ended after \(Int(FreeTier.maxTrackingSeconds / 60)) minutes. Sightline Pro removes the limit.")
             self?.refreshControls()
-            self?.showPaywall = true
+            Analytics.track("limit_reached", ["kind": "voice"])
+            self?.paywallWhenDone = true
         }
         #if DEBUG
         if !ScreenshotMode.isActive { pro.start() }
@@ -81,6 +108,7 @@ final class AppModel: ObservableObject {
         controller.delegate = self
         controller.stickResponse = { [settings] in (Float(settings.stickDeadzone), settings.stickCurve) }
         controller.start()
+        Analytics.track("app_open")
 
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         NotificationCenter.default
@@ -286,6 +314,7 @@ final class AppModel: ObservableObject {
         }
         // Edits made on the Mac while the app was in the background.
         library.load()
+        backUpLibrary()
     }
 
     // MARK: - Camera mode
@@ -422,9 +451,38 @@ final class AppModel: ObservableObject {
     private static var libraryFolder: URL {
         if let shared = LibraryContainer.documentsURL ?? LibraryFolderBookmark.resolve() {
             LibraryContainer.adopt(from: [localLibraryFolder, LibraryContainer.nestedFolder(in: shared)], into: shared)
+            // A folder remembered from a build that had no iCloud container (the old library) is copied in, never moved.
+            if LibraryContainer.documentsURL != nil, let remembered = LibraryFolderBookmark.resolve() {
+                LibraryContainer.adopt(from: [remembered], into: shared, keepOriginals: true)
+            }
             return shared
         }
         return localLibraryFolder
+    }
+
+    /// Daily safety copy of the library, in the app's own Documents (visible in the Files app).
+    static var backupFolder: URL {
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("Sightline Backups", isDirectory: true)
+    }
+
+    /// Takes today's snapshot off the main thread. Cheap when it already exists.
+    func backUpLibrary() {
+        let folder = Self.libraryFolder
+        DispatchQueue.global(qos: .utility).async {
+            LibraryContainer.snapshot(of: folder, into: Self.backupFolder)
+        }
+    }
+
+    /// Copies the scripts of any folder the user points at into the library. The folder is left untouched.
+    @discardableResult
+    func recoverScripts(from picked: URL) -> Int {
+        let scoped = picked.startAccessingSecurityScopedResource()
+        defer { if scoped { picked.stopAccessingSecurityScopedResource() } }
+        let moved = LibraryContainer.adopt(from: [picked, LibraryContainer.nestedFolder(in: picked)], into: Self.libraryFolder, keepOriginals: true)
+        library.relocate(to: Self.libraryFolder)
+        library.republishAll()
+        return moved
     }
 
     /// True when scripts live in a folder shared with the Mac (the iCloud container or a folder chosen in Files).
@@ -441,6 +499,13 @@ final class AppModel: ObservableObject {
         }
         LibraryContainer.adopt(from: [Self.localLibraryFolder, LibraryContainer.nestedFolder(in: folder)], into: folder)
         library.relocate(to: folder)
+        library.republishAll()
+        reloadActiveScript()
+    }
+
+    /// Moves the library into the iCloud container after the user signs in while the app is open.
+    func switchToSharedLibrary() {
+        library.relocate(to: Self.libraryFolder)
         library.republishAll()
         reloadActiveScript()
     }

@@ -24,9 +24,18 @@ struct PrompterScreen: View {
         self.onCameraSettings = onCameraSettings
     }
 
+    /// The horizon line is a live sensor reading; store screenshots leave it out.
+    private static var hidesLevel: Bool {
+        #if DEBUG
+        ScreenshotMode.isActive
+        #else
+        false
+        #endif
+    }
+
     /// Height of one text line, matching the paragraph style the prompter view draws with.
     private var lineHeight: CGFloat {
-        UIFont.systemFont(ofSize: CGFloat(settings.fontSize), weight: .semibold).lineHeight * 1.35
+        UIFont.systemFont(ofSize: CGFloat(settings.fontSize), weight: .semibold).lineHeight * CGFloat(settings.lineSpacing)
     }
 
     @ViewBuilder
@@ -90,6 +99,7 @@ struct PrompterScreen: View {
         .onAppear { level.start() }
         .onDisappear { level.stop() }
         .persistentSystemOverlays(.hidden)
+        .overlay(alignment: .top) { TakeStatusCard(camera: camera) }
     }
 
     private func screen(_ proxy: GeometryProxy, insets: EdgeInsets) -> some View {
@@ -152,7 +162,7 @@ struct PrompterScreen: View {
                         // Only landscape footage is cropped to vertical afterwards.
                         if layout.isLandscape { VerticalCropGuide(videoAspect: layout.previewAspect) }
                     }
-                    .overlay { LevelOverlay(level: level) }
+                    .overlay { if !Self.hidesLevel { LevelOverlay(level: level) } }
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                     .offset(x: preview.minX, y: preview.minY)
             }
@@ -218,7 +228,8 @@ private struct PrompterSurface: UIViewRepresentable {
     }
 }
 
-/// Camera controls: a row along the bottom in portrait, a column on the far edge in landscape.
+/// Camera controls in one glass capsule: a row along the bottom in portrait, a column on the far edge in
+/// landscape. Record sits in the middle; the prompter and capture switches flank it, rarer actions live in "More".
 private struct ControlsPane: View {
     @ObservedObject var model: AppModel
     @ObservedObject var camera: CameraEngine
@@ -228,108 +239,135 @@ private struct ControlsPane: View {
 
     var body: some View {
         let frame = layout.controlsFrame
-        cameraPane
-        .frame(width: frame.width, height: frame.height)
-        // The controls float over the video, so they sit on a dark plate that keeps them visible on any scene.
-        .background {
-            RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .fill(Color.black.opacity(0.42))
-                .padding(.vertical, 3)
-                .padding(.horizontal, layout.isLandscape ? 3 : 10)
+        VStack(spacing: 6) {
+            cameraStatus
+            bar
         }
+        .frame(width: frame.width, height: frame.height)
         .offset(x: frame.minX, y: frame.minY)
         .opacity(model.controlsVisible ? 1 : 0)
         .allowsHitTesting(model.controlsVisible)
         .animation(.easeInOut(duration: 0.25), value: model.controlsVisible)
+        .sensoryFeedback(.impact(weight: .medium), trigger: camera.isRecording)
     }
 
-    // MARK: - Camera
-
-    /// Zoom, record, camera switch and prompter play in one row (portrait) or column (landscape).
-    private var cameraPane: some View {
-        // Landscape has a column of eight controls, so the buttons shrink to fit.
-        let size: CGFloat = layout.isLandscape ? 34 : 38
-        return VStack(spacing: 8) {
-            cameraStatus
-            let stack = layout.isLandscape ? AnyLayout(VStackLayout(spacing: 4)) : AnyLayout(HStackLayout(spacing: 6))
-            stack {
-                ZoomButton(zoom: camera.zoomFactor, presets: camera.zoomPresets, size: size) { next in
-                    camera.setZoom(next, animated: true)
-                }
-                ControlButton(title: "Camera settings", systemImage: "slider.horizontal.3", identifier: "camera.settings", size: size, action: onCameraSettings)
-                RecordButton(isRecording: camera.isRecording, size: size + 12) {
-                    camera.toggleRecording()
-                }
-                ControlButton(title: "Switch camera", systemImage: "arrow.triangle.2.circlepath.camera", identifier: "camera.switch", size: size) {
-                    camera.switchCamera()
-                }
-                ControlButton(
-                    title: "Speech tracking",
-                    systemImage: model.isTracking ? "mic.fill" : "mic.slash",
-                    active: model.isTracking,
-                    identifier: "camera.tracking",
-                    size: size
-                ) {
-                    model.toggleTracking()
-                }
-                ControlButton(
-                    title: model.isPlaying ? "Pause" : "Play",
-                    systemImage: model.isPlaying ? "pause.fill" : "play.fill",
-                    identifier: "camera.playpause",
-                    size: size
-                ) {
-                    model.togglePlay()
-                }
-                ControlButton(title: "Back to scripts", systemImage: "xmark", identifier: "camera.exit", size: size, action: onExit)
+    private var bar: some View {
+        let size: CGFloat = layout.isLandscape ? 40 : 42
+        let stack = layout.isLandscape ? AnyLayout(VStackLayout(spacing: 0)) : AnyLayout(HStackLayout(spacing: 0))
+        return stack {
+            BarButton(title: "Back to scripts", systemImage: "xmark", identifier: "camera.exit", size: size) {
+                if !camera.isProcessingTake { onExit() }
             }
+            Spacer(minLength: 0)
+            BarButton(
+                title: model.isPlaying ? "Pause" : "Play",
+                systemImage: model.isPlaying ? "pause.fill" : "play.fill",
+                identifier: "camera.playpause", size: size
+            ) { model.togglePlay() }
+            Spacer(minLength: 0)
+            BarButton(
+                title: "Speech tracking",
+                systemImage: model.isTracking ? "mic.fill" : "mic.slash",
+                active: model.isTracking, identifier: "camera.tracking", size: size
+            ) { model.toggleTracking() }
+            Spacer(minLength: 0)
+            RecordButton(isRecording: camera.isRecording, size: layout.isLandscape ? 54 : 58) {
+                camera.toggleRecording()
+            }
+            Spacer(minLength: 0)
+            BarButton(
+                title: camera.monoAudio ? "Mono audio on" : "Mono audio off",
+                systemImage: camera.monoAudio ? "speaker.fill" : "speaker.wave.2",
+                active: camera.monoAudio, identifier: "camera.mono", size: size
+            ) { camera.monoAudio.toggle() }
+            Spacer(minLength: 0)
+            ZoomButton(zoom: camera.zoomFactor, presets: camera.zoomPresets, size: size) { next in
+                camera.setZoom(next, animated: true)
+            }
+            Spacer(minLength: 0)
+            Menu {
+                Button { onCameraSettings() } label: { Label("Camera settings", systemImage: "slider.horizontal.3") }
+                Button { camera.switchCamera() } label: { Label("Switch camera", systemImage: "arrow.triangle.2.circlepath.camera") }
+            } label: {
+                BarIcon(systemImage: "ellipsis", active: false, size: size)
+            }
+            .accessibilityLabel("More")
+            .accessibilityIdentifier("camera.more")
         }
+        .padding(layout.isLandscape ? .vertical : .horizontal, 10)
+        .padding(layout.isLandscape ? .horizontal : .vertical, 6)
+        .barSurface()
+        .padding(layout.isLandscape ? .horizontal : .horizontal, layout.isLandscape ? 2 : 10)
     }
 
     @ViewBuilder
     private var cameraStatus: some View {
-        let text = cameraStatusText
-        if let text {
+        if camera.isRecording {
+            let seconds = camera.recordedSeconds
+            HStack(spacing: 6) {
+                Circle().fill(Color.red).frame(width: 7, height: 7)
+                Text(String(format: "%02d:%02d", seconds / 60, seconds % 60))
+                    .font(.system(.footnote, design: .rounded).weight(.semibold))
+                    .monospacedDigit()
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10).padding(.vertical, 3)
+            .background(Color.black.opacity(0.55), in: Capsule())
+        } else if let text = idleStatus {
             Text(text)
                 .font(.caption)
-                .monospacedDigit()
-                .foregroundStyle(.white.opacity(0.8))
+                .foregroundStyle(.white.opacity(0.85))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
     }
 
-    private var cameraStatusText: String? {
-        if camera.isRecording {
-            let seconds = camera.recordedSeconds
-            return String(format: "● %02d:%02d", seconds / 60, seconds % 60)
-        }
+    private var idleStatus: String? {
         if let message = camera.message { return message }
         return model.statusText.isEmpty ? nil : model.statusText
     }
-
 }
 
-private struct ControlButton: View {
+/// Icon on a 44 pt hit area; an active switch gets a soft yellow capsule behind a yellow symbol.
+private struct BarIcon: View {
+    let systemImage: String
+    let active: Bool
+    let size: CGFloat
+
+    var body: some View {
+        Image(systemName: systemImage)
+            .font(.system(size: 19, weight: .semibold))
+            .foregroundStyle(active ? Color.sightline : Color.white)
+            .frame(width: size, height: size)
+            .background(active ? Color.sightline.opacity(0.2) : Color.clear, in: Circle())
+            .contentShape(Rectangle())
+    }
+}
+
+private struct PressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.9 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+private struct BarButton: View {
     let title: String
     let systemImage: String
-    var prominent = false
     var active = false
     let identifier: String
-    var size: CGFloat = 38
+    var size: CGFloat = 42
     let action: () -> Void
 
     var body: some View {
-        let dimension: CGFloat = prominent ? 50 : size
         Button(action: action) {
-            Image(systemName: systemImage)
-                .font(.system(size: prominent ? 21 : size * 0.42, weight: .semibold))
-                .foregroundStyle(active ? Color.yellow : Color.white)
-                .frame(width: dimension, height: dimension)
-                .controlSurface(in: Circle())
+            BarIcon(systemImage: systemImage, active: active, size: size)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressStyle())
         .accessibilityLabel(title)
         .accessibilityIdentifier(identifier)
+        .accessibilityAddTraits(active ? .isSelected : [])
     }
 }
 
@@ -337,7 +375,7 @@ private struct ControlButton: View {
 private struct ZoomButton: View {
     let zoom: CGFloat
     let presets: [CGFloat]
-    var size: CGFloat = 38
+    var size: CGFloat = 42
     let action: (CGFloat) -> Void
 
     var body: some View {
@@ -347,13 +385,13 @@ private struct ZoomButton: View {
             action(next)
         } label: {
             Text(label)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.system(size: 14, weight: .bold, design: .rounded))
                 .monospacedDigit()
-                .foregroundStyle(.white)
+                .foregroundStyle(zoom == 1 ? Color.white : Color.sightline)
                 .frame(width: size, height: size)
-                .controlSurface(in: Circle())
+                .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressStyle())
         .accessibilityLabel("Zoom")
         .accessibilityValue(label)
         .accessibilityIdentifier("camera.zoom")
@@ -364,44 +402,43 @@ private struct ZoomButton: View {
     }
 }
 
-/// The record button: a red dot that becomes a square while recording.
+/// The record button: a white ring around a red dot that becomes a rounded square while recording.
 private struct RecordButton: View {
     let isRecording: Bool
-    var size: CGFloat = 50
+    var size: CGFloat = 58
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             ZStack {
-                Circle()
-                    .stroke(.white, lineWidth: 3)
-                    .frame(width: size, height: size)
-                RoundedRectangle(cornerRadius: isRecording ? 4 : size / 2)
+                Circle().stroke(.white, lineWidth: 3.5).frame(width: size, height: size)
+                RoundedRectangle(cornerRadius: isRecording ? 6 : size / 2, style: .continuous)
                     .fill(Color.red)
-                    .frame(width: isRecording ? size * 0.44 : size * 0.8, height: isRecording ? size * 0.44 : size * 0.8)
+                    .frame(width: isRecording ? size * 0.4 : size - 11, height: isRecording ? size * 0.4 : size - 11)
             }
-            .animation(.easeInOut(duration: 0.2), value: isRecording)
+            .animation(.spring(response: 0.28, dampingFraction: 0.8), value: isRecording)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressStyle())
         .accessibilityLabel(isRecording ? "Stop recording" : "Start recording")
         .accessibilityIdentifier("camera.record")
     }
 }
 
 private extension View {
-    /// Liquid Glass on iOS 26, a material everywhere else.
+    /// The bar floats over the video: Liquid Glass on iOS 26, a dark material before that.
     @ViewBuilder
-    func controlSurface<S: Shape>(in shape: S) -> some View {
+    func barSurface() -> some View {
         if #available(iOS 26.0, *) {
-            self.glassEffect(.regular, in: shape)
+            self.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 34, style: .continuous))
         } else {
-            self.background(.ultraThinMaterial, in: shape)
+            self.background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 34, style: .continuous))
+                .environment(\.colorScheme, .dark)
         }
     }
 }
 
 /// Landscape recording: marks the centered 9:16 strip of the frame that stays when the clip is cropped to
-/// a vertical video in the edit. The sides are dimmed, the strip edges get thin lines. Touches pass through.
+/// a vertical video in the edit. The sides are dimmed, the strip edges get thin lines and faint thirds. Touches pass through.
 private struct VerticalCropGuide: View {
     /// Width / height of the recorded picture. When the preview is wider than that the picture is cropped at the
     /// top and bottom, so the strip is measured on the picture's full height, not on the visible part.
@@ -428,9 +465,81 @@ private struct VerticalCropGuide: View {
                     .fill(Color.white.opacity(0.7))
                     .frame(width: 1, height: proxy.size.height)
                     .offset(x: left + width - 1)
+                // Rule-of-thirds lines inside the strip, barely there.
+                ForEach(1..<3) { i in
+                    Rectangle()
+                        .fill(Color.white.opacity(0.22))
+                        .frame(width: 0.5, height: proxy.size.height)
+                        .offset(x: left + width * CGFloat(i) / 3)
+                    Rectangle()
+                        .fill(Color.white.opacity(0.22))
+                        .frame(width: width, height: 0.5)
+                        .offset(x: left, y: proxy.size.height * CGFloat(i) / 3)
+                }
             }
         }
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+    }
+}
+
+
+/// Shown after a recording stops: what is being done to the take, then a way to open it in Photos.
+private struct TakeStatusCard: View {
+    @ObservedObject var camera: CameraEngine
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        Group {
+            switch camera.takeState {
+            case .idle:
+                EmptyView()
+            case let .working(text, fraction):
+                card {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(spacing: 10) {
+                            ProgressView().tint(.white)
+                            Text(text).font(.subheadline.weight(.semibold))
+                        }
+                        if let fraction { ProgressView(value: fraction).tint(Color.sightline) }
+                        Text("Keep the app open until this finishes.").font(.caption).opacity(0.7)
+                    }
+                }
+            case .saved:
+                card {
+                    HStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.sightline)
+                        Text("Saved to Photos").font(.subheadline.weight(.semibold))
+                        Spacer(minLength: 8)
+                        Button("Open Photos") {
+                            if let url = URL(string: "photos-redirect://") { openURL(url) }
+                        }
+                        .buttonStyle(.borderedProminent).tint(Color.sightline).foregroundStyle(.black)
+                        Button { camera.dismissTakeState() } label: { Image(systemName: "xmark") }
+                            .accessibilityLabel("Dismiss")
+                    }
+                }
+            case let .failed(text):
+                card {
+                    HStack(spacing: 12) {
+                        Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                        Text(text).font(.subheadline)
+                        Spacer(minLength: 8)
+                        Button { camera.dismissTakeState() } label: { Image(systemName: "xmark") }
+                            .accessibilityLabel("Dismiss")
+                    }
+                }
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: camera.takeState)
+    }
+
+    private func card<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        content()
+            .foregroundStyle(.white)
+            .padding(14)
+            .background(.black.opacity(0.85), in: RoundedRectangle(cornerRadius: 14))
+            .padding(.horizontal, 16)
+            .padding(.top, 60)
     }
 }

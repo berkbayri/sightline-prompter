@@ -23,12 +23,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
     private let pro = ProStore.shared
     private var libraryWindow: LibraryWindowController!
     private var cancellables = Set<AnyCancellable>()
+    private var gateWindow: NSWindow?
+    /// True while an App Store build waits for an iCloud sign-in: the prompter, library and voice following stay off.
+    private var isLocked: Bool { ICloudAccount.shared.status.blocksUse() }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         installMainMenu()
         panel = NotchPanel(prompter: prompter)
         panel.onAction = { [weak self] action in self?.handle(action) }
-        panel.orderFrontRegardless()
+        if !isLocked { panel.orderFrontRegardless() }
 
         libraryWindow = LibraryWindowController(store: library) { [weak self] script in
             self?.activate(script)
@@ -58,10 +61,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
         }
 
         pro.start()
+        Analytics.track("app_open")
         tracker.sessionLimit = { [pro] in pro.isUnlocked ? nil : FreeTier.maxTrackingSeconds }
+        tracker.onLimitNear = { [weak self] seconds in
+            self?.panel.setStatus("\(seconds) seconds of free voice following left. Sightline Pro removes the limit.")
+        }
         tracker.onLimitReached = { [weak self] in
             self?.panel.setStatus("Free voice following ended after \(Int(FreeTier.maxTrackingSeconds / 60)) minutes. Sightline Pro removes the limit.")
             self?.refreshControls()
+            Analytics.track("limit_reached", ["kind": "voice"])
             self?.openPaywall()
         }
 
@@ -72,6 +80,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
         controller.start()
         startPaceSampling()
         refreshControls()
+
+        ICloudAccount.shared.$status
+            .sink { [weak self] _ in self?.applyGate() }
+            .store(in: &cancellables)
+        applyGate()
+    }
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+        ICloudAccount.shared.refresh()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -84,7 +101,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
 
     /// Clicking the Dock icon brings the prompter back if it was hidden.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        panel.orderFrontRegardless()
+        if isLocked { showGate() } else { panel.orderFrontRegardless() }
         return true
     }
 
@@ -308,6 +325,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
     // MARK: - Actions (shared by menu, control bar and controller)
 
     private func handle(_ action: PanelAction) {
+        guard !isLocked else { return }
         switch action {
         case .playPause: togglePlay()
         case .restart: restart()
@@ -320,25 +338,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
     }
 
     @objc private func toggleVisibility() {
+        guard !isLocked else { return }
         panel.togglePanel()
     }
 
     @objc private func togglePlay() {
+        guard !isLocked else { return }
         prompter.togglePlay()
         refreshControls()
     }
 
     @objc private func restart() {
+        guard !isLocked else { return }
         prompter.restart()
         tracker.reset(to: 0)
         refreshControls()
     }
 
     private func adjustSpeed(_ direction: Int) {
+        guard !isLocked else { return }
         prompter.adjustSpeed(by: CGFloat(direction) * 10)
     }
 
     @objc private func toggleTracking() {
+        guard !isLocked else { return }
         if tracker.isRunning {
             tracker.stop()
         } else if pro.isUnlocked || FreeTier.allowsLanguage(Settings.shared.scriptLanguage) {
@@ -355,7 +378,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
         if paywallWindow == nil {
             let view = PaywallView(store: pro) { [weak self] in self?.paywallWindow?.close() }
                 .frame(minWidth: 420, minHeight: 620)
+                .tint(Color.sightline)
             let window = NSWindow(contentViewController: NSHostingController(rootView: view))
+            window.applySightlineStyle()
             window.title = "Sightline Pro"
             window.styleMask = [.titled, .closable]
             window.level = NSWindow.Level(rawValue: NSWindow.Level.mainMenu.rawValue + 3)
@@ -373,13 +398,56 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
     }
 
     @objc private func openLibrary() {
+        guard !isLocked else { return showGate() }
         libraryWindow.show()
+    }
+
+    // MARK: - iCloud sign-in gate
+
+    /// Locks the app behind the sign-in screen, or unlocks it and moves the library into iCloud once signed in.
+    private func applyGate() {
+        if isLocked {
+            tracker.stop()
+            panel.orderOut(nil)
+            showGate()
+        } else if gateWindow != nil {
+            gateWindow?.close()
+            gateWindow = nil
+            library.relocate(to: LibraryLocation.current.url)
+            loadActiveScript()
+            panel.orderFrontRegardless()
+        }
+    }
+
+    private func showGate() {
+        if gateWindow == nil {
+            let view = SignInGateView(
+                status: ICloudAccount.shared.status,
+                instructions: "Open System Settings, sign in with your Apple Account, and turn on iCloud Drive.",
+                openSettings: {
+                    if let url = URL(string: "x-apple.systempreferences:com.apple.preferences.AppleIDPrefPane") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }
+            )
+            let window = NSWindow(contentViewController: NSHostingController(rootView: view.tint(Color.sightline)))
+            window.applySightlineStyle()
+            window.title = "Sightline Prompter"
+            window.styleMask = [.titled, .miniaturizable]
+            window.setContentSize(NSSize(width: 460, height: 340))
+            window.isReleasedWhenClosed = false
+            window.center()
+            gateWindow = window
+        }
+        NSApp.activate()
+        gateWindow?.makeKeyAndOrderFront(nil)
     }
 
     @objc private func openSettings() {
         if settingsWindow == nil {
-            let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView()))
-            window.title = "Sightline Prompter Settings"
+            let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView().tint(Color.sightline)))
+            window.applySightlineStyle()
+            window.title = "Settings"
             window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             // Above the teleprompter panel (mainMenu + 1), so it can never end up behind it.
             window.level = NSWindow.Level(rawValue: NSWindow.Level.mainMenu.rawValue + 2)

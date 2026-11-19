@@ -12,36 +12,19 @@ public struct PaywallView: View {
         self.onClose = onClose
     }
 
-    private static let features: [(String, String)] = [
-        ("waveform", "Unlimited voice following"),
-        ("video", "Record 4K, 60 fps, HDR and ProRes, without a time limit"),
-        ("globe", "Voice following in all 31 languages"),
-        ("rectangle.and.text.magnifyingglass", "Adjust the prompter width and height"),
-        ("gamecontroller", "DualSense controller and pace readout"),
-        ("macbook.and.iphone", "One purchase for iPhone and Mac"),
-    ]
-
     public var body: some View {
         ScrollView {
             VStack(spacing: 18) {
-                VStack(spacing: 6) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 34))
-                        .foregroundStyle(.yellow)
-                    Text("Sightline Pro")
-                        .font(.largeTitle.bold())
-                    Text("Read to the camera without limits.")
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.top, 8)
+                ProDemoStrip()
 
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(Self.features, id: \.1) { feature in
-                        Label(feature.1, systemImage: feature.0)
-                            .symbolRenderingMode(.hierarchical)
-                    }
+                VStack(spacing: 4) {
+                    Text("Sightline Pro").font(.largeTitle.bold())
+                    Text("Read to the camera without limits. One purchase covers iPhone and Mac.")
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+
+                ProComparison()
 
                 offerList
 
@@ -54,10 +37,14 @@ public struct PaywallView: View {
                         .frame(maxWidth: .infinity, minHeight: 28)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.yellow)
+                .tint(Color.sightline)
                 .foregroundStyle(.black)
                 .disabled(store.offers.isEmpty || store.isBusy)
                 .accessibilityIdentifier("paywall.continue")
+
+                if let terms = trialTerms {
+                    Text(terms).font(.footnote).foregroundStyle(.secondary)
+                }
 
                 if let message = store.message {
                     Text(message).font(.footnote).foregroundStyle(.orange).multilineTextAlignment(.center)
@@ -94,6 +81,9 @@ public struct PaywallView: View {
                 if store.loadFailed {
                     Text("Prices are not available right now. Check your connection and try again.")
                         .font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                    if let detail = store.loadDetail {
+                        Text(detail).font(.caption2).foregroundStyle(.tertiary).multilineTextAlignment(.center)
+                    }
                     Button("Try Again") { Task { await store.loadProducts() } }
                 } else {
                     ProgressView()
@@ -115,7 +105,7 @@ public struct PaywallView: View {
                                         Text(badge)
                                             .font(.caption2.bold())
                                             .padding(.horizontal, 6).padding(.vertical, 2)
-                                            .background(Color.yellow, in: Capsule())
+                                            .background(Color.sightline, in: Capsule())
                                             .foregroundStyle(.black)
                                     }
                                 }
@@ -131,9 +121,10 @@ public struct PaywallView: View {
                         }
                         .padding(12)
                         .frame(maxWidth: .infinity)
-                        .background(
+                        .background(isSelected ? Color.sightline.opacity(0.12) : Color.clear, in: RoundedRectangle(cornerRadius: 12))
+                        .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .strokeBorder(isSelected ? Color.yellow : Color.secondary.opacity(0.35), lineWidth: isSelected ? 2 : 1)
+                                .strokeBorder(isSelected ? Color.sightline : Color.secondary.opacity(0.35), lineWidth: isSelected ? 2 : 1)
                         )
                         .contentShape(RoundedRectangle(cornerRadius: 12))
                     }
@@ -142,6 +133,13 @@ public struct PaywallView: View {
                 }
             }
         }
+    }
+
+    /// "7 days free, then $29.99 per year": the price after the trial, next to the button that starts it.
+    private var trialTerms: String? {
+        guard let offer = store.offers.first(where: { $0.id == (selected ?? store.offers.first?.id) }),
+              let trial = offer.trial else { return nil }
+        return "\(trial), then \(offer.price) \(offer.period)"
     }
 
     private var continueTitle: String {

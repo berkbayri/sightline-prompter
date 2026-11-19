@@ -143,8 +143,15 @@ final class NotchPanel: NSPanel {
     /// Keeps the play/pause icon and tracking tint in sync with the real state.
     func setControlState(playing: Bool, tracking: Bool) {
         playPauseButton?.image = symbol(playing ? "pause.fill" : "play.fill", playing ? "Pause" : "Play", size: 16)
-        trackingButton?.contentTintColor = tracking ? .systemYellow : .white
-        statusDot.contentTintColor = tracking ? .systemGreen : .secondaryLabelColor
+        setActive(playPauseButton, playing)
+        setActive(trackingButton, tracking)
+        statusDot.contentTintColor = tracking ? .sightline : .secondaryLabelColor
+    }
+
+    /// Same active state as the iPhone bar: yellow symbol on a soft yellow circle.
+    private func setActive(_ button: NSButton?, _ active: Bool) {
+        button?.contentTintColor = active ? .sightline : .white
+        button?.layer?.backgroundColor = active ? NSColor.sightline.withAlphaComponent(0.2).cgColor : NSColor.clear.cgColor
     }
 
     /// Short status line next to the controls, e.g. "Listening" or a permission error.
@@ -239,7 +246,7 @@ final class NotchPanel: NSPanel {
         #if compiler(>=6.2)
         if #available(macOS 26.0, *) {
             let glass = NSGlassEffectView()
-            glass.cornerRadius = 16
+            glass.cornerRadius = 20
             glass.contentView = stack
             return glass
         }
@@ -249,7 +256,7 @@ final class NotchPanel: NSPanel {
         effect.blendingMode = .withinWindow
         effect.state = .active
         effect.wantsLayer = true
-        effect.layer?.cornerRadius = 16
+        effect.layer?.cornerRadius = 20
         effect.layer?.masksToBounds = true
         stack.translatesAutoresizingMaskIntoConstraints = false
         effect.addSubview(stack)
@@ -303,8 +310,10 @@ final class NotchPanel: NSPanel {
         button.contentTintColor = .white
         button.toolTip = tooltip(for: action)
         button.setButtonType(.momentaryChange)
-        button.widthAnchor.constraint(equalToConstant: 28).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 28).isActive = true
+        button.wantsLayer = true
+        button.layer?.cornerRadius = 15
+        button.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
 
         switch action {
         case .playPause: playPauseButton = button

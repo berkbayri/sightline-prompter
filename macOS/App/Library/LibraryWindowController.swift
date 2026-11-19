@@ -31,11 +31,12 @@ final class LibraryWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "Sightline Prompter"
+        window.applySightlineStyle()
+        window.title = "Scripts"
         window.minSize = NSSize(width: 760, height: 480)
         window.level = .normal
         window.isReleasedWhenClosed = false
-        window.contentView = NSHostingView(rootView: LibraryView(store: store, onActivate: onActivate))
+        window.contentView = NSHostingView(rootView: LibraryView(store: store, onActivate: onActivate).tint(Color.sightline))
         window.center()
         _ = window.setFrameAutosaveName("SightlineLibraryWindow")
         return window

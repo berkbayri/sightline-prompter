@@ -98,6 +98,9 @@ public final class SpeechTracker {
     public var sessionLimit: (() -> TimeInterval?)?
     /// Called after a run ended because the limit was reached.
     public var onLimitReached: (() -> Void)?
+    /// Called once, `limitWarning` seconds before the limit, so the app can offer Pro before the run is cut.
+    public var onLimitNear: ((Int) -> Void)?
+    public static let limitWarning: TimeInterval = 30
     private var limitTask: Task<Void, Never>?
 
     private func armLimit() {
@@ -105,7 +108,14 @@ public final class SpeechTracker {
         limitTask = nil
         guard let seconds = sessionLimit?() else { return }
         limitTask = Task { @MainActor [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+            var wait = seconds
+            if seconds > Self.limitWarning {
+                try? await Task.sleep(nanoseconds: UInt64((seconds - Self.limitWarning) * 1_000_000_000))
+                guard !Task.isCancelled, let self, self.isRunning else { return }
+                self.onLimitNear?(Int(Self.limitWarning))
+                wait = Self.limitWarning
+            }
+            try? await Task.sleep(nanoseconds: UInt64(wait * 1_000_000_000))
             guard !Task.isCancelled, let self, self.isRunning else { return }
             self.stop()
             self.onLimitReached?()
@@ -284,14 +294,36 @@ public final class SpeechTracker {
 
 /// Microphone session setup. iOS needs an active record session before the input node reports a format.
 /// macOS has no session to configure.
-enum AudioSession {
+public enum AudioSession {
     static func activateForListening() throws {
         #if os(iOS)
         let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.record, mode: .measurement, options: [])
+        try session.setCategory(.record, mode: .measurement, options: [.allowBluetooth])
         try session.setActive(true, options: [])
+        applyPreferredInput()
         #endif
     }
+
+    /// UserDefaults key holding the chosen microphone's port UID. Empty means the system's pick.
+    public static let preferredInputKey = "preferredMicUID"
+
+    #if os(iOS)
+    /// Microphones the system offers right now (built-in, USB, wired, Bluetooth), as (uid, name).
+    public static func inputs() -> [(uid: String, name: String)] {
+        let session = AVAudioSession.sharedInstance()
+        // Ports only list once a category that records is set.
+        try? session.setCategory(.playAndRecord, mode: .default, options: [.allowBluetooth, .defaultToSpeaker])
+        return (session.availableInputs ?? []).map { ($0.uid, $0.portName) }
+    }
+
+    /// Routes capture to the chosen microphone. A mic that is no longer plugged in falls back to the system's pick.
+    public static func applyPreferredInput() {
+        let session = AVAudioSession.sharedInstance()
+        let uid = UserDefaults.standard.string(forKey: preferredInputKey) ?? ""
+        let port = session.availableInputs?.first { $0.uid == uid }
+        try? session.setPreferredInput(port)
+    }
+    #endif
 
     static func deactivate() {
         #if os(iOS)

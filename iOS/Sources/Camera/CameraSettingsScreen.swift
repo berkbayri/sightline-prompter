@@ -4,18 +4,26 @@ import SwiftUI
 /// Camera controls that do not fit on the prompter's control row: video format, codec, color, HDR,
 /// stabilization, exposure, locks, torch. Only options the current camera supports are shown.
 struct CameraSettingsScreen: View {
-    @ObservedObject var camera: CameraEngine
+    @ObservedObject var model: AppModel
+    @ObservedObject private var camera: CameraEngine
     @ObservedObject private var pro = ProStore.shared
     @Environment(\.dismiss) private var dismiss
+
+    init(model: AppModel) {
+        _model = ObservedObject(wrappedValue: model)
+        _camera = ObservedObject(wrappedValue: model.camera)
+    }
 
     var body: some View {
         NavigationStack {
             Form {
+                scriptSection
+                PrompterSettingsSections(model: model, dismiss: dismiss.callAsFunction)
                 videoSection
                 exposureSection
                 lightSection
             }
-            .navigationTitle("Camera")
+            .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -26,6 +34,21 @@ struct CameraSettingsScreen: View {
     }
 
     // MARK: - Sections
+
+    @ViewBuilder
+    private var scriptSection: some View {
+        if let script = model.activeScript {
+            Section {
+                NavigationLink {
+                    ScriptEditor(library: model.library, scriptID: script.id)
+                } label: {
+                    Label("Edit \(script.title.isEmpty ? "Untitled" : script.title)", systemImage: "pencil")
+                }
+            } header: {
+                Label("Script", systemImage: "text.alignleft")
+            }
+        }
+    }
 
     private var videoSection: some View {
         Section {

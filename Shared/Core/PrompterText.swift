@@ -55,6 +55,8 @@ public enum PrompterText {
         script: String,
         language: ScriptLanguage,
         fontSize: CGFloat,
+        lineSpacing: CGFloat = 1.35,
+        letterSpacing: CGFloat = 0,
         cursor: Int,
         wordColor: (Int) -> PrompterColor
     ) -> Result {
@@ -63,7 +65,7 @@ public enum PrompterText {
 
         let font = PrompterFont.systemFont(ofSize: fontSize, weight: .semibold)
         let style = NSMutableParagraphStyle()
-        style.lineHeightMultiple = 1.35
+        style.lineHeightMultiple = lineSpacing
         style.paragraphSpacing = fontSize * 0.8
         style.lineBreakMode = .byWordWrapping
         style.baseWritingDirection = language.rightToLeft ? .rightToLeft : .natural
@@ -114,6 +116,7 @@ public enum PrompterText {
                 text.append(NSAttributedString(string: token.display, attributes: [
                     .font: font,
                     .paragraphStyle: style,
+                    .kern: letterSpacing * fontSize,
                     .foregroundColor: wordColor(index),
                 ]))
                 words.append(Word(range: range, paragraph: token.paragraph))

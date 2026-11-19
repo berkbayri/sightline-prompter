@@ -42,6 +42,8 @@ public final class ProStore: ObservableObject {
     @Published public private(set) var offers: [ProOffer] = []
     @Published public private(set) var isBusy = false
     @Published public private(set) var loadFailed = false
+    /// Why the last price load failed, shown under "Try Again" so a store-side problem can be told from a network one.
+    @Published public private(set) var loadDetail: String?
     @Published public var message: String?
 
     #if DEBUG || SIGHTLINE_DEV
@@ -92,15 +94,27 @@ public final class ProStore: ObservableObject {
         }
     }
 
+    /// Loads prices, retrying with a growing pause: the App Store often answers empty or errors for a moment
+    /// right after launch or a network change, and a single try would show "Prices are not available".
     public func loadProducts() async {
-        do {
-            let loaded = try await Product.products(for: Self.allIDs)
+        loadFailed = false
+        loadDetail = nil
+        for attempt in 0..<4 {
+            if attempt > 0 { try? await Task.sleep(nanoseconds: UInt64(attempt) * 2_000_000_000) }
+            let loaded: [Product]
+            do { loaded = try await Product.products(for: Self.allIDs) } catch {
+                loadDetail = error.localizedDescription
+                continue
+            }
+            guard !loaded.isEmpty else {
+                loadDetail = "The App Store returned no products."
+                continue
+            }
             products = Dictionary(uniqueKeysWithValues: loaded.map { ($0.id, $0) })
-            loadFailed = loaded.isEmpty
             await rebuildOffers()
-        } catch {
-            loadFailed = true
+            return
         }
+        loadFailed = true
     }
 
     private func rebuildOffers() async {
@@ -158,6 +172,7 @@ public final class ProStore: ObservableObject {
                 if case .verified(let transaction) = verification {
                     await transaction.finish()
                     await refreshEntitlements()
+                    Analytics.track("purchase_completed", ["product": offer.id])
                 } else {
                     message = "The purchase could not be verified."
                 }

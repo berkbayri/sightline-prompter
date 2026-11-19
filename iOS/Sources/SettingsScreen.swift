@@ -4,11 +4,13 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct SettingsScreen: View {
-    @ObservedObject private var settings = PhoneSettings.shared
     @ObservedObject private var catalog: LanguageCatalog
     @ObservedObject private var pro = ProStore.shared
     @ObservedObject private var model: AppModel
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(Analytics.enabledKey) private var shareUsage = true
+    @State private var recovering = false
+    @State private var recoveredCount: Int?
 
     init(model: AppModel) {
         _catalog = ObservedObject(wrappedValue: model.catalog)
@@ -23,22 +25,23 @@ struct SettingsScreen: View {
                         Label("Sightline Pro is active", systemImage: "checkmark.seal.fill")
                             .foregroundStyle(.green)
                     } else {
-                        Button {
+                        ProBanner {
                             dismiss()
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { model.showPaywall = true }
-                        } label: {
-                            Label("Upgrade to Sightline Pro", systemImage: "sparkles")
                         }
-                        .accessibilityIdentifier("settings.upgrade")
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
                     }
                     #if DEBUG
-                    Toggle("Debug: act as Pro", isOn: $pro.debugPro)
+                    if !ScreenshotMode.isActive { Toggle("Debug: act as Pro", isOn: $pro.debugPro) }
                     #endif
                 } header: {
-                    Label("Sightline Pro", systemImage: "star")
+                    Text("Sightline Pro")
                 } footer: {
                     Text(pro.isUnlocked ? "One purchase covers iPhone and Mac." : "Free: voice following and recording up to 2 minutes, 1080p, in English, Turkish and Spanish. Pro removes every limit.")
                 }
+
+                librarySection
 
                 Section {
                     ForEach(ScriptLanguage.all) { language in
@@ -52,77 +55,17 @@ struct SettingsScreen: View {
                         }
                     }
                 } header: {
-                    Label("Languages", systemImage: "globe")
+                    Text("Languages")
                 } footer: {
                     Text("On device works without an internet connection. Online languages use Apple's servers until their offline model is installed.")
                 }
 
                 Section {
-                    slider("Font size", value: $settings.fontSize, range: 20...72, step: 1, unit: "pt")
-                    slider("Auto-scroll speed", value: $settings.autoSpeed, range: 0...300, step: 5, unit: "pt/s")
-                    Toggle("Show words per minute and time left", isOn: $settings.showPace)
-                        .disabled(!pro.isUnlocked)
+                    Toggle("Share anonymous usage", isOn: $shareUsage)
                 } header: {
-                    Label("Reading", systemImage: "textformat.size")
-                }
-
-                Section {
-                    Picker("Camera side", selection: $settings.cameraSide) {
-                        ForEach(CameraSide.allCases) { side in
-                            Text(side.name).tag(side)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    slider("Reading line below camera", value: $settings.readingDistanceCm, range: 0.5...4, step: 0.1, unit: "cm", decimals: 1)
-                } header: {
-                    Label("Camera", systemImage: "camera")
+                    Text("Privacy")
                 } footer: {
-                    Text("The camera side follows the device orientation unless set here.")
-                }
-
-                Section {
-                    slider("Portrait width", value: $settings.portraitWidthPercent, range: 30...100, step: 1, unit: "%")
-                    slider("Portrait height", value: $settings.portraitLines, range: 1...8, step: 0.5, unit: "lines", decimals: 1)
-                    slider("Landscape width", value: $settings.landscapeColumnWidth, range: 120...720, step: 10, unit: "pt")
-                    slider("Landscape height", value: $settings.landscapeLines, range: 1...12, step: 0.5, unit: "lines", decimals: 1)
-                } header: {
-                    Label("Prompter area while recording", systemImage: "rectangle.and.text.magnifyingglass")
-                } footer: {
-                    Text(pro.isUnlocked
-                         ? "A narrow, short area keeps your eye movement small on the recording. Width is centered in portrait and sits next to the camera in landscape."
-                         : "Adjusting the prompter area is part of Sightline Pro.")
-                }
-                .disabled(!pro.isUnlocked)
-
-                Section {
-                    Picker("Response", selection: $settings.stickCurve) {
-                        ForEach(StickCurve.allCases) { curve in
-                            Text(curve.name).tag(curve)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    CurvePreview(curve: settings.stickCurve, deadzone: settings.stickDeadzone)
-                        .frame(height: 90)
-                    slider("Max speed", value: $settings.stickMaxSpeed, range: 50...800, step: 10, unit: "pt/s")
-                    slider("Deadzone", value: $settings.stickDeadzone, range: 0...0.4, step: 0.01, unit: "", decimals: 2)
-                    Toggle("Light bar shows reading state", isOn: $settings.gamepadLight)
-                } header: {
-                    Label("Gamepad", systemImage: "gamecontroller")
-                } footer: {
-                    Text("Precise starts very slowly for fine adjustments. Smooth is in between. Linear is 1:1.")
-                }
-
-                librarySection
-
-                Section {
-                    shortcutRow("Play / pause", "Tap the text")
-                    shortcutRow("Scroll", "Drag the text")
-                    shortcutRow("Speech tracking", "Mic button")
-                    shortcutRow("Controller", "DualSense over Bluetooth")
-                } header: {
-                    Label("Controls", systemImage: "hand.tap")
-                } footer: {
-                    Text("Dragging moves the reading position. Speech tracking continues from the words now on screen.")
+                    Text("Counts which screens and limits are reached, tied to a random ID. Never your scripts, voice, video or Apple Account.")
                 }
             }
             .navigationTitle("Settings")
@@ -133,6 +76,15 @@ struct SettingsScreen: View {
                 }
             }
             .onAppear { catalog.refresh() }
+            .fileImporter(isPresented: $recovering, allowedContentTypes: [.folder]) { result in
+                if case .success(let url) = result { recoveredCount = model.recoverScripts(from: url) }
+            }
+            .alert("Restore scripts", isPresented: Binding(get: { recoveredCount != nil }, set: { if !$0 { recoveredCount = nil } })) {
+                Button("OK") { recoveredCount = nil }
+            } message: {
+                let count = recoveredCount ?? 0
+                Text(count == 0 ? "No new scripts were found in that folder." : "\(count) script(s) were copied into your library. The folder was not changed.")
+            }
         }
     }
 
@@ -143,44 +95,26 @@ struct SettingsScreen: View {
             LabeledContent("Scripts") {
                 Text(AppModel.libraryDescription).foregroundStyle(.secondary)
             }
+            switch LibraryContainer.Status.current {
+            case .ready:
+                Label("Signed in to iCloud", systemImage: "checkmark.icloud.fill").foregroundStyle(.green)
+            case .signedOut:
+                Label("Not signed in to iCloud", systemImage: "icloud.slash").foregroundStyle(.orange)
+                Button("Sign in to iCloud in Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
+                }
+            case .unavailable:
+                EmptyView()
+            }
+            Button("Restore scripts from a folder…") { recovering = true }
         } header: {
-            Label("Library", systemImage: "icloud")
+            Text("Library")
         } footer: {
             if LibraryContainer.documentsURL != nil {
-                Text("Scripts you add or edit here appear on your Mac, and the other way round. They are the files in iCloud Drive > Sightline Prompter.")
+                Text("Scripts you add or edit here appear on your Mac, and the other way round. They are the files in iCloud Drive > Sightline Prompter. A dated backup is kept in Files > Sightline Prompter > Sightline Backups.")
             } else {
                 Text("Scripts are the files in iCloud Drive > Sightline Prompter, the same folder the Mac app uses.")
             }
-        }
-    }
-
-    private func slider(
-        _ title: String,
-        value: Binding<Double>,
-        range: ClosedRange<Double>,
-        step: Double,
-        unit: String,
-        decimals: Int = 0
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            LabeledContent(title) {
-                Text(valueText(value.wrappedValue, unit: unit, decimals: decimals))
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
-            }
-            Slider(value: value, in: range, step: step)
-        }
-    }
-
-    private func valueText(_ value: Double, unit: String, decimals: Int) -> String {
-        let number = String(format: "%.\(decimals)f", value)
-        return unit.isEmpty ? number : "\(number) \(unit)"
-    }
-
-    private func shortcutRow(_ action: String, _ input: String) -> some View {
-        LabeledContent(action) {
-            Text(input)
-                .foregroundStyle(.secondary)
         }
     }
 }

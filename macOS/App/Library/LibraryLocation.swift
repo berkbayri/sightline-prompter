@@ -46,6 +46,14 @@ enum LibraryLocation: Equatable {
 
     /// The folder scripts are stored in. Created on access if missing.
     var url: URL {
+        #if DEBUG || SIGHTLINE_DEV
+        // Screenshot runs point at a throwaway folder, so a real library is never opened.
+        if let path = ProcessInfo.processInfo.environment["SIGHTLINE_LIBRARY_DIR"] {
+            let override = URL(fileURLWithPath: path, isDirectory: true)
+            try? FileManager.default.createDirectory(at: override, withIntermediateDirectories: true)
+            return override
+        }
+        #endif
         let folder: URL
         switch self {
         case .iCloudDrive:

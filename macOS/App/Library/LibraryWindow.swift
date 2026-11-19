@@ -6,6 +6,8 @@ import UniformTypeIdentifiers
 
 struct LibraryView: View {
     @ObservedObject var store: LibraryStore
+    @ObservedObject private var pro = ProStore.shared
+    @ObservedObject private var settings = Settings.shared
     let onActivate: (Script) -> Void
 
     @State private var selection: UUID?
@@ -105,7 +107,7 @@ struct LibraryView: View {
     private var sidebar: some View {
         List(selection: $selection) {
             ForEach(filteredScripts) { script in
-                ScriptRow(script: script)
+                ScriptRow(script: script, isActive: script.id.uuidString == settings.activeScriptID)
                     .tag(script.id)
                     .contextMenu {
                         Button("Duplicate") {
@@ -126,13 +128,19 @@ struct LibraryView: View {
             }
         }
         .listStyle(.sidebar)
+        .safeAreaInset(edge: .bottom) {
+            if !pro.isUnlocked {
+                ProBanner { (NSApp.delegate as? AppDelegate)?.openPaywall() }
+                    .padding(10)
+            }
+        }
         .searchable(text: $searchText, placement: .sidebar, prompt: "Search scripts")
         .overlay {
             if store.scripts.isEmpty {
                 ContentUnavailableView(
-                    "Drop Files Here",
-                    systemImage: "tray.and.arrow.down",
-                    description: Text("Drop a document to import it, or create a new script.")
+                    "No Scripts",
+                    systemImage: "text.alignleft",
+                    description: Text("Create a script, or import a document: txt, md, rtf, html, pdf, docx or odt.")
                 )
             } else if filteredScripts.isEmpty {
                 ContentUnavailableView.search(text: searchText)
@@ -143,8 +151,8 @@ struct LibraryView: View {
         }
         .overlay {
             if isDropTargeted {
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(Color.accentColor, lineWidth: 2)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(Color.sightline, lineWidth: 2)
                     .padding(4)
                     .allowsHitTesting(false)
             }
@@ -160,9 +168,9 @@ struct LibraryView: View {
                 .toolbar { toolbarItems(for: script) }
         } else if store.scripts.isEmpty {
             ContentUnavailableView {
-                Label("No Scripts Yet", systemImage: "text.alignleft")
+                Label("No Scripts", systemImage: "text.alignleft")
             } description: {
-                Text("Create a script, or import a document (txt, md, rtf, html, pdf, docx, odt).")
+                Text("Create a script, or import a document: txt, md, rtf, html, pdf, docx or odt.")
             } actions: {
                 Button("New Script", action: createScript)
                     .buttonStyle(.borderedProminent)
@@ -357,12 +365,20 @@ struct LibraryView: View {
 
 private struct ScriptRow: View {
     let script: Script
+    let isActive: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text(script.title.isEmpty ? "Untitled" : script.title)
-                .font(.headline)
-                .lineLimit(1)
+            HStack(spacing: 6) {
+                Text(script.title.isEmpty ? "Untitled" : script.title)
+                    .font(.headline)
+                    .lineLimit(1)
+                if isActive {
+                    Image(systemName: "play.circle.fill")
+                        .foregroundStyle(Color.sightline)
+                        .accessibilityLabel("Active script")
+                }
+            }
             HStack(spacing: 6) {
                 Text(script.language.name)
                     .font(.caption2.weight(.medium))

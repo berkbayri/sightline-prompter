@@ -63,4 +63,11 @@ final class PrompterTextTests: XCTestCase {
         XCTAssertTrue(built.cues.isEmpty)
         XCTAssertEqual(built.paragraphStarts, [0, 2])
     }
+
+    func testLineAndLetterSpacingReachTheText() {
+        let built = PrompterText.build(script: "Hello there.", language: english, fontSize: 20, lineSpacing: 1.8, letterSpacing: 0.1, cursor: 0) { _ in PrompterColor.white }
+        let attributes = built.attributed.attributes(at: 0, effectiveRange: nil)
+        XCTAssertEqual(attributes[.kern] as? CGFloat, 2)
+        XCTAssertEqual((attributes[.paragraphStyle] as? NSParagraphStyle)?.lineHeightMultiple, 1.8)
+    }
 }

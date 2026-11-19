@@ -82,7 +82,7 @@ public struct CurvePreview: View {
                     path.addLine(to: CGPoint(x: x, y: y))
                 }
             }
-            context.stroke(path, with: .color(.yellow), lineWidth: 2)
+            context.stroke(path, with: .color(Color.sightline), lineWidth: 2)
 
             let deadX = CGFloat(deadzone) * size.width
             var axis = Path()

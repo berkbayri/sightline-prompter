@@ -9,6 +9,7 @@ struct LibraryScreen: View {
     let onUse: (Script) -> Void
     let onSettings: () -> Void
     @ObservedObject private var library: LibraryStore
+    @ObservedObject private var pro: ProStore
 
     @State private var path: [UUID] = []
     @State private var searchText = ""
@@ -25,18 +26,38 @@ struct LibraryScreen: View {
         self.onUse = onUse
         self.onSettings = onSettings
         _library = ObservedObject(wrappedValue: model.library)
+        _pro = ObservedObject(wrappedValue: model.pro)
     }
 
     var body: some View {
         NavigationStack(path: $path) {
             List {
                 ForEach(filteredScripts) { script in
-                    Button {
-                        onUse(script)
-                    } label: {
-                        ScriptRow(script: script, isActive: script.id == model.activeScript?.id)
+                    HStack(spacing: 8) {
+                        Button {
+                            onUse(script)
+                        } label: {
+                            ScriptRow(script: script, isActive: script.id == model.activeScript?.id)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        Button {
+                            path.append(script.id)
+                        } label: {
+                            Image(systemName: "pencil")
+                                .font(.body.weight(.semibold))
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.borderless)
+                        .accessibilityLabel("Edit script")
                     }
-                    .buttonStyle(.plain)
+                    .contextMenu {
+                        Button { path.append(script.id) } label: { Label("Edit", systemImage: "pencil") }
+                        Button { library.duplicate(script.id) } label: { Label("Duplicate", systemImage: "plus.square.on.square") }
+                        Button(role: .destructive) { pendingDelete = script } label: { Label("Delete", systemImage: "trash") }
+                    }
                     .swipeActions(edge: .trailing) {
                         Button(role: .destructive) {
                             pendingDelete = script
@@ -57,6 +78,12 @@ struct LibraryScreen: View {
                         .tint(.blue)
                     }
                 }
+                // Below the scripts: the first thing on the home screen is the user's own work, not an ad.
+                if !pro.isUnlocked {
+                    ProBanner { model.showPaywall = true }
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+                        .listRowSeparator(.hidden)
+                }
             }
             .overlay { emptyState }
             .searchable(text: $searchText, prompt: "Search scripts")
@@ -69,6 +96,9 @@ struct LibraryScreen: View {
             .onAppear {
                 // Without the iCloud entitlement the phone cannot reach iCloud Drive by itself: it asks for the
                 // folder once, remembers it, and does not ask again.
+                #if DEBUG
+                if ScreenshotMode.isActive { return }
+                #endif
                 if !isShared, !askedThisLaunch {
                     askedThisLaunch = true
                     explainingSync = true
@@ -302,6 +332,9 @@ struct ScriptEditor: View {
 private struct ScriptRow: View {
     let script: Script
     let isActive: Bool
+    @ObservedObject private var pro = ProStore.shared
+
+    private var needsPro: Bool { !pro.isUnlocked && !FreeTier.allowsLanguage(script.language.id) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -311,12 +344,15 @@ private struct ScriptRow: View {
                     .lineLimit(1)
                 if isActive {
                     Image(systemName: "play.circle.fill")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color.sightline)
                         .accessibilityLabel("Active script")
                 }
             }
             HStack(spacing: 6) {
-                Text(script.language.name)
+                HStack(spacing: 3) {
+                    if needsPro { Image(systemName: "lock.fill").accessibilityLabel("Needs Sightline Pro") }
+                    Text(script.language.name)
+                }
                     .font(.caption2.weight(.medium))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 1)

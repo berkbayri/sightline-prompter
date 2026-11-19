@@ -43,7 +43,7 @@ struct ArrangeOverlay: View {
         return ZStack(alignment: .bottomTrailing) {
             RoundedRectangle(cornerRadius: 14)
                 .strokeBorder(
-                    isSelected ? Color.yellow : Color.white.opacity(0.5),
+                    isSelected ? Color.sightline : Color.white.opacity(0.5),
                     style: StrokeStyle(lineWidth: isSelected ? 2.5 : 1.5, dash: isSelected ? [] : [6, 4])
                 )
             if isSelected {
@@ -51,7 +51,7 @@ struct ArrangeOverlay: View {
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(.black)
                     .frame(width: 28, height: 28)
-                    .background(Color.yellow, in: Circle())
+                    .background(Color.sightline, in: Circle())
                     .padding(4)
             }
         }
@@ -141,7 +141,7 @@ struct ArrangeBar: View {
             .accessibilityIdentifier("arrange.reset")
             Button("Done", action: onDone)
                 .buttonStyle(.borderedProminent)
-                .tint(.yellow)
+                .tint(Color.sightline)
                 .foregroundStyle(.black)
                 .accessibilityIdentifier("arrange.done")
         }

@@ -15,7 +15,7 @@ final class PrompterUIView: UIView {
         var rect: CGRect = .zero
     }
 
-    private static let dimColor = UIColor(white: 1, alpha: 0.35)
+    private static let dimColor = UIColor(white: 1, alpha: 0.6)
     private static let normalColor = UIColor(white: 1, alpha: 0.95)
     private static let currentColor = UIColor(red: 1, green: 0.86, blue: 0.4, alpha: 1)
     private static let highlightFill = UIColor(red: 1, green: 0.86, blue: 0.4, alpha: 0.16)
@@ -104,9 +104,7 @@ final class PrompterUIView: UIView {
     func setCameraMode(_ on: Bool) {
         backgroundColor = on ? .clear : .black
         isOpaque = !on
-        // Difference with white inverts whatever is behind the text: over the video the letters show the
-        // inverse of the picture, over the black screen they stay white.
-        layer.compositingFilter = on ? "differenceBlendMode" : nil
+        // Normal compositing: legibility over the video comes from the veil and halo drawn in draw(_:).
         cameraMode = on
         setNeedsDisplay()
     }
@@ -145,6 +143,19 @@ final class PrompterUIView: UIView {
         UIBezierPath(roundedRect: highlight, cornerRadius: 6).fill()
 
         layoutManager.drawBackground(forGlyphRange: glyphs, at: origin)
+        if cameraMode {
+            // Over the camera picture: a feathered dark veil under the text band and a two-layer halo on every
+            // glyph keep it readable on white, black and mid-grey scenes while the video stays untouched elsewhere.
+            let band = CGRect(x: 0, y: textFrame.minY, width: bounds.width, height: textFrame.height)
+            let veil = [UIColor.black.withAlphaComponent(0).cgColor, UIColor.black.withAlphaComponent(0.3).cgColor,
+                        UIColor.black.withAlphaComponent(0.3).cgColor, UIColor.black.withAlphaComponent(0).cgColor]
+            if let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: veil as CFArray, locations: [0, 0.18, 0.82, 1]) {
+                context.drawLinearGradient(gradient, start: band.origin, end: CGPoint(x: band.minX, y: band.maxY), options: [])
+            }
+            context.setShadow(offset: .zero, blur: 10, color: UIColor.black.withAlphaComponent(0.7).cgColor)
+            layoutManager.drawGlyphs(forGlyphRange: glyphs, at: origin)
+            context.setShadow(offset: CGSize(width: 0, height: 1), blur: 2.5, color: UIColor.black.withAlphaComponent(0.95).cgColor)
+        }
         layoutManager.drawGlyphs(forGlyphRange: glyphs, at: origin)
         context.restoreGState()
     }
@@ -302,6 +313,10 @@ final class PrompterUIView: UIView {
             .dropFirst()
             .sink { [weak self] size in self?.setFontSize(CGFloat(size)) }
             .store(in: &cancellables)
+        Publishers.CombineLatest(settings.$lineSpacing, settings.$letterSpacing)
+            .dropFirst()
+            .sink { [weak self] _, _ in self?.buildText() }
+            .store(in: &cancellables)
         settings.$autoSpeed
             .sink { [weak self] speed in self?.scroll.autoSpeed = CGFloat(speed) }
             .store(in: &cancellables)
@@ -322,6 +337,8 @@ final class PrompterUIView: UIView {
             script: script,
             language: language,
             fontSize: fontSize,
+            lineSpacing: CGFloat(settings.lineSpacing),
+            letterSpacing: CGFloat(settings.letterSpacing),
             cursor: cursorIndex,
             wordColor: { [cursorIndex] in Self.color(for: $0, cursor: cursorIndex) }
         )

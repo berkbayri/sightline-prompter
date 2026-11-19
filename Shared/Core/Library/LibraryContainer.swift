@@ -13,7 +13,13 @@ public enum LibraryContainer {
     /// The shared library folder, created if needed. Nil when the container is not available: signed out of
     /// iCloud, iCloud Drive off for the app, or a build signed without the iCloud entitlement (a personal
     /// development team cannot have it). Resolved once per launch, because the first lookup can take a moment.
-    public static let documentsURL: URL? = resolveDocuments()
+    public static var documentsURL: URL? {
+        if resolvedDocuments == nil { resolvedDocuments = resolveDocuments() }
+        return resolvedDocuments
+    }
+
+    /// Cached once found. Looked up again while missing, so signing in to iCloud while the app runs is noticed.
+    nonisolated(unsafe) private static var resolvedDocuments: URL?
 
     private static func resolveDocuments() -> URL? {
         let fileManager = FileManager.default
@@ -22,6 +28,41 @@ public enum LibraryContainer {
             return makeFolder(container.appendingPathComponent("Documents", isDirectory: true))
         }
         return nil
+    }
+
+    /// Whether the script library can sync through iCloud right now. Read fresh each time, so Settings shows the
+    /// state after the user signs in; `documentsURL` itself stays resolved once per launch.
+    public enum Status: Equatable {
+        /// Signed in and the container is reachable.
+        case ready
+        /// No iCloud account, or iCloud Drive is off: the user has to sign in.
+        case signedOut
+        /// Signed in, but this build cannot reach the container (no iCloud entitlement).
+        case unavailable
+
+        /// App Store builds need an iCloud account to be used at all. Debug and developer builds never ask for one,
+        /// because a personal development team cannot sign the iCloud entitlement.
+        public static let isEnforced: Bool = {
+            #if DEBUG || SIGHTLINE_DEV
+            false
+            #else
+            true
+            #endif
+        }()
+
+        /// True when the app must stay locked behind the sign-in screen.
+        public func blocksUse(enforced: Bool = Status.isEnforced) -> Bool {
+            enforced && self != .ready
+        }
+
+        public static func resolve(hasAccount: Bool, hasContainer: Bool) -> Status {
+            guard hasAccount else { return .signedOut }
+            return hasContainer ? .ready : .unavailable
+        }
+
+        public static var current: Status {
+            resolve(hasAccount: FileManager.default.ubiquityIdentityToken != nil, hasContainer: documentsURL != nil)
+        }
     }
 
     /// True for the container's Documents folder, which iCloud Drive lists as "Sightline Prompter".
@@ -45,8 +86,9 @@ public enum LibraryContainer {
 
     /// Moves the scripts found in the old folders into the shared library. A script whose id is already in the
     /// library is left where it is, so nothing is ever overwritten. Returns how many scripts were moved.
+    /// With `keepOriginals` the source files stay where they are (recovery from a folder the user still owns).
     @discardableResult
-    public static func adopt(from sources: [URL], into destination: URL) -> Int {
+    public static func adopt(from sources: [URL], into destination: URL, keepOriginals: Bool = false) -> Int {
         let fileManager = FileManager.default
         var moved = 0
         for source in sources where source.standardizedFileURL != destination.standardizedFileURL {
@@ -56,15 +98,45 @@ public enum LibraryContainer {
             for entry in entries where entry.pathExtension == fileExtension {
                 let target = destination.appendingPathComponent(entry.lastPathComponent)
                 guard !fileManager.fileExists(atPath: target.path) else { continue }
-                if move(entry, to: target) { moved += 1 }
+                if move(entry, to: target, keepOriginal: keepOriginals) { moved += 1 }
             }
         }
         return moved
     }
 
+    /// A dated copy of every script in the library, kept next to the app's own files (Files app > Sightline
+    /// Prompter > Sightline Backups). One snapshot per day, the newest `keep` are kept. This is the net under every
+    /// move, sync or update: whatever happens to the library folder, yesterday's scripts are still on the device.
+    /// Returns the snapshot folder when one was made.
+    @discardableResult
+    public static func snapshot(of library: URL, into backups: URL, keep: Int = 7, now: Date = Date()) -> URL? {
+        let fileManager = FileManager.default
+        let scripts = ((try? fileManager.contentsOfDirectory(at: library, includingPropertiesForKeys: nil)) ?? [])
+            .filter { $0.pathExtension == fileExtension }
+        guard !scripts.isEmpty else { return nil }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        let folder = backups.appendingPathComponent(formatter.string(from: now), isDirectory: true)
+        guard !fileManager.fileExists(atPath: folder.path) else { return nil }
+        do { try fileManager.createDirectory(at: folder, withIntermediateDirectories: true) } catch { return nil }
+        var copied = 0
+        for script in scripts {
+            if (try? fileManager.copyItem(at: script, to: folder.appendingPathComponent(script.lastPathComponent))) != nil {
+                copied += 1
+            }
+        }
+        guard copied > 0 else { try? fileManager.removeItem(at: folder); return nil }
+        let old = ((try? fileManager.contentsOfDirectory(at: backups, includingPropertiesForKeys: nil)) ?? [])
+            .sorted { $0.lastPathComponent > $1.lastPathComponent }
+            .dropFirst(keep)
+        for url in old { try? fileManager.removeItem(at: url) }
+        return folder
+    }
+
     /// Copies the file into the destination through file coordination (so iCloud notices the new file), and only
     /// removes the original once the copy is there. A plain move can leave the file where iCloud never sees it.
-    private static func move(_ source: URL, to target: URL) -> Bool {
+    private static func move(_ source: URL, to target: URL, keepOriginal: Bool = false) -> Bool {
         var readError: NSError?
         var data: Data?
         NSFileCoordinator(filePresenter: nil).coordinate(readingItemAt: source, options: [], error: &readError) { url in
@@ -84,6 +156,7 @@ public enum LibraryContainer {
         }
         guard writeError == nil, written, FileManager.default.fileExists(atPath: target.path) else { return false }
 
+        guard !keepOriginal else { return true }
         var removeError: NSError?
         NSFileCoordinator(filePresenter: nil).coordinate(writingItemAt: source, options: .forDeleting, error: &removeError) { url in
             try? FileManager.default.removeItem(at: url)

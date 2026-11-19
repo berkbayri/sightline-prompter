@@ -6,6 +6,7 @@ struct SettingsView: View {
     @ObservedObject private var settings = Settings.shared
     @StateObject private var catalog = LanguageCatalog()
     @ObservedObject private var pro = ProStore.shared
+    @AppStorage(Analytics.enabledKey) private var shareUsage = true
 
     /// Offered languages, plus the current one even when this Mac cannot recognize it, so the picker keeps its value.
     private var pickerOptions: [ScriptLanguage] {
@@ -17,6 +18,10 @@ struct SettingsView: View {
         return options
     }
 
+    private func lockRow(_ text: String) -> some View {
+        ProLockRow(text) { (NSApp.delegate as? AppDelegate)?.openPaywall() }
+    }
+
     var body: some View {
         Form {
             Section {
@@ -24,41 +29,50 @@ struct SettingsView: View {
                     Label("Sightline Pro is active", systemImage: "checkmark.seal.fill")
                         .foregroundStyle(.green)
                 } else {
-                    Button {
-                        (NSApp.delegate as? AppDelegate)?.openPaywall()
-                    } label: {
-                        Label("Upgrade to Sightline Pro", systemImage: "sparkles")
-                    }
+                    ProBanner { (NSApp.delegate as? AppDelegate)?.openPaywall() }
                 }
                 #if DEBUG
                 Toggle("Debug: act as Pro", isOn: $pro.debugPro)
                 #endif
             } header: {
-                Label("Sightline Pro", systemImage: "star")
+                Text("Sightline Pro")
             } footer: {
                 Text(pro.isUnlocked ? "One purchase covers iPhone and Mac." : "Free: voice following up to 2 minutes at a time, in English, Turkish and Spanish. Pro removes every limit and adds the controller and pace readout.")
             }
 
             Section {
-                Picker("Language", selection: $settings.scriptLanguage) {
-                    ForEach(pickerOptions) { language in
-                        Text(language.name).tag(language.id)
-                    }
-                }
-                LabeledContent("Library") {
+                LabeledContent("Scripts") {
                     Text(LibraryLocation.current.displayName)
                         .foregroundStyle(.secondary)
+                }
+                switch LibraryContainer.Status.current {
+                case .ready:
+                    Label("Signed in to iCloud", systemImage: "checkmark.icloud.fill").foregroundStyle(.green)
+                case .signedOut:
+                    Label("Not signed in to iCloud", systemImage: "icloud.slash").foregroundStyle(.orange)
+                    Button("Sign in to iCloud in System Settings…") {
+                        if let url = URL(string: "x-apple.systempreferences:com.apple.preferences.AppleIDPrefPane") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }
+                case .unavailable:
+                    EmptyView()
                 }
                 Button("Open Library…") {
                     NotificationCenter.default.post(name: .openLibrary, object: nil)
                 }
             } header: {
-                Label("Script", systemImage: "text.alignleft")
+                Text("Library")
             } footer: {
-                Text("The active script is chosen in the Library. Speech tracking listens in the selected language. Only languages listed below are offered here.")
+                Text("Scripts you add or edit here appear on your iPhone, and the other way round. They are the files in iCloud Drive > Sightline Prompter.")
             }
 
             Section {
+                Picker("Speech language", selection: $settings.scriptLanguage) {
+                    ForEach(pickerOptions) { language in
+                        Text(language.name).tag(language.id)
+                    }
+                }
                 ForEach(ScriptLanguage.all) { language in
                     LanguageRow(
                         language: language,
@@ -69,9 +83,9 @@ struct SettingsView: View {
                     )
                 }
             } header: {
-                Label("Languages", systemImage: "globe")
+                Text("Languages")
             } footer: {
-                Text("On device works without an internet connection. Online languages use Apple's servers until their offline model is installed.")
+                Text("On device works without an internet connection. Online languages use Apple's servers until their offline model is installed. Speech tracking listens in the speech language above.")
             }
 
             Section {
@@ -83,7 +97,7 @@ struct SettingsView: View {
                 }
                 Toggle("Hide from screen sharing", isOn: $settings.hideFromCapture)
             } header: {
-                Label("Window", systemImage: "macwindow")
+                Text("Window")
             }
 
             Section {
@@ -91,8 +105,13 @@ struct SettingsView: View {
                 slider("Auto-scroll speed", value: $settings.autoSpeed, range: 0...300, step: 5, unit: "pt/s")
                 Toggle("Show words per minute and time left", isOn: $settings.showPace)
                     .disabled(!pro.isUnlocked)
+                if !pro.isUnlocked { lockRow("Pace readout is part of Sightline Pro") }
             } header: {
-                Label("Reading", systemImage: "textformat.size")
+                Text("Reading")
+            }
+
+            if !pro.isUnlocked {
+                Section { lockRow("Controller tuning is part of Sightline Pro") }
             }
 
             Section {
@@ -108,7 +127,7 @@ struct SettingsView: View {
                 slider("Deadzone", value: $settings.stickDeadzone, range: 0...0.4, step: 0.01, unit: "")
                 Toggle("Light bar shows reading state", isOn: $settings.gamepadLight)
             } header: {
-                Label("Gamepad", systemImage: "gamecontroller")
+                Text("Gamepad")
             } footer: {
                 Text("Precise starts very slowly for fine adjustments. Smooth is in between. Linear is 1:1.")
             }
@@ -123,9 +142,17 @@ struct SettingsView: View {
                 shortcutRow("Speech tracking", "Triangle")
                 shortcutRow("Show / hide", "Circle")
             } header: {
-                Label("Controls", systemImage: "keyboard")
+                Text("Controls")
             } footer: {
                 Text("Manual scrolling moves the reading position. Speech tracking continues from the words now on screen.")
+            }
+
+            Section {
+                Toggle("Share anonymous usage", isOn: $shareUsage)
+            } header: {
+                Text("Privacy")
+            } footer: {
+                Text("Counts which screens and limits are reached, tied to a random ID. Never your scripts, voice, video or Apple Account.")
             }
         }
         .formStyle(.grouped)

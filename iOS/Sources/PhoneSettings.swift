@@ -23,7 +23,7 @@ final class PhoneSettings: ObservableObject {
     static let shared = PhoneSettings()
 
     private enum Key: String {
-        case activeScriptID, fontSize, autoSpeed, showPace, readingDistanceCm, landscapeColumnWidth
+        case activeScriptID, fontSize, lineSpacing, letterSpacing, autoSpeed, showPace, readingDistanceCm, landscapeColumnWidth
         case portraitWidthPercent, portraitLines, landscapeLines
         case arrangementPortrait, arrangementLandscape
         case cameraSide, stickCurve, stickMaxSpeed, stickDeadzone, gamepadLight
@@ -41,6 +41,14 @@ final class PhoneSettings: ObservableObject {
         didSet { defaults.set(fontSize, forKey: Key.fontSize.rawValue) }
     }
 
+    /// Line height as a multiple of the font size.
+    @Published var lineSpacing: Double {
+        didSet { defaults.set(lineSpacing, forKey: Key.lineSpacing.rawValue) }
+    }
+    /// Extra space between letters, in em (a fraction of the font size).
+    @Published var letterSpacing: Double {
+        didSet { defaults.set(letterSpacing, forKey: Key.letterSpacing.rawValue) }
+    }
     /// Auto-scroll speed in points per second.
     @Published var autoSpeed: Double {
         didSet { defaults.set(autoSpeed, forKey: Key.autoSpeed.rawValue) }
@@ -124,6 +132,8 @@ final class PhoneSettings: ObservableObject {
     private init() {
         activeScriptID = defaults.string(forKey: Key.activeScriptID.rawValue) ?? ""
         fontSize = defaults.object(forKey: Key.fontSize.rawValue) as? Double ?? 34
+        lineSpacing = defaults.object(forKey: Key.lineSpacing.rawValue) as? Double ?? 1.35
+        letterSpacing = defaults.object(forKey: Key.letterSpacing.rawValue) as? Double ?? 0
         autoSpeed = defaults.object(forKey: Key.autoSpeed.rawValue) as? Double ?? 40
         showPace = defaults.object(forKey: Key.showPace.rawValue) as? Bool ?? true
         readingDistanceCm = defaults.object(forKey: Key.readingDistanceCm.rawValue) as? Double ?? 0.5

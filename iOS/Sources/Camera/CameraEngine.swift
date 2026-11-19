@@ -178,6 +178,31 @@ final class CameraEngine: NSObject, ObservableObject {
     @Published private(set) var hasMicrophone = false
     /// Last result or error, shown briefly under the controls.
     @Published private(set) var message: String?
+    /// What happens to a take after the recording stops. The screen shows it until the take is in Photos.
+    enum TakeState: Equatable {
+        case idle
+        case working(String, Double?)
+        case saved
+        case failed(String)
+    }
+    @Published private(set) var takeState: TakeState = .idle
+
+    var isProcessingTake: Bool {
+        if case .working = takeState { return true }
+        return false
+    }
+
+    func dismissTakeState() { takeState = .idle }
+
+    private static func log(_ line: String) {
+        let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("take.log")
+        let entry = "\(Date()) \(line)\n"
+        if let handle = try? FileHandle(forWritingTo: url) {
+            handle.seekToEndOfFile(); handle.write(Data(entry.utf8)); try? handle.close()
+        } else {
+            try? entry.write(to: url, atomically: true, encoding: .utf8)
+        }
+    }
 
     // MARK: - Session
 
@@ -209,6 +234,7 @@ final class CameraEngine: NSObject, ObservableObject {
     /// Asks for camera and microphone access, builds the session once, and starts it.
     func start() {
         guard status != .running else { return }
+        saveLeftoverTakes()
         Task {
             let videoGranted = await AVCaptureDevice.requestAccess(for: .video)
             guard videoGranted else {
@@ -236,6 +262,17 @@ final class CameraEngine: NSObject, ObservableObject {
         status = .idle
     }
 
+    /// The microphone picked in Settings, else the system default. Capture devices share the audio port's UID.
+    private static func microphone() -> AVCaptureDevice? {
+        let uid = UserDefaults.standard.string(forKey: AudioSession.preferredInputKey) ?? ""
+        if !uid.isEmpty {
+            let found = AVCaptureDevice.DiscoverySession(deviceTypes: [.microphone, .external], mediaType: .audio, position: .unspecified)
+                .devices.first { $0.uniqueID == uid }
+            if let found { return found }
+        }
+        return AVCaptureDevice.default(for: .audio)
+    }
+
     private func configure() {
         guard !configured else { return }
         session.beginConfiguration()
@@ -252,7 +289,8 @@ final class CameraEngine: NSObject, ObservableObject {
         videoInput = input
         device = camera
 
-        if let microphone = AVCaptureDevice.default(for: .audio),
+        AudioSession.applyPreferredInput()
+        if let microphone = Self.microphone(),
            let audio = try? AVCaptureDeviceInput(device: microphone),
            session.canAddInput(audio) {
             session.addInput(audio)
@@ -353,7 +391,13 @@ final class CameraEngine: NSObject, ObservableObject {
     /// Whether Sightline Pro is unlocked. The free version records 1080p at up to 30 fps, in 16:9, for two minutes.
     var isProUnlocked: () -> Bool = { true }
     /// Called when a free recording was stopped at the time limit.
+    /// Record the sound as one channel. Off records with the microphone's own layout. Remembered between launches.
+    @Published var monoAudio = UserDefaults.standard.bool(forKey: "monoAudio") {
+        didSet { UserDefaults.standard.set(monoAudio, forKey: "monoAudio") }
+    }
     var onRecordingLimit: (() -> Void)?
+    /// Called after a recording was saved to Photos.
+    var onTakeSaved: (() -> Void)?
 
     /// The purchase state changed: offer the modes and codecs it allows.
     func entitlementChanged() {
@@ -727,12 +771,31 @@ final class CameraEngine: NSObject, ObservableObject {
         }
     }
 
+    private var recordedMono = false
+    private var recordedName = "Sightline"
+    /// The title of the script on the prompter; it names the video file in Photos.
+    var takeTitle: () -> String? = { nil }
+
+    private static func fileName(from title: String?) -> String {
+        let bad = CharacterSet(charactersIn: "/\\:*?\"<>|").union(.controlCharacters).union(.newlines)
+        let clean = (title ?? "").components(separatedBy: bad).joined(separator: " ")
+            .trimmingCharacters(in: .whitespaces.union(CharacterSet(charactersIn: ".")))
+        return clean.isEmpty ? "Sightline" : String(clean.prefix(80))
+    }
+
     private func startRecording() {
+        recordedMono = monoAudio
+        recordedName = Self.fileName(from: takeTitle())
         guard status == .running, !movieOutput.isRecording, let connection = movieOutput.connection(with: .video) else {
             return
         }
         if movieOutput.availableVideoCodecTypes.contains(codec.videoType) {
             movieOutput.setOutputSettings([AVVideoCodecKey: codec.videoType], for: connection)
+        }
+        // One audio track on one channel: a multichannel interface would otherwise record all its inputs.
+        if let audio = movieOutput.connection(with: .audio) {
+            // Recorded with the microphone's own layout; the mono switch folds the channels together after the take.
+            movieOutput.setOutputSettings(nil, for: audio)
         }
         applyStabilization(stabilization)
 
@@ -773,8 +836,9 @@ final class CameraEngine: NSObject, ObservableObject {
         if let error {
             let nsError = error as NSError
             let finished = nsError.userInfo[AVErrorRecordingSuccessfullyFinishedKey] as? Bool ?? false
+            Self.log("recording ended with error \(nsError.domain) \(nsError.code) finished=\(finished)")
             guard finished else {
-                message = "Recording failed: \(error.localizedDescription)"
+                takeState = .failed("Recording failed: \(error.localizedDescription)")
                 try? FileManager.default.removeItem(at: url)
                 return
             }
@@ -782,23 +846,89 @@ final class CameraEngine: NSObject, ObservableObject {
         saveVideo(url)
     }
 
+    private static func audioChannels(of url: URL) async -> Int? {
+        let asset = AVURLAsset(url: url)
+        guard let track = try? await asset.loadTracks(withMediaType: .audio).first,
+              let format = try? await track.load(.formatDescriptions).first,
+              let basic = CMAudioFormatDescriptionGetStreamBasicDescription(format) else { return nil }
+        return Int(basic.pointee.mChannelsPerFrame)
+    }
+
+    /// The take goes to Photos first: the mono mixdown is only an upgrade. If it fails, the untouched original is
+    /// saved instead, and files are deleted only after Photos has them. The screen shows every step.
     private func saveVideo(_ url: URL) {
+        let mono = recordedMono
+        let name = recordedName
+        takeState = .working("Finishing your take…", nil)
+        UIApplication.shared.isIdleTimerDisabled = true
         Task {
+            var background = UIBackgroundTaskIdentifier.invalid
+            background = UIApplication.shared.beginBackgroundTask(withName: "Save take") {
+                Self.log("background time expired")
+                UIApplication.shared.endBackgroundTask(background)
+            }
+            defer {
+                UIApplication.shared.endBackgroundTask(background)
+                UIApplication.shared.isIdleTimerDisabled = false
+            }
+
+            var saving = url
+            var mixed: URL?
+            if mono {
+                takeState = .working("Mixing the sound to mono…", 0)
+                do {
+                    let result = try await MonoMixdown.mixed(url) { fraction in
+                        Task { @MainActor [weak self] in self?.takeState = .working("Mixing the sound to mono…", fraction) }
+                    }
+                    if result != url { mixed = result; saving = result }
+                } catch {
+                    Self.log("mixdown failed: \(error)")
+                }
+            }
+            let channels = await Self.audioChannels(of: saving)
+            takeState = .working("Saving to Photos…", nil)
             let access = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
             guard access == .authorized || access == .limited else {
-                message = "Allow Photos access to save recordings."
-                try? FileManager.default.removeItem(at: url)
+                // The file stays: the next launch offers it to Photos again.
+                takeState = .failed("Allow Photos access to save recordings.")
                 return
             }
             do {
-                try await PHPhotoLibrary.shared().performChanges {
-                    PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
-                }
-                message = "Saved to Photos."
+                try await Self.addToPhotos(saving, name: name)
             } catch {
-                message = "Could not save the video."
+                Self.log("photos save failed for \(saving.lastPathComponent): \(error)")
+                guard saving != url else { takeState = .failed("Could not save the video."); return }
+                do { try await Self.addToPhotos(url, name: name); saving = url } catch { takeState = .failed("Could not save the video."); return }
             }
+            Self.log("saved \(saving.lastPathComponent) audio=\(channels.map(String.init) ?? "none")")
+            takeState = .saved
+            onTakeSaved?()
             try? FileManager.default.removeItem(at: url)
+            if let mixed { try? FileManager.default.removeItem(at: mixed) }
+        }
+    }
+
+    /// Adds the file to Photos under the script's title, so the clip is named after what was read.
+    private static func addToPhotos(_ url: URL, name: String = "Sightline") async throws {
+        try await PHPhotoLibrary.shared().performChanges {
+            let options = PHAssetResourceCreationOptions()
+            options.originalFilename = "\(name).mov"
+            options.shouldMoveFile = false
+            PHAssetCreationRequest.forAsset().addResource(with: .video, fileURL: url, options: options)
+        }
+    }
+
+    /// Takes left in the temporary folder (the app was suspended or killed before Photos had them) are saved
+    /// on the next launch. Half-written files are skipped.
+    func saveLeftoverTakes() {
+        Task {
+            let folder = FileManager.default.temporaryDirectory
+            let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? []
+            for url in files where url.lastPathComponent.hasPrefix("Sightline-") && url.pathExtension == "mov" {
+                let asset = AVURLAsset(url: url)
+                guard (try? await asset.load(.isPlayable)) == true else { continue }
+                if (try? await Self.addToPhotos(url)) != nil { try? FileManager.default.removeItem(at: url) }
+            }
         }
     }
 }
@@ -826,6 +956,9 @@ private final class MovieDelegate: NSObject, AVCaptureFileOutputRecordingDelegat
 /// Converts each microphone sample buffer to PCM for the speech recognizer. Runs on the audio queue.
 private final class AudioSampleDelegate: NSObject, AVCaptureAudioDataOutputSampleBufferDelegate {
     private let deliver: @Sendable (AVAudioPCMBuffer) -> Void
+    /// Smoothed energy per input channel, to follow the one the microphone is plugged into.
+    private var energy: [Float] = []
+    private var active = 0
 
     init(deliver: @escaping @Sendable (AVAudioPCMBuffer) -> Void) {
         self.deliver = deliver
@@ -836,8 +969,46 @@ private final class AudioSampleDelegate: NSObject, AVCaptureAudioDataOutputSampl
         didOutput sampleBuffer: CMSampleBuffer,
         from connection: AVCaptureConnection
     ) {
-        guard let buffer = Self.pcmBuffer(from: sampleBuffer) else { return }
+        guard let raw = Self.pcmBuffer(from: sampleBuffer), let buffer = mono(raw) else { return }
         deliver(buffer)
+    }
+
+    /// Audio interfaces expose many inputs (a UMC1820 shows 10 channels) and the speech recognizer only
+    /// understands one. Passes the loudest channel through as mono Float32; the choice only moves when
+    /// another channel is clearly louder, so the audio does not jump between inputs.
+    private func mono(_ buffer: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
+        let channels = Int(buffer.format.channelCount)
+        guard channels > 1 else { return buffer }
+        let frames = Int(buffer.frameLength)
+        guard let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: buffer.format.sampleRate, channels: 1, interleaved: false),
+              let out = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: buffer.frameLength),
+              let dst = out.floatChannelData?[0] else { return nil }
+        out.frameLength = buffer.frameLength
+
+        let sample: (Int, Int) -> Float
+        if let ints = buffer.int16ChannelData {
+            let interleaved = buffer.format.isInterleaved
+            sample = { channel, frame in
+                Float(interleaved ? ints[0][frame * channels + channel] : ints[channel][frame]) / 32768
+            }
+        } else if let floats = buffer.floatChannelData {
+            let interleaved = buffer.format.isInterleaved
+            sample = { channel, frame in interleaved ? floats[0][frame * channels + channel] : floats[channel][frame] }
+        } else {
+            return nil
+        }
+
+        if energy.count != channels { energy = Array(repeating: 0, count: channels); active = 0 }
+        for channel in 0..<channels {
+            var sum: Float = 0
+            for frame in 0..<frames { let value = sample(channel, frame); sum += value * value }
+            energy[channel] = energy[channel] * 0.9 + (sum / Float(max(frames, 1))) * 0.1
+        }
+        if let loudest = energy.indices.max(by: { energy[$0] < energy[$1] }), energy[loudest] > energy[active] * 4 {
+            active = loudest
+        }
+        for frame in 0..<frames { dst[frame] = sample(active, frame) }
+        return out
     }
 
     private static func pcmBuffer(from sample: CMSampleBuffer) -> AVAudioPCMBuffer? {

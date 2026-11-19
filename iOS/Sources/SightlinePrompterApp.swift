@@ -1,5 +1,6 @@
 import SightlineCore
 import SwiftUI
+import UIKit
 
 @main
 struct SightlinePrompterApp: App {
@@ -7,8 +8,45 @@ struct SightlinePrompterApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView(model: model)
+            SignInGate(model: model)
                 .preferredColorScheme(.dark)
+                .tint(Color.sightline)
+        }
+    }
+}
+
+/// App Store builds stay locked on a sign-in screen until an iCloud account is signed in. Debug builds skip it.
+struct SignInGate: View {
+    @ObservedObject var model: AppModel
+    @ObservedObject private var account = ICloudAccount.shared
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var onboarded = Onboarding.isDone
+
+    var body: some View {
+        Group {
+            if !onboarded {
+                OnboardingWizard {
+                    Onboarding.isDone = true
+                Analytics.track("onboarding_done")
+                    onboarded = true
+                }
+            } else if account.status.blocksUse() {
+                SignInGateView(
+                    status: account.status,
+                    instructions: "Open Settings, sign in with your Apple Account at the top, and turn on iCloud Drive.",
+                    openSettings: {
+                        if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
+                    }
+                )
+            } else {
+                RootView(model: model)
+            }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { account.refresh() }
+        }
+        .onChange(of: account.status) { _, status in
+            if status == .ready { model.switchToSharedLibrary() }
         }
     }
 }
@@ -49,7 +87,7 @@ struct RootView: View {
                 onCameraSettings: { showingCameraSettings = true }
             )
             .sheet(isPresented: $showingCameraSettings) {
-                CameraSettingsScreen(camera: model.camera)
+                CameraSettingsScreen(model: model)
             }
             .sheet(isPresented: Binding(get: { model.showPaywall && showingPrompter }, set: { model.showPaywall = $0 })) {
                 PaywallView(store: model.pro) { model.showPaywall = false }
@@ -61,6 +99,12 @@ struct RootView: View {
         #if DEBUG
         .onAppear { openScreenshotScene() }
         #endif
+        .onChange(of: showingPrompter) { _, showing in
+            if !showing, model.paywallWhenDone, !model.pro.isUnlocked {
+                model.paywallWhenDone = false
+                model.showPaywall = true
+            }
+        }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .background: model.enterBackground()
@@ -74,6 +118,10 @@ struct RootView: View {
     /// Opens the screen named by `-ScreenshotScene` (simulator screenshots for the App Store).
     private func openScreenshotScene() {
         guard let scene = ScreenshotMode.scene else { return }
+        if UserDefaults.standard.bool(forKey: "ScreenshotLandscape"),
+           let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+            windowScene.requestGeometryUpdate(.iOS(interfaceOrientations: .landscapeRight))
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
             switch scene {
             case "recording":

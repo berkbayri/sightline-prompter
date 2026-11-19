@@ -239,6 +239,12 @@ final class AppModel: ObservableObject {
         if let first = library.scripts.first(where: { $0.title == "Product launch video" }) {
             settings.activeScriptID = first.id.uuidString
         }
+        if let custom = ScreenshotMode.customScript {
+            library.create(title: "Screenshot script", language: .named(custom.language), text: custom.text)
+            if let script = library.scripts.first(where: { $0.title == "Screenshot script" }) {
+                settings.activeScriptID = script.id.uuidString
+            }
+        }
     }
     #endif
 

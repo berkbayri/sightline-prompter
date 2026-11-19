@@ -128,7 +128,16 @@ struct RootView: View {
                 if let script = model.activeScript ?? model.library.scripts.first { model.activate(script) }
                 model.setCameraOn(true)
                 showingPrompter = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { model.prompter.setCursor(wordIndex: 3) }
+                if ScreenshotMode.autoAdvanceWPM > 0 {
+                    var word = 0
+                    Timer.scheduledTimer(withTimeInterval: 60 / ScreenshotMode.autoAdvanceWPM, repeats: true) { timer in
+                        word += 1
+                        model.prompter.setCursor(wordIndex: word)
+                        if word >= (model.activeScript?.wordCount ?? 0) { timer.invalidate() }
+                    }
+                } else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { model.prompter.setCursor(wordIndex: 3) }
+                }
             case "settings": showingSettings = true
             case "paywall": model.showPaywall = true
             case "camera":

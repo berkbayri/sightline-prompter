@@ -10,7 +10,21 @@ enum ScreenshotMode {
     static var scene: String? { UserDefaults.standard.string(forKey: "ScreenshotScene") }
     static var isActive: Bool { scene != nil }
     /// Store screenshots always show the text as sized for this viewing distance, whatever is saved on the device.
-    static let simulatedDistanceCm = 45.0
+    /// `-ScreenshotDistanceCm 70` overrides it, for the distance screenshot.
+    static var simulatedDistanceCm: Double {
+        let v = UserDefaults.standard.double(forKey: "ScreenshotDistanceCm")
+        return v > 0 ? v : 45
+    }
+
+    /// `-ScreenshotAutoAdvanceWPM 150` moves the cursor word by word at that pace (simulates voice following, for screen recordings).
+    static var autoAdvanceWPM: Double { UserDefaults.standard.double(forKey: "ScreenshotAutoAdvanceWPM") }
+
+    /// `-ScreenshotScript "text" -ScreenshotLanguage ja-JP` seeds one extra script in that language and makes it the
+    /// active one (localized site screenshots). The language picks the tokenizer, so CJK is split correctly.
+    static var customScript: (text: String, language: String)? {
+        guard let text = UserDefaults.standard.string(forKey: "ScreenshotScript"), !text.isEmpty else { return nil }
+        return (text, UserDefaults.standard.string(forKey: "ScreenshotLanguage") ?? "en-US")
+    }
 
     static var backdrop: UIImage? {
         guard let path = UserDefaults.standard.string(forKey: "ScreenshotBackdrop") else { return nil }

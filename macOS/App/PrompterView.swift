@@ -119,14 +119,27 @@ final class PrompterView: NSView {
                              width: contentWidth, height: bounds.height + 80)
         let glyphs = layoutManager.glyphRange(forBoundingRect: visible, in: textContainer)
 
+        // The reading line only ticks in the margins, so it never crosses the text.
         NSColor(white: 1, alpha: 0.18).setFill()
-        NSRect(x: Self.insetX - 12, y: readingLineY, width: contentWidth + 24, height: 1).fill()
+        for x in [Self.insetX - 12, Self.insetX + contentWidth + 2] {
+            NSRect(x: x, y: readingLineY, width: 10, height: 1).fill()
+        }
 
-        let highlight = words[cursorIndex].rect
+        // Highlight sits on the glyphs (cap top to under the baseline), not on the taller line box.
+        let wordRect = words[cursorIndex].rect
+        let glyph = layoutManager.glyphIndexForCharacter(at: words[cursorIndex].range.location)
+        let fragment = layoutManager.lineFragmentRect(forGlyphAt: glyph, effectiveRange: nil)
+        let font = textStorage.attribute(.font, at: words[cursorIndex].range.location, effectiveRange: nil) as? NSFont
+            ?? .systemFont(ofSize: fontSize)
+        let band = PrompterTypography.highlightBand(
+            baseline: Double(fragment.minY + layoutManager.location(forGlyphAt: glyph).y),
+            capHeight: Double(font.capHeight), fontSize: Double(font.pointSize))
+        let pad = 0.12 * font.pointSize
+        let highlight = CGRect(x: wordRect.minX - pad, y: CGFloat(band.top), width: wordRect.width + 2 * pad,
+                               height: CGFloat(band.bottom - band.top))
             .offsetBy(dx: origin.x, dy: origin.y)
-            .insetBy(dx: -6, dy: -3)
         Self.highlightFill.setFill()
-        NSBezierPath(roundedRect: highlight, xRadius: 6, yRadius: 6).fill()
+        NSBezierPath(roundedRect: highlight, xRadius: 0.2 * font.pointSize, yRadius: 0.2 * font.pointSize).fill()
 
         layoutManager.drawBackground(forGlyphRange: glyphs, at: origin)
         layoutManager.drawGlyphs(forGlyphRange: glyphs, at: origin)

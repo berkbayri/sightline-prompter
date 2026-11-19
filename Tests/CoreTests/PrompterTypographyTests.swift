@@ -290,6 +290,15 @@ final class PrompterTypographyTests: XCTestCase {
         XCTAssertLessThanOrEqual(sizes.count, 6) // a few steady steps, not a flicker
     }
 
+    func testHighlightBandSitsOnTheGlyphsAndScalesWithTheFont() {
+        let small = T.highlightBand(baseline: 100, capHeight: 20, fontSize: 28)
+        let big = T.highlightBand(baseline: 100, capHeight: 40, fontSize: 56)
+        XCTAssertLessThan(small.top, 100 - 20)       // above the cap top
+        XCTAssertGreaterThan(small.bottom, 100)      // below the baseline
+        XCTAssertLessThan(small.bottom, 100 + 28 * 0.3)  // never reaches the next line
+        XCTAssertEqual((big.bottom - big.top) / (small.bottom - small.top), 2, accuracy: 0.01)
+    }
+
     func testPipelineKeepsTheLastSizeWhenTheFaceIsGone() {
         var sizer = AdaptiveTextSize(initial: 36)
         sizer.add(500, at: 0)

@@ -69,6 +69,8 @@ public enum PrompterText {
         style.lineHeightMultiple = lineSpacing
         style.paragraphSpacing = fontSize * 0.8
         style.lineBreakMode = .byWordWrapping
+        // Hangul wraps per syllable by default; Korean is spaced, so break at word boundaries.
+        style.lineBreakStrategy = [.standard, .hangulWordPriority]
         style.baseWritingDirection = language.rightToLeft ? .rightToLeft : .natural
         style.alignment = language.rightToLeft ? .right : .left
 
@@ -77,6 +79,7 @@ public enum PrompterText {
         cueBlockStyle.lineHeightMultiple = 1.25
         cueBlockStyle.paragraphSpacing = fontSize * 0.55
         cueBlockStyle.lineBreakMode = .byWordWrapping
+        cueBlockStyle.lineBreakStrategy = style.lineBreakStrategy
         cueBlockStyle.baseWritingDirection = style.baseWritingDirection
         cueBlockStyle.alignment = style.alignment
 

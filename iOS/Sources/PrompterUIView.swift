@@ -129,7 +129,7 @@ final class PrompterUIView: UIView {
     /// Redraws only the text band in camera mode, so a scroll frame does not repaint the whole screen.
     private func invalidateText() {
         if cameraMode, !textFrame.isEmpty {
-            setNeedsDisplay(textFrame.insetBy(dx: -16, dy: -4))
+            setNeedsDisplay(textFrame.insetBy(dx: -16, dy: -1.3 * fontSize))
         } else {
             setNeedsDisplay()
         }
@@ -146,21 +146,31 @@ final class PrompterUIView: UIView {
                              width: textFrame.width, height: textFrame.height + 80)
         let glyphs = layoutManager.glyphRange(forBoundingRect: visible, in: textContainer)
 
+        // Plates are not clipped to the text band: their feathered edge fades out past it instead of ending in a line.
+        if cameraMode {
+            drawPlates(in: context, lines: lineRects(glyphs: glyphs, origin: origin))
+        }
+
         // Text is clipped to the band between the camera area and the controls.
         context.saveGState()
         context.clip(to: CGRect(x: 0, y: textFrame.minY, width: bounds.width, height: textFrame.height))
 
-        if cameraMode {
-            drawPlates(in: context, lines: lineRects(glyphs: glyphs, origin: origin))
-        }
+        // The reading line only ticks in the margins, so it never crosses the text.
         Self.readingLineColor.setFill()
-        UIRectFill(CGRect(x: textFrame.minX - 12, y: readingLineY, width: textFrame.width + 24, height: 1))
+        for x in [textFrame.minX - 12, textFrame.maxX + 2] {
+            UIRectFill(CGRect(x: x, y: readingLineY, width: 10, height: 1))
+        }
 
-        let highlight = words[cursorIndex].rect
+        let wordRect = words[cursorIndex].rect
+        let glyph = layoutManager.glyphIndexForCharacter(at: words[cursorIndex].range.location)
+        let metrics = glyphMetrics(glyph: glyph)
+        let band = PrompterTypography.highlightBand(baseline: Double(metrics.baseline), capHeight: Double(metrics.cap), fontSize: Double(fontSize))
+        let pad = 0.12 * fontSize
+        let highlight = CGRect(x: wordRect.minX - pad, y: CGFloat(band.top), width: wordRect.width + 2 * pad,
+                               height: CGFloat(band.bottom - band.top))
             .offsetBy(dx: origin.x, dy: origin.y)
-            .insetBy(dx: -6, dy: -3)
         Self.highlightFill.setFill()
-        UIBezierPath(roundedRect: highlight, cornerRadius: 6).fill()
+        UIBezierPath(roundedRect: highlight, cornerRadius: 0.2 * fontSize).fill()
 
         layoutManager.drawBackground(forGlyphRange: glyphs, at: origin)
         if cameraMode {
@@ -177,37 +187,49 @@ final class PrompterUIView: UIView {
 
     // MARK: - Backing plates
 
-    /// The line boxes in `glyphs`, in view coordinates, inflated to the plate size (0.6 em across, 0.22 em up and down).
+    /// Baseline (container coordinates) and cap height of the line that holds `glyph`.
+    private func glyphMetrics(glyph: Int) -> (baseline: CGFloat, cap: CGFloat) {
+        let fragment = layoutManager.lineFragmentRect(forGlyphAt: glyph, effectiveRange: nil)
+        let char = layoutManager.characterIndexForGlyph(at: glyph)
+        let font = textStorage.attribute(.font, at: char, effectiveRange: nil) as? UIFont ?? .systemFont(ofSize: fontSize)
+        return (fragment.minY + layoutManager.location(forGlyphAt: glyph).y, font.capHeight)
+    }
+
+    /// The glyph boxes of the lines in `glyphs` (cap top to under the baseline, not the taller line box), in view
+    /// coordinates, inflated to the plate size (0.6 em across, 0.22 em up and down).
     private func lineRects(glyphs: NSRange, origin: CGPoint) -> [(key: Int, rect: CGRect)] {
         var lines: [(key: Int, rect: CGRect)] = []
         layoutManager.enumerateLineFragments(forGlyphRange: glyphs) { _, used, _, range, _ in
-            let rect = used.offsetBy(dx: origin.x, dy: origin.y).insetBy(dx: -0.6 * self.fontSize, dy: -0.22 * self.fontSize)
-            lines.append((range.location, rect))
+            let metrics = self.glyphMetrics(glyph: range.location)
+            let band = PrompterTypography.highlightBand(baseline: Double(metrics.baseline), capHeight: Double(metrics.cap), fontSize: Double(self.fontSize))
+            let box = CGRect(x: used.minX, y: CGFloat(band.top), width: used.width, height: CGFloat(band.bottom - band.top))
+            lines.append((range.location, box.offsetBy(dx: origin.x, dy: origin.y).insetBy(dx: -0.6 * self.fontSize, dy: -0.22 * self.fontSize)))
         }
         return lines
     }
 
-    /// A soft black plate behind each line, only as dark as the picture behind that line needs. Lines are close,
-    /// so the plates merge into one shape that follows the ragged right edge; the video stays visible around it.
-    /// The shape is drawn in a few growing steps for a feathered edge (about 0.3 em), then its opacity is set
-    /// per line by a vertical ramp between the lines' own values.
+    /// A soft black plate behind each line, only as dark as the picture behind that line needs. The lines'
+    /// boxes are united into one shape (so overlaps never double the opacity) and drawn as a Gaussian shadow
+    /// (sigma 0.3 em), so no rectangle edge shows; then the opacity is set per line by a vertical ramp
+    /// between the lines' own values.
     private func drawPlates(in context: CGContext, lines: [(key: Int, rect: CGRect)]) {
         guard let first = lines.first, let last = lines.last else { return }
         let sigma = 0.3 * fontSize, radius = 0.5 * fontSize
-        let steps = 5
         let top = first.rect.minY - 2 * sigma, bottom = max(last.rect.maxY + 2 * sigma, top + 1)
 
         context.beginTransparencyLayer(auxiliaryInfo: nil)
-        for step in 0..<steps {
-            let grow = 2 * sigma - CGFloat(step) * 4 * sigma / CGFloat(steps)
-            let shape = UIBezierPath()
-            for line in lines {
-                shape.append(UIBezierPath(roundedRect: line.rect.insetBy(dx: -grow, dy: -grow), cornerRadius: max(radius + grow, 0)))
-            }
-            // Outermost first; these opacities add up to an even ramp from 0 at the rim to 1 inside.
-            UIColor.black.withAlphaComponent(1 / CGFloat(steps - step)).setFill()
-            shape.fill()
+        // Fill the shape far off to the side with its shadow brought back: only the blurred shadow lands.
+        let shift: CGFloat = 1000
+        context.saveGState()
+        context.setShadow(offset: CGSize(width: -shift, height: 0), blur: 2 * sigma,
+                          color: UIColor.black.cgColor)
+        let shape = UIBezierPath()
+        for line in lines {
+            shape.append(UIBezierPath(roundedRect: line.rect.offsetBy(dx: shift, dy: 0), cornerRadius: radius))
         }
+        UIColor.black.setFill()
+        shape.fill()
+        context.restoreGState()
         context.setBlendMode(.destinationIn)
         var colors = lines.map { UIColor.black.withAlphaComponent(lineAlpha[$0.key] ?? Self.defaultPlateAlpha).cgColor }
         var places = lines.map { min(max(($0.rect.midY - top) / (bottom - top), 0), 1) }

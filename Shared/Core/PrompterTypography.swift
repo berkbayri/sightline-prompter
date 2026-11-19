@@ -29,6 +29,12 @@ public enum PrompterTypography {
     public static let scrimTargetRatio = 7.0
     public static let macScrimAlpha = 0.65
     public static let colorReadAlpha = 0.55
+
+    /// Vertical extent of the current-word highlight, y growing downwards: cap top to just under the baseline,
+    /// padded in em so it scales with the text and sits on the glyphs, not on the (taller) line box.
+    public static func highlightBand(baseline: Double, capHeight: Double, fontSize: Double) -> (top: Double, bottom: Double) {
+        (baseline - capHeight - 0.14 * fontSize, baseline + 0.2 * fontSize)
+    }
     public static let iPhoneMinFontSize = 20.0
     public static let macMinFontSize = 16.0
     /// Mac distance presets in centimetres, spec section 5.4.

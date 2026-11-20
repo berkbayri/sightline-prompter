@@ -20,12 +20,12 @@
   },
   "hero": {
     "lines": [
-      "Objektife bak.",
-      "Metin yalnız sözünle akar.",
-      "Öksürsen yerinden oynamaz."
+      "Metni kameraya bakarak oku.",
+      "Senin hızını izler.",
+      "Gözün objektiften ayrılmaz."
     ],
     "cue": "[[gülümse]]",
-    "sub": "Sightline Prompter, iPhone ve Mac için bir teleprompter uygulaması. Sesini yalnızca ekrandaki kelimelerle eşleştirerek takip eder, bu yüzden öksürük, doğaçlama bir cümle ya da atladığın satır onu şaşırtmaz. Metin tam kameranın altında durur. Ücretsiz dene.",
+    "sub": "iPhone ve Mac için, sesini kelime kelime takip eden bir teleprompter. İster hızlı konuş ister yavaş, istediğin an dur. Metin seninle gelir, sen de notlara değil izleyicine bakarsın.",
     "cta_secondary": "Nasıl çalıştığını gör"
   },
   "devices": {

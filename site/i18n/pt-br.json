@@ -20,12 +20,12 @@
   },
   "hero": {
     "lines": [
-      "Olhe para a câmera.",
-      "Só as suas palavras o movem.",
-      "Uma tosse não o faz pular."
+      "Leia seu texto olhando a câmera.",
+      "Ele segue o seu ritmo.",
+      "Seus olhos ficam na lente."
     ],
     "cue": "[[sorria]]",
-    "sub": "O Sightline Prompter é um app de teleprompter para iPhone e Mac. Ele acompanha sua voz comparando só as palavras que estão na tela, então uma tosse, um improviso ou uma linha pulada não o confundem. O texto fica logo abaixo da câmera. Experimente grátis.",
+    "sub": "Um teleprompter para iPhone e Mac que acompanha sua voz palavra por palavra. Fale rápido ou devagar, faça pausas quando quiser. O texto vai junto, e você olha para o público, não para as anotações.",
     "cta_secondary": "Veja como funciona"
   },
   "devices": {

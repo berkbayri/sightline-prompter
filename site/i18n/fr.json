@@ -20,12 +20,12 @@
   },
   "hero": {
     "lines": [
-      "Regardez l'objectif.",
-      "Seuls vos mots le guident.",
-      "Une toux ne change rien."
+      "Lisez votre texte face caméra.",
+      "Il suit votre rythme.",
+      "Vos yeux restent sur l'objectif."
     ],
     "cue": "[[sourire]]",
-    "sub": "Sightline Prompter est une application de téléprompteur pour iPhone et Mac. Elle suit votre voix en ne comparant que les mots affichés à l'écran : une toux, une improvisation ou une ligne sautée ne la font pas décrocher. Le texte reste juste sous la caméra. Essai gratuit.",
+    "sub": "Un téléprompteur pour iPhone et Mac qui suit votre voix mot à mot. Parlez vite ou lentement, faites des pauses quand vous voulez : le texte suit, et vous regardez votre public, pas vos notes.",
     "cta_secondary": "Voir comment ça marche"
   },
   "devices": {

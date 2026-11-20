@@ -20,12 +20,12 @@
   },
   "hero": {
     "lines": [
-      "Look at the lens.",
-      "Only your words move it.",
-      "A cough won't make it jump."
+      "Read your script on camera.",
+      "It follows your pace.",
+      "Your eyes never leave the lens."
     ],
     "cue": "[[smile]]",
-    "sub": "Sightline Prompter is a teleprompter app for iPhone and Mac. It follows your voice by matching only the words on screen, so a cough, an ad-lib or a skipped line does not throw it. The text stays right under the camera. Free to try.",
+    "sub": "A teleprompter for iPhone and Mac that follows your voice word by word. Speak fast, slow, or pause: the script keeps up, so you face your audience, not your notes.",
     "cta_secondary": "See how it works"
   },
   "devices": {

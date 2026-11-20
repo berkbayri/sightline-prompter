@@ -66,8 +66,16 @@ final class PrompterUIView: UIView {
     var onManualScrollEnded: ((Int) -> Void)?
     /// Called on a tap on the text. The owner decides what a tap does.
     var onTap: (() -> Void)?
-    /// Called when the text is pressed and held, to start moving and resizing it.
+    /// Called when the text is pressed and held on a gap between words, to start moving and resizing it.
     var onLongPress: (() -> Void)?
+    /// Called when a word is pressed and held, with its index, to edit the script there.
+    var onLongPressWord: ((Int) -> Void)?
+    /// Called when editing ends, with the whole edited script text.
+    var onEditDone: ((String) -> Void)?
+    /// The script being edited in place of the prompter band; nil when not editing.
+    private var editor: UITextView?
+    private var editorInsets: [NSLayoutConstraint] = []
+    var isEditing: Bool { editor != nil }
 
     /// Screen y where the text starts at zero scroll offset.
     private var contentTop: CGFloat { textFrame.minY }
@@ -101,6 +109,9 @@ final class PrompterUIView: UIView {
     var passThroughRect: CGRect = .zero
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        if let editor {
+            return editor.frame.contains(point) ? super.hitTest(point, with: event) : nil
+        }
         if passThroughRect.contains(convert(point, to: nil)) {
             return nil
         }
@@ -136,6 +147,8 @@ final class PrompterUIView: UIView {
     }
 
     override func draw(_ rect: CGRect) {
+        // The editor stands in for the text, so nothing of the prompter shows around it.
+        guard editor == nil else { return }
         guard !words.isEmpty, let context = UIGraphicsGetCurrentContext() else {
             drawPlaceholder()
             return
@@ -304,17 +317,29 @@ final class PrompterUIView: UIView {
     }
 
     @objc private func handleHold(_ hold: UILongPressGestureRecognizer) {
-        guard hold.state == .began else { return }
+        guard hold.state == .began, editor == nil else { return }
         UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-        onLongPress?()
+        if let word = wordIndex(at: hold.location(in: self)), let onLongPressWord {
+            onLongPressWord(word)
+        } else {
+            onLongPress?()
+        }
     }
 
     @objc private func handleTap() {
+        guard editor == nil else { return }
         onTap?()
+    }
+
+    /// The word under a point of this view, with a little slack around it; nil on a gap.
+    private func wordIndex(at point: CGPoint) -> Int? {
+        let local = CGPoint(x: point.x - textFrame.minX, y: point.y - contentTop + scroll.offset)
+        return words.indices.first { words[$0].rect.insetBy(dx: -0.3 * fontSize, dy: -0.15 * fontSize).contains(local) }
     }
 
     /// Dragging moves the text by the finger; a release flings it. Manual scrolling moves the reading position.
     @objc private func handlePan(_ pan: UIPanGestureRecognizer) {
+        guard editor == nil else { return }
         switch pan.state {
         case .began:
             dragging = true
@@ -352,14 +377,70 @@ final class PrompterUIView: UIView {
 
     // MARK: - Public API
 
-    /// Loads a script: resets the position and segments the text for the language.
-    func load(script text: String, language: ScriptLanguage) {
+    /// Loads a script: resets the position (to the given word, at the start by default) and segments the text for the language.
+    func load(script text: String, language: ScriptLanguage, startingAt word: Int = 0) {
         self.language = language
         script = text
-        cursorIndex = 0
+        cursorIndex = max(word, 0)
         scroll.restart()
         buildText()
+        if cursorIndex > 0, !words.isEmpty {
+            scroll.offset = min(max(targetOffset(for: cursorIndex), 0), scroll.maxOffset)
+        }
         updateDisplayLink()
+    }
+
+    // MARK: - Editing
+
+    /// Swaps the text band for an editable text view of the script, caret on the given word, keyboard up.
+    func beginEditing(atWord word: Int) {
+        guard editor == nil, !textFrame.isEmpty else { return }
+        let view = UITextView()
+        view.text = script
+        view.font = .systemFont(ofSize: 20)
+        view.textColor = .white
+        view.tintColor = Self.currentColor
+        view.backgroundColor = UIColor(white: 0.08, alpha: 1)
+        view.keyboardAppearance = .dark
+        view.layer.cornerRadius = 12
+        view.textContainerInset = UIEdgeInsets(top: 12, left: 10, bottom: 12, right: 10)
+        view.accessibilityIdentifier = "prompter.editor"
+        let bar = UIToolbar(frame: CGRect(x: 0, y: 0, width: 320, height: 44))
+        let done = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(finishEditing))
+        done.accessibilityIdentifier = "prompter.editDone"
+        bar.items = [UIBarButtonItem(systemItem: .flexibleSpace), done]
+        view.inputAccessoryView = bar
+        view.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(view)
+        // Fills the band down to the keyboard, so the text being edited is never covered by it.
+        editorInsets = [view.leadingAnchor.constraint(equalTo: leadingAnchor), view.trailingAnchor.constraint(equalTo: trailingAnchor),
+                        view.topAnchor.constraint(equalTo: topAnchor)]
+        NSLayoutConstraint.activate(editorInsets + [view.bottomAnchor.constraint(equalTo: keyboardLayoutGuide.topAnchor, constant: -8)])
+        placeEditor()
+        editor = view
+        setNeedsDisplay()
+        view.becomeFirstResponder()
+        view.selectedRange = NSRange(location: ScriptEditing.startOffset(ofWord: word, in: script, language: language), length: 0)
+        view.scrollRangeToVisible(view.selectedRange)
+    }
+
+    @objc private func finishEditing() {
+        guard let view = editor else { return }
+        let text = view.text ?? script
+        view.resignFirstResponder()
+        view.removeFromSuperview()
+        editor = nil
+        editorInsets = []
+        setNeedsDisplay()
+        onEditDone?(text)
+    }
+
+    private func placeEditor() {
+        guard editorInsets.count == 3 else { return }
+        editorInsets[0].constant = textFrame.minX - 8
+        editorInsets[1].constant = -(bounds.width - textFrame.maxX - 8)
+        // Landscape has little height above the keyboard, so there the editor starts at the top edge.
+        editorInsets[2].constant = bounds.width > bounds.height ? 8 : textFrame.minY
     }
 
     /// Applies the camera layout. Re-flows the text and keeps the current word on the reading line.
@@ -368,6 +449,7 @@ final class PrompterUIView: UIView {
         guard layout.textFrame != textFrame || layout.readingLineY != readingLineY else { return }
         textFrame = layout.textFrame
         readingLineY = layout.readingLineY
+        placeEditor()
         relayout()
         if !words.isEmpty {
             scroll.followTarget = targetOffset(for: cursorIndex)

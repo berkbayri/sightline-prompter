@@ -4,6 +4,15 @@ import Combine
 import QuartzCore
 import SightlineCore
 
+/// The script editor that replaces the prompter text while editing; Esc ends it, like the Done button.
+private final class ScriptEditorTextView: NSTextView {
+    var onDone: (() -> Void)?
+
+    override func cancelOperation(_ sender: Any?) {
+        onDone?()
+    }
+}
+
 /// Draws the teleprompter text word by word. Reading state is shown with per-word colors
 /// on a shared NSTextStorage; scroll position lives in ScrollEngine and is applied at draw time.
 @MainActor
@@ -46,6 +55,14 @@ final class PrompterView: NSView {
 
     var currentWordIndex: Int { cursorIndex }
     var isPlaying: Bool { scroll.isPlaying }
+
+    /// The script is shown in an editable text view in place of the prompter text.
+    private var editor: NSScrollView?
+    private var editorDone: NSButton?
+    private var appBeforeEditing: NSRunningApplication?
+    var isEditing: Bool { editor != nil }
+    /// Called when editing starts (true) and, after the new text is in place, when it ends (false).
+    var onEditingChanged: ((Bool) -> Void)?
 
     private var readingLineY: CGFloat { bounds.height * Self.readingLineRatio }
 
@@ -99,6 +116,7 @@ final class PrompterView: NSView {
         super.setFrameSize(newSize)
         if abs(newSize.width - oldSize.width) > 0.5 || abs(newSize.height - oldSize.height) > 0.5 {
             relayout()
+            layoutEditor()
         }
     }
 
@@ -108,6 +126,8 @@ final class PrompterView: NSView {
     }
 
     override func draw(_ dirtyRect: NSRect) {
+        // The editor stands in for the text, so nothing of the prompter shows behind it.
+        guard editor == nil else { return }
         guard !words.isEmpty else {
             drawPlaceholder()
             return
@@ -155,7 +175,113 @@ final class PrompterView: NSView {
     override func mouseDown(with event: NSEvent) {
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate()
+        if event.clickCount >= 2 {
+            beginEditing(atWord: wordIndex(at: convert(event.locationInWindow, from: nil)))
+            return
+        }
         togglePlay()
+    }
+
+    /// The word under a point of this view, with a little slack around it; nil on a gap.
+    private func wordIndex(at point: CGPoint) -> Int? {
+        let local = CGPoint(x: point.x - Self.insetX, y: point.y - Self.insetTop + scroll.offset)
+        return words.indices.first { words[$0].rect.insetBy(dx: -0.3 * fontSize, dy: -0.15 * fontSize).contains(local) }
+    }
+
+    // MARK: - Editing
+
+    /// Swaps the prompter text for an editable text view of the script, caret on the given word (the current one by
+    /// default). Scrolling pauses; the panel becomes the key window until editing ends.
+    func beginEditing(atWord word: Int? = nil) {
+        guard editor == nil, let window else { return }
+        if scroll.isPlaying { togglePlay() }
+        let front = NSWorkspace.shared.frontmostApplication
+        appBeforeEditing = front == NSRunningApplication.current ? nil : front
+
+        let scrollView = NSScrollView()
+        scrollView.drawsBackground = false
+        scrollView.hasVerticalScroller = true
+        scrollView.scrollerStyle = .overlay
+        let textView = ScriptEditorTextView(frame: NSRect(origin: .zero, size: scrollView.contentSize))
+        textView.onDone = { [weak self] in self?.endEditing() }
+        textView.isRichText = false
+        textView.allowsUndo = true
+        textView.isAutomaticQuoteSubstitutionEnabled = false
+        textView.isAutomaticDashSubstitutionEnabled = false
+        textView.font = .systemFont(ofSize: 16)
+        textView.textColor = .white
+        textView.insertionPointColor = Self.currentColor
+        textView.drawsBackground = false
+        textView.textContainerInset = NSSize(width: 4, height: 6)
+        textView.minSize = .zero
+        textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
+        textView.isVerticallyResizable = true
+        textView.autoresizingMask = [.width]
+        textView.textContainer?.widthTracksTextView = true
+        textView.string = script
+        scrollView.documentView = textView
+
+        let done = NSButton(title: "Done", target: self, action: #selector(endEditingPressed))
+        done.bezelStyle = .rounded
+        done.toolTip = "Save and continue (Esc)"
+        addSubview(scrollView)
+        addSubview(done)
+        editor = scrollView
+        editorDone = done
+        layoutEditor()
+        needsDisplay = true
+
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate()
+        window.makeFirstResponder(textView)
+        let offset = ScriptEditing.startOffset(ofWord: word ?? cursorIndex, in: script, language: language)
+        textView.setSelectedRange(NSRange(location: offset, length: 0))
+        textView.scrollRangeToVisible(textView.selectedRange())
+        onEditingChanged?(true)
+    }
+
+    @objc private func endEditingPressed() {
+        endEditing()
+    }
+
+    /// Saves the text through Settings.script (which the library follows), puts the reading position back on
+    /// the same word and hands the focus back to the app that had it.
+    private func endEditing() {
+        guard let scrollView = editor, let textView = scrollView.documentView as? NSTextView else { return }
+        let text = textView.string
+        let old = script
+        let word = cursorIndex
+        editor = nil
+        scrollView.removeFromSuperview()
+        editorDone?.removeFromSuperview()
+        editorDone = nil
+        needsDisplay = true
+        window?.makeFirstResponder(self)
+        if text != old {
+            settings.script = text
+            place(word: ScriptEditing.remap(word: word, old: old, new: text, language: language))
+        }
+        appBeforeEditing?.activate()
+        appBeforeEditing = nil
+        onEditingChanged?(false)
+    }
+
+    private func layoutEditor() {
+        guard let editor, let editorDone else { return }
+        editorDone.sizeToFit()
+        editorDone.setFrameOrigin(NSPoint(x: bounds.maxX - editorDone.frame.width - 12, y: 6))
+        editor.frame = NSRect(x: 12, y: 38, width: max(bounds.width - 24, 40), height: max(bounds.height - 46, 40))
+    }
+
+    /// Puts the reading position on a word at once (no scroll animation), after the text was replaced.
+    private func place(word: Int) {
+        guard !words.isEmpty else { return }
+        cursorIndex = min(max(word, 0), words.count - 1)
+        cursorMoved = CACurrentMediaTime()
+        recolor(0, words.count - 1)
+        scroll.offset = min(max(Self.insetTop + words[cursorIndex].rect.midY - readingLineY, 0), scroll.maxOffset)
+        updateDisplayLink()
+        needsDisplay = true
     }
 
     // MARK: - Public API

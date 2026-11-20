@@ -138,6 +138,10 @@ struct RootView: View {
                 } else {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { model.prompter.setCursor(wordIndex: 3) }
                 }
+                // `-ScreenshotEditing YES`: opens the on-prompter editor, caret on the current word.
+                if UserDefaults.standard.bool(forKey: "ScreenshotEditing") {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { model.beginEditing() }
+                }
             case "settings": showingSettings = true
             case "paywall": model.showPaywall = true
             case "camera":

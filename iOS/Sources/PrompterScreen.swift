@@ -148,7 +148,7 @@ struct PrompterScreen: View {
         }
         // Touches on the controls must reach the SwiftUI buttons, not the text or the preview beneath.
         let controls = layout.controlsFrame.offsetBy(dx: proxy.frame(in: .global).minX, dy: proxy.frame(in: .global).minY)
-        let passThrough = (model.controlsVisible || arranging != nil) ? controls : CGRect.zero
+        let passThrough = ((model.controlsVisible || arranging != nil) && !model.isEditing) ? controls : CGRect.zero
         return ZStack(alignment: .topLeading) {
             if model.cameraOn, layout.previewFrame != nil {
                 // The same live picture fills the whole screen, dimmed and blurred, so no part of the screen is empty
@@ -172,7 +172,8 @@ struct PrompterScreen: View {
                 view: model.prompter,
                 layout: layout,
                 passThrough: passThrough,
-                onLongPress: { beginArranging(.text) }
+                onLongPress: { beginArranging(.text) },
+                onLongPressWord: arranging == nil ? { model.beginEditing(atWord: $0) } : nil
             )
             if let item = arranging {
                 ArrangeOverlay(
@@ -193,7 +194,7 @@ struct PrompterScreen: View {
                         liveFrames = nil
                     }
                 )
-            } else {
+            } else if !model.isEditing {
                 ControlsPane(
                     model: model,
                     camera: model.camera,
@@ -219,6 +220,7 @@ private struct PrompterSurface: UIViewRepresentable {
     let layout: CameraLayout
     let passThrough: CGRect
     let onLongPress: () -> Void
+    let onLongPressWord: ((Int) -> Void)?
 
     func makeUIView(context: Context) -> PrompterUIView {
         view
@@ -228,6 +230,7 @@ private struct PrompterSurface: UIViewRepresentable {
         uiView.apply(layout)
         uiView.passThroughRect = passThrough
         uiView.onLongPress = onLongPress
+        uiView.onLongPressWord = onLongPressWord
     }
 }
 
@@ -256,7 +259,7 @@ private struct ControlsPane: View {
     }
 
     private var bar: some View {
-        let size: CGFloat = layout.isLandscape ? 40 : 42
+        let size: CGFloat = layout.isLandscape ? 38 : 40
         let stack = layout.isLandscape ? AnyLayout(VStackLayout(spacing: 0)) : AnyLayout(HStackLayout(spacing: 0))
         return stack {
             BarButton(title: "Back to scripts", systemImage: "xmark", identifier: "camera.exit", size: size) {
@@ -274,6 +277,10 @@ private struct ControlsPane: View {
                 systemImage: model.isTracking ? "mic.fill" : "mic.slash",
                 active: model.isTracking, identifier: "camera.tracking", size: size
             ) { model.toggleTracking() }
+            Spacer(minLength: 0)
+            BarButton(title: "Edit script", systemImage: "pencil", identifier: "camera.edit", size: size) {
+                model.beginEditing()
+            }
             Spacer(minLength: 0)
             RecordButton(isRecording: camera.isRecording, size: layout.isLandscape ? 54 : 58) {
                 camera.toggleRecording()

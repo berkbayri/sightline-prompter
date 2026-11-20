@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
     private let tracker = SpeechTracker(script: Settings.shared.script, language: Settings.shared.scriptLanguage)
     private let controller = ControllerInput()
     private let light = GamepadLight()
+    private var resumeTrackingAfterEdit = false
     private let library = LibraryStore(directory: LibraryLocation.current.url)
     private var pace = PaceMeter()
     private var totalWords = 0
@@ -31,6 +32,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
         installMainMenu()
         panel = NotchPanel(prompter: prompter)
         panel.onAction = { [weak self] action in self?.handle(action) }
+        prompter.onEditingChanged = { [weak self] editing in self?.editingChanged(editing) }
         if !isLocked { panel.orderFrontRegardless() }
 
         libraryWindow = LibraryWindowController(store: library) { [weak self] script in
@@ -44,6 +46,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
         #if DEBUG || SIGHTLINE_DEV
         // Site screenshots: open the library window at launch (with SIGHTLINE_LIBRARY_DIR pointing at sample scripts).
         if ProcessInfo.processInfo.environment["SIGHTLINE_SHOW_LIBRARY"] != nil { libraryWindow.show() }
+        #if DEBUG
+        if ProcessInfo.processInfo.environment["SIGHTLINE_EDIT"] != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [prompter] in prompter.beginEditing() }
+        }
+        #endif
         #endif
 
         // Manual scrolling moves the reading position; speech tracking continues from there.
@@ -147,6 +154,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
             .sink { [weak self] text in
                 guard let self else { return }
                 self.tracker.setScript(text)
+                // A new text starts at word 0, except after an edit on the panel, which keeps its place.
+                self.tracker.reset(to: self.prompter.currentWordIndex)
                 self.updateActiveScript(text: text)
                 self.refreshTotalWords()
             }
@@ -338,7 +347,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
         case .toggleTracking: toggleTracking()
         case .settings: openSettings()
         case .hide: panel.togglePanel()
+        case .edit: prompter.beginEditing()
         }
+    }
+
+    /// While the script is edited on the panel, voice following pauses; it resumes on the new text afterwards.
+    private func editingChanged(_ editing: Bool) {
+        panel.setEditing(editing)
+        if editing {
+            resumeTrackingAfterEdit = tracker.isRunning
+            if resumeTrackingAfterEdit { tracker.stop() }
+        } else if resumeTrackingAfterEdit {
+            resumeTrackingAfterEdit = false
+            tracker.start()
+        }
+        refreshControls()
     }
 
     @objc private func toggleVisibility() {

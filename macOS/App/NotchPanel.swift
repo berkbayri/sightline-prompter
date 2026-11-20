@@ -2,7 +2,7 @@ import AppKit
 import Combine
 
 enum PanelAction: Int, CaseIterable {
-    case playPause, restart, slower, faster, toggleTracking, settings, hide
+    case playPause, restart, slower, faster, toggleTracking, settings, hide, edit
 }
 
 /// Content view that reports pointer entry and exit, used to show the control bar on hover.
@@ -119,6 +119,10 @@ final class NotchPanel: NSPanel {
         }
 
         observeSettings()
+        #if DEBUG
+        // SIGHTLINE_SHOW_BAR=1: control bar stays visible without hovering, for screenshots (Debug builds only).
+        if ProcessInfo.processInfo.environment["SIGHTLINE_SHOW_BAR"] != nil { controlBar.alphaValue = 1 }
+        #endif
     }
 
     /// Re-applies frame and capture flag from Settings.shared.
@@ -179,7 +183,13 @@ final class NotchPanel: NSPanel {
             width: width,
             height: height
         )
-        sharingType = hideFromCapture ? .none : .readOnly
+        #if DEBUG
+        // SIGHTLINE_CAPTURABLE=1: screenshots of the panel (Debug builds only).
+        let capturable = ProcessInfo.processInfo.environment["SIGHTLINE_CAPTURABLE"] != nil
+        #else
+        let capturable = false
+        #endif
+        sharingType = (hideFromCapture && !capturable) ? .none : .readOnly
         setFrame(frame, display: true)
 
         // Content starts below the notch (0 on notch-less screens) plus a small gutter.
@@ -204,6 +214,7 @@ final class NotchPanel: NSPanel {
             makeButton(for: .restart),
             makeButton(for: .playPause),
             makeButton(for: .toggleTracking),
+            makeButton(for: .edit),
             divider(),
             makeButton(for: .slower),
             speedStack(),
@@ -333,6 +344,7 @@ final class NotchPanel: NSPanel {
         case .toggleTracking: name = "waveform"
         case .settings: name = "gearshape.fill"
         case .hide: name = "eye.slash.fill"
+        case .edit: name = "pencil"
         }
         return symbol(name, tooltip(for: action), size: 14)
     }
@@ -352,6 +364,7 @@ final class NotchPanel: NSPanel {
         case .toggleTracking: "Speech tracking on / off"
         case .settings: "Settings"
         case .hide: "Hide window"
+        case .edit: "Edit script (or double-click the text)"
         }
     }
 
@@ -360,7 +373,13 @@ final class NotchPanel: NSPanel {
         onAction?(action)
     }
 
+    /// The bar stays away while the script is edited; it comes back with the next hover.
+    func setEditing(_ editing: Bool) {
+        if editing { setControlBarVisible(false) }
+    }
+
     private func setControlBarVisible(_ visible: Bool) {
+        let visible = visible && !prompter.isEditing
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.18
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)

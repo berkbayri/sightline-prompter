@@ -18,6 +18,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var deviceCameraEdge: CameraEdge = .left
     /// Camera mode: the live preview is behind the prompter text and the camera controls replace the transport row.
     @Published private(set) var cameraOn = false
+    /// The script is being edited on the prompter: scrolling and voice following are paused, controls hidden.
+    @Published private(set) var isEditing = false
+    private var resumeTrackingAfterEdit = false
 
     let settings = PhoneSettings.shared
     let library: LibraryStore
@@ -73,6 +76,7 @@ final class AppModel: ObservableObject {
             self?.togglePlay()
             self?.showControls()
         }
+        prompter.onEditDone = { [weak self] text in self?.finishEditing(text) }
         tracker.onCursorChange = { [prompter] index in prompter.setCursor(wordIndex: index) }
         tracker.visibleWords = { [prompter] in prompter.visibleWordRange() }
         tracker.onStatus = { [weak self] text in self?.receiveStatus(text) }
@@ -263,16 +267,16 @@ final class AppModel: ObservableObject {
     }
 
     /// Loads a library script into the prompter and the speech tracker.
-    func activate(_ script: Script?) {
+    func activate(_ script: Script?, startingAt word: Int = 0) {
         activeScript = script
         settings.activeScriptID = script?.id.uuidString ?? ""
 
         let language = script?.language ?? .named("en-US")
         let text = script?.text ?? ""
-        prompter.load(script: text, language: language)
+        prompter.load(script: text, language: language, startingAt: word)
         tracker.setScript(text)
         tracker.setLanguage(language)
-        tracker.reset(to: 0)
+        tracker.reset(to: prompter.currentWordIndex)
 
         totalWords = ScriptTokenizer.tokenize(text, language: language).count
         pace.reset()
@@ -300,7 +304,7 @@ final class AppModel: ObservableObject {
     /// position stays where it was. While a take is being recorded the prompter text is left alone; the change is
     /// applied when the recording stops.
     func libraryDidChange() {
-        guard !camera.isRecording else { return }
+        guard !camera.isRecording, !isEditing else { return }
         guard let active = activeScript,
               let updated = library.scripts.first(where: { $0.id == active.id }) else {
             reloadActiveScript()
@@ -320,6 +324,36 @@ final class AppModel: ObservableObject {
         } else if updated != active {
             activeScript = updated
         }
+    }
+
+    // MARK: - Editing
+
+    /// Edits the script right on the prompter, caret on the given word (the current one by default). Scrolling and
+    /// voice following pause; a recording in progress keeps going. Editing is free.
+    func beginEditing(atWord word: Int? = nil) {
+        guard activeScript != nil, !isEditing else { return }
+        pause()
+        prompter.beginEditing(atWord: word ?? prompter.currentWordIndex)
+        guard prompter.isEditing else { return }
+        resumeTrackingAfterEdit = tracker.isRunning
+        if resumeTrackingAfterEdit { tracker.stop() }
+        isEditing = true
+        refreshControls()
+    }
+
+    /// Saves the edit through the library (so iCloud sync and the Mac see it), rebuilds the prompter text and resumes
+    /// at the same word, then voice following re-anchors to the new words.
+    private func finishEditing(_ text: String) {
+        isEditing = false
+        if let script = activeScript, text != script.text {
+            let word = prompter.currentWordIndex
+            library.update(script.id, text: text)
+            let updated = library.scripts.first { $0.id == script.id } ?? script
+            activate(updated, startingAt: ScriptEditing.remap(word: word, old: script.text, new: text, language: script.language))
+        }
+        if resumeTrackingAfterEdit { startTrackingIfAllowed() }
+        resumeTrackingAfterEdit = false
+        refreshControls()
     }
 
     // MARK: - Transport

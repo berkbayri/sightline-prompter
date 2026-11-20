@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#18181E"/>
+      <stop offset="1" stop-color="#07070A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <!-- website mark: bars 100/80/60%, thickness 23% of longest, gap 0.6x thickness; block optically centred (nudged 10px right for the left-heavy mass) -->
+  <g transform="translate(234 235)">
+    <rect x="0" y="0" width="576" height="132" rx="66" fill="#F5D77A"/>
+    <rect x="0" y="211" width="461" height="132" rx="66" fill="#C9CBD2"/>
+    <rect x="0" y="422" width="346" height="132" rx="66" fill="#4A4D57"/>
+  </g>
+</svg>

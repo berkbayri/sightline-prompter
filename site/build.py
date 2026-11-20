@@ -90,6 +90,21 @@ def parse(tpl):
     return root
 
 
+# English brand names inside uppercased text get lang="en", so a tr page shows "IPHONE", never "İPHONE".
+BRANDS = re.compile(r"\b(iPhone|iPad|iCloud|MacBook|Mac|Sightline Prompter|Sightline Pro|Sightline|TikTok|YouTube|DualSense|ProRes|App Store)\b")
+UPPER_BLOCKS = re.compile(r"(<h2\b[^>]*>.*?</h2>|<li class=\"tag\">.*?</li>|<h3\b[^>]*>.*?</h3>)", re.S)
+
+
+def mark_brands(page):
+    def in_text(block):
+        # only touch text between tags, never attributes
+        return re.sub(r">([^<]+)<", lambda t: ">" + BRANDS.sub(r'<span lang="en">\1</span>', t.group(1)) + "<", block.group(0))
+    return UPPER_BLOCKS.sub(in_text, page)
+
+
+assert mark_brands('<h2><em>iPhone\'da kaydet.</em></h2><img alt="iPhone">') == '<h2><em><span lang="en">iPhone</span>\'da kaydet.</em></h2><img alt="iPhone">'
+
+
 def render(nodes, stack):
     out = []
     for n in nodes:
@@ -383,7 +398,10 @@ def main():
             ctx["og_image"] = f"{SITE_URL}/assets/og/{code}.png?v={file_hash(card)}"
         out = DOCS / "index.html" if code == "en" else DOCS / code / "index.html"
         out.parent.mkdir(exist_ok=True)
-        out.write_text(render(tpl, [ctx]), encoding="utf-8")
+        page = render(tpl, [ctx])
+        if code != "en":
+            page = mark_brands(page)
+        out.write_text(page, encoding="utf-8")
         print("wrote", out.relative_to(ROOT))
 
     # English-only long-form pages: same chrome, content from site/pages/<slug>.html

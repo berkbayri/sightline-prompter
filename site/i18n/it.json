@@ -1,9 +1,9 @@
 {
   "meta": {
-    "title": "App teleprompter per iPhone e Mac | Sightline Prompter",
-    "description": "App teleprompter per iPhone e Mac che segue la tua voce parola per parola. Parla al tuo ritmo, veloce o lento, e fai pause quando vuoi. Il testo ti segue.",
-    "og_title": "Sightline Prompter: un teleprompter che segue la tua voce",
-    "og_description": "Leggi in camera con il tuo ritmo. Il testo avanza quando parli e aspetta quando fai una pausa o tossisci. Per iPhone e Mac, provala gratis.",
+    "title": "Sightline Prompter | Teleprompter per riunioni e video",
+    "description": "Sightline segue la tua voce e mantiene il testo vicino alla fotocamera. Un teleprompter per riunioni e presentazioni su Mac e per registrare video su iPhone.",
+    "og_title": "Alza lo sguardo. Non perdere il filo. | Sightline",
+    "og_description": "Sightline segue la tua voce e mantiene il testo vicino alla fotocamera. Un teleprompter per riunioni e presentazioni su Mac e per registrare video su iPhone.",
     "og_image_alt": "Sightline Prompter su iPhone e Mac, con il testo appena sotto l'obiettivo"
   },
   "nav": {
@@ -20,27 +20,28 @@
   },
   "hero": {
     "lines": [
-      "Leggi il copione in camera.",
-      "Segue il tuo ritmo.",
-      "Occhi sempre sull'obiettivo."
+      "Alza lo sguardo.",
+      "Non perdere il filo."
     ],
     "cue": "[[sorridi]]",
-    "sub": "Un teleprompter per iPhone e Mac che segue la tua voce parola per parola. Parla veloce o piano, fai pause quando vuoi, e il testo ti tiene il passo mentre guardi il pubblico.",
-    "cta_secondary": "Guarda come funziona"
+    "sub": "Sightline è il teleprompter per iPhone e Mac che segue la tua voce e tiene il copione vicino alla fotocamera. Durante una presentazione importante o mentre registri il prossimo video, puoi concentrarti su chi ti ascolta.",
+    "cta_secondary": "Scopri Sightline su Mac e iPhone"
   },
   "devices": {
     "kicker_cue": "[[un solo copione]]",
-    "title": "Un solo copione.",
-    "title_accent": "Due dispositivi.",
-    "body": "Su iPhone il testo resta sospeso sopra l'anteprima live mentre registri. Su Mac un pannello si sistema accanto alla fotocamera, per le videochiamate e per le registrazioni fatte con altri strumenti. È una sola app sull'App Store e un solo acquisto di Sightline Pro sblocca entrambe.",
+    "title": "La riunione la conduci tu.",
+    "title_accent": "Senza cercare gli appunti.",
+    "body": "Devi guidare una riunione, presentare una proposta o spiegare un argomento complesso. Hai già preparato gli appunti, ma ogni volta che li cerchi perdi il contatto visivo. Su Mac, Sightline mette il testo subito sotto la fotocamera e lo mantiene visibile anche quando cambi app o passi a schermo intero. Puoi escludere il pannello dalle condivisioni dello schermo e dalle registrazioni. Gli altri vedono te; tu hai il testo a portata di sguardo.",
     "mac_label": "Mac, sotto la tacca",
     "iphone_label": "iPhone, sopra l'anteprima live",
-    "demo_script": "Bentornati sul canale. Oggi leggo questo copione guardando dritto l'obiettivo. Le parole mi tengono il passo e il mio sguardo non si stacca."
+    "demo_script": "Bentornati sul canale. Oggi leggo questo copione guardando dritto l'obiettivo. Le parole mi tengono il passo e il mio sguardo non si stacca.",
+    "tag_mac": "Mac · riunioni e presentazioni",
+    "tag_iphone": "iPhone · registrazione video"
   },
   "autosize": {
-    "title": "Testo su misura",
-    "title_accent": "per la tua distanza.",
-    "body": "Appoggia l'iPhone dove serve all'inquadratura. La fotocamera frontale stima a che distanza si trova il tuo viso e regola di conseguenza dimensione del testo, lunghezza e numero delle righe. Se ti sposti indietro il testo cresce, se ti avvicini si riduce, e i tuoi occhi restano vicini all'obiettivo.",
+    "title": "Trova la posizione giusta.",
+    "title_accent": "Il testo si adegua.",
+    "body": "Avvicinati, appoggiati allo schienale o allontanati per un’inquadratura più ampia. Su iPhone, la fotocamera frontale stima la distanza e regola la dimensione del testo quando fai una pausa. Su Mac puoi scegliere una distanza di lettura oppure attivare la misurazione facoltativa con la fotocamera. Il testo resta leggibile senza continue regolazioni.",
     "mac_note": "Su Mac scegli a che distanza ti siedi oppure lasci che la fotocamera integrata la misuri. La fotocamera resta spenta finché non la attivi e non viene salvato né inviato nulla.",
     "script": "Guarda l'obiettivo, respira e dillo come lo diresti a un amico.",
     "distance_label": "Distanza dallo schermo",
@@ -50,43 +51,45 @@
     "caption": "Dimensioni di esempio per un iPhone 16 Pro."
   },
   "cases": {
-    "title": "Pensato per la tua",
-    "title_accent": "prossima ripresa.",
+    "title": "Per ogni occasione",
+    "title_accent": "in cui contano le parole.",
     "items": [
+      {
+        "id": "meeting",
+        "tab": "Riunioni e presentazioni",
+        "title": "Presenta senza cercare gli appunti.",
+        "body": "In una call con un cliente o mentre spieghi un progetto, tieni il testo vicino alla webcam e lo sguardo verso le persone. Se condividi lo schermo, puoi fare in modo che il pannello non compaia nella condivisione.",
+        "alt": "Scena illustrativa: una persona in videochiamata su un MacBook con il pannello del copione sotto la tacca della fotocamera"
+      },
       {
         "id": "youtube",
         "tab": "YouTube",
-        "title": "Registra l'intro in un'unica ripresa",
-        "body": "Metti il copione sotto la fotocamera frontale e parla ai tuoi spettatori. Il testo avanza solo con le parole che dici davvero, quindi un respiro, un colpo di tosse o un'improvvisazione non ti fanno perdere il segno.",
+        "title": "Guarda la fotocamera, senza inseguire il testo.",
+        "body": "Puoi fermarti, respirare o aggiungere una frase al momento. Sightline confronta le parole che pronunci con il copione e non lo fa scorrere a una velocità imposta.",
         "alt": "Scena illustrativa: un creator registra l'intro di un video YouTube con Sightline Prompter su iPhone"
       },
       {
         "id": "reels",
         "tab": "Reels e Shorts",
-        "title": "Video brevi, copioni asciutti",
-        "body": "Registra in verticale o in orizzontale e il testo resta accanto all'obiettivo, così in un Reel o in uno Short verticale mantieni il contatto visivo. Una guida 9:16 dal vivo mostra cosa terrà il taglio verticale.",
+        "title": "Video brevi, parole al posto giusto.",
+        "body": "In verticale o in orizzontale, il testo resta accanto all'obiettivo. La guida 9:16 ti mostra già in ripresa quale parte rimarrà in un montaggio verticale.",
         "alt": "Scena illustrativa: una persona gira un breve video verticale con iPhone, con il copione sospeso sull'anteprima"
       },
       {
         "id": "course",
         "tab": "Corsi",
-        "title": "Una lezione intera, senza scorrere",
-        "body": "Leggi una lezione intera senza toccare lo schermo. Aggiungi note di lettura tra doppie parentesi quadre come promemoria. Restano sullo schermo e non vengono mai lette ad alta voce né contate come parole. Pro mostra le parole al minuto e il tempo rimanente.",
+        "title": "Spiega la lezione senza perdere il ritmo.",
+        "body": "Segui anche un testo lungo senza toccare lo schermo. Aggiungi indicazioni per pause ed enfasi: rimangono visibili ma non vengono contate come parole da pronunciare.",
         "alt": "Scena illustrativa: un docente registra una lezione online alla scrivania con il copione sullo schermo"
-      },
-      {
-        "id": "meeting",
-        "tab": "Chiamate e interventi",
-        "title": "Contatto visivo nelle chiamate",
-        "body": "Su un MacBook con tacca, il pannello si trova subito sotto, accanto alla fotocamera, così guardi le persone della chiamata mentre leggi. Sui Mac senza tacca il pannello appare in alto al centro dello schermo.",
-        "alt": "Scena illustrativa: una persona in videochiamata su un MacBook con il pannello del copione sotto la tacca della fotocamera"
       }
-    ]
+    ],
+    "intro": "Riunioni di lavoro, proposte ai clienti, webinar, lezioni online, interviste, video YouTube e contenuti brevi. Sightline non serve solo a girare video: ti aiuta a parlare con naturalezza, restando presente con chi ti ascolta.",
+    "tablist_label": "Pensato per la tua prossima ripresa."
   },
   "crop": {
-    "title": "Resta nel",
-    "title_accent": "fotogramma",
-    "body": "Giri in orizzontale per una piattaforma verticale? La fotocamera dell'iPhone mostra dal vivo una guida di ritaglio 9:16 mentre giri, con regola dei terzi e livella. Una sola ripresa orizzontale ti dà il video largo e un taglio verticale con la testa ancora nell'inquadratura.",
+    "title": "Concentrati su quello che dici.",
+    "title_accent": "Non sulle impostazioni.",
+    "body": "Su iPhone hai anteprima della fotocamera, copione e comandi di registrazione in un’unica schermata. Scegli un microfono compatibile e usa le guide per preparare un ritaglio verticale e verificare che l’inquadratura sia dritta. Con Pro, sui dispositivi supportati puoi registrare fino a 4K a 60 fps, HDR o ProRes. Pensa al messaggio, non ai comandi.",
     "tags": [
       "Guida di ritaglio 9:16",
       "Regola dei terzi",
@@ -94,22 +97,23 @@
     ]
   },
   "languages": {
-    "title": "Segue la voce in",
-    "title_accent": "31 lingue",
-    "body": "Il teleprompter segue la tua voce in 31 lingue e varianti regionali, dall'inglese, tedesco e francese al giapponese, coreano, mandarino, cantonese e turco. Molte sono riconosciute sul dispositivo, quindi funzionano senza connessione.",
-    "note": "La versione gratuita segue la tua voce in inglese, turco e spagnolo. Sightline Pro aggiunge le altre. Cinese, giapponese e cantonese vengono confrontati per segmenti, quindi la precisione è inferiore rispetto alle lingue scritte con gli spazi."
+    "title": "La tua lingua.",
+    "title_accent": "Il tuo ritmo.",
+    "body": "Sightline supporta complessivamente 31 lingue e varianti regionali, tra cui italiano, inglese, turco, tedesco, francese, spagnolo, giapponese, coreano e mandarino. Per molte lingue il riconoscimento può avvenire direttamente sul dispositivo, se è disponibile il modello adatto.",
+    "note": "La versione gratuita segue la tua voce in inglese, turco e spagnolo. Le altre lingue e varianti sono incluse in Sightline Pro. Cinese, giapponese e cantonese vengono confrontati per segmenti, quindi la precisione può essere inferiore rispetto alle lingue che separano le parole con spazi."
   },
   "library": {
     "window_title": "Copioni",
-    "title": "Scrivi sul Mac.",
-    "title_accent": "Registra sull'iPhone.",
-    "body": "Scrivi, cerca e modifica i copioni su entrambi i dispositivi. Si sincronizzano con iCloud, quindi il copione scritto alla scrivania è già sul telefono quando premi registra. Importa quello che hai già da Word, PDF, Markdown e altro. La sincronizzazione usa il tuo account iCloud e non esiste un account Sightline.",
+    "title": "Prepari il testo su Mac.",
+    "title_accent": "Lo ritrovi su iPhone.",
+    "body": "Scrivi il copione su Mac o importa file Word, PDF, Markdown e altri formati. Grazie alla tua libreria iCloud, lo ritrovi su iPhone. Puoi inserire indicazioni per pause, sorrisi o cambi di tono: restano visibili ma non vengono considerate parole da pronunciare. Prepari una volta, usi dove serve.",
     "cue_example": "[[rallenta, guarda in alto]]",
     "cue_note": "Le note tra doppie parentesi quadre appaiono sullo schermo come piccoli promemoria. Non vengono mai lette ad alta voce né contate come parole.",
-    "formats_label": "Importa: Word, PDF, Markdown, RTF, HTML, OpenDocument, testo"
+    "formats_label": "Importa: Word, PDF, Markdown, RTF, HTML, OpenDocument, testo",
+    "alt": "Copioni: [[rallenta, guarda in alto]]"
   },
   "pro": {
-    "title": "Gratis per iniziare",
+    "title": "Comincia gratis.",
     "free_title": "Gratuita",
     "free_items": [
       "Segue la tua voce fino a 2 minuti per sessione",
@@ -121,19 +125,24 @@
     "pro_items": [
       "Nessun limite di 2 minuti per sessione",
       "4K a 60 fps, HDR e ProRes",
-      "Tutte le 31 lingue",
+      "Tutte le 31 lingue e varianti regionali",
       "Parole al minuto e tempo rimanente",
       "Controller DualSense su Mac",
-      "Un solo acquisto per iPhone e Mac"
+      "Un solo acquisto Pro per iPhone e Mac"
     ],
-    "note": "Prezzi attuali e prova gratuita sono mostrati nell'App Store, nella tua valuta locale."
+    "note": "Prova il testo che segue la voce fino a due minuti per sessione in inglese, turco o spagnolo. Su iPhone puoi registrare gratuitamente brevi video in 1080p. Pro offre sessioni più lunghe, video avanzato, indicazioni sul ritmo e 31 lingue e varianti regionali. Scegli il piano mensile, annuale o l’acquisto unico. Un solo Pro vale per Mac e iPhone.",
+    "title_accent": "Passa a Pro quando serve."
   },
   "faq": {
     "title": "Domande sul teleprompter",
     "items": [
       {
+        "q": "Posso usare Sightline in videochiamata senza mostrare gli appunti?",
+        "a": "Sì. Su Mac, il pannello resta vicino alla fotocamera e sopra le altre app, anche a schermo intero. Puoi escluderlo dalla condivisione schermo e dalle registrazioni, così leggi gli appunti senza trasmetterli."
+      },
+      {
         "q": "Come funziona un teleprompter che segue la voce?",
-        "a": "Ascolta mentre leggi e confronta ciò che sente con le parole sullo schermo. Il testo avanza quando parli e aspetta quando fai una pausa, quindi il ritmo lo decidi tu. Contano solo le parole del tuo copione, perciò un colpo di tosse, un'improvvisazione o una riga saltata non lo fanno saltare."
+        "a": "Sightline confronta le parole che pronunci con quelle presenti nel copione. Il testo avanza quando parli e aspetta quando ti fermi. Un colpo di tosse, una frase improvvisata o una riga saltata non lo fanno scorrere senza controllo: conta solo ciò che è presente nel copione."
       },
       {
         "q": "Esiste un'app teleprompter gratuita che segue la voce?",
@@ -149,7 +158,7 @@
       },
       {
         "q": "E se esco dal copione?",
-        "a": "Il testo resta dove sei. Un colpo di tosse, un'improvvisazione o una riga saltata non lo fanno saltare. Avanza solo quando dici parole che sono sullo schermo."
+        "a": "Il testo resta al punto in cui ti sei fermato. Una tosse, una frase improvvisata o una riga saltata non lo fanno avanzare all’improvviso. Riprende quando pronunci di nuovo le parole del copione."
       },
       {
         "q": "Serve un MacBook con la tacca?",
@@ -161,11 +170,11 @@
       },
       {
         "q": "Registra video?",
-        "a": "Sì, su iPhone. L'app registra con il copione sospeso sull'anteprima in tempo reale e salva il video nella libreria Foto. L'app per Mac è un pannello teleprompter per chiamate e registrazioni fatte con altri strumenti."
+        "a": "Sì, su iPhone. Durante la registrazione Sightline mostra il copione sopra l’anteprima della fotocamera e salva il video nell’app Foto. Su Mac funziona come pannello teleprompter per chiamate e registrazioni effettuate con altre app."
       },
       {
         "q": "Un solo acquisto copre iPhone e Mac?",
-        "a": "Sì. È una sola app sull'App Store e Sightline Pro sblocca sia la versione per iPhone sia quella per Mac. Entrambe usano la stessa libreria iCloud."
+        "a": "Sì. Un solo acquisto di Sightline Pro sblocca le funzioni su iPhone e Mac. I copioni si sincronizzano tra i dispositivi tramite iCloud."
       },
       {
         "q": "Quanto costa Sightline Pro?",
@@ -187,14 +196,15 @@
   },
   "close": {
     "title": "Alza lo sguardo.",
-    "title_accent": "Continua a parlare.",
-    "sub": "Provala gratis su iPhone e Mac. Incolla il tuo prossimo copione e leggilo all'obiettivo."
+    "title_accent": "Hai la parola.",
+    "sub": "Ora non resta che parlare."
   },
   "footer": {
     "privacy": "Privacy",
     "terms": "Termini",
     "support": "Supporto",
-    "rights": "Tutti i diritti riservati."
+    "rights": "Tutti i diritti riservati.",
+    "legal": "iPhone e MacBook Pro sono marchi di Apple Inc. App Store è un marchio di servizio di Apple Inc."
   },
   "consent": {
     "text": "Questo sito conta le visite con Google Analytics. Non imposta cookie di analisi finché non accetti.",
@@ -205,5 +215,22 @@
   "store": {
     "badge_alt": "Scarica su App Store",
     "badge_lang": "it-it"
+  },
+  "story": {
+    "pace": {
+      "title": "Il ritmo lo decidi tu.",
+      "title_accent": "Il testo ti segue.",
+      "body": "Fermati a riflettere. Sottolinea un passaggio. Aggiungi una frase spontanea. Sightline confronta quello che dici con le parole del copione. Aspetta durante le pause e non perde il segno quando improvvisi. Non devi accelerare per inseguire un testo che scorre da solo."
+    },
+    "connection": {
+      "title": "Meno occhi sul copione.",
+      "title_accent": "Più attenzione a chi ascolta.",
+      "body": "Su iPhone, poche righe rimangono vicino alla fotocamera frontale. Su Mac, il testo sta appena sotto la webcam. Puoi seguire il copione senza distogliere troppo lo sguardo da chi ti ascolta. Essere preparati non deve sembrare una recita."
+    },
+    "privacy": {
+      "title": "I tuoi copioni.",
+      "title_accent": "Il tuo spazio.",
+      "body": "I copioni vengono salvati nel tuo iCloud Drive. Non serve creare un account Sightline separato e non ci sono annunci né tracciamento tra app. Per molte lingue il riconoscimento vocale può funzionare direttamente sul dispositivo, quando è disponibile il modello adatto."
+    }
   }
 }

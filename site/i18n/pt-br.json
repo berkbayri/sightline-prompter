@@ -1,9 +1,9 @@
 {
   "meta": {
-    "title": "App de teleprompter para iPhone e Mac | Sightline Prompter",
-    "description": "App de teleprompter para iPhone e Mac que acompanha sua voz palavra por palavra. Fale no seu ritmo, rápido ou devagar, e pause à vontade. O texto acompanha.",
-    "og_title": "Sightline Prompter: um teleprompter que acompanha sua voz",
-    "og_description": "Leia para a câmera no seu ritmo. O texto avança quando você fala e espera quando você pausa ou tosse. Para iPhone e Mac, experimente grátis.",
+    "title": "Sightline Prompter | Teleprompter para reuniões e vídeos",
+    "description": "O Sightline acompanha sua voz e deixa o roteiro perto da câmera. Um teleprompter para reuniões e apresentações no Mac e para gravar vídeos no iPhone.",
+    "og_title": "Levante o olhar. Não perca o fio da conversa. | Sightline",
+    "og_description": "O Sightline acompanha sua voz e deixa o roteiro perto da câmera. Um teleprompter para reuniões e apresentações no Mac e para gravar vídeos no iPhone.",
     "og_image_alt": "Sightline Prompter no iPhone e no Mac, com o texto logo abaixo da câmera"
   },
   "nav": {
@@ -20,27 +20,28 @@
   },
   "hero": {
     "lines": [
-      "Leia seu texto olhando a câmera.",
-      "Ele segue o seu ritmo.",
-      "Seus olhos ficam na lente."
+      "Levante o olhar.",
+      "Não perca o fio da conversa."
     ],
     "cue": "[[sorria]]",
-    "sub": "Um teleprompter para iPhone e Mac que acompanha sua voz palavra por palavra. Fale rápido ou devagar, faça pausas quando quiser, e o texto vai junto enquanto você olha para o público.",
-    "cta_secondary": "Veja como funciona"
+    "sub": "O Sightline é o teleprompter para iPhone e Mac que acompanha a sua voz e mantém o roteiro perto da câmera. Numa apresentação importante ou no próximo vídeo, você pode se concentrar em quem está ouvindo.",
+    "cta_secondary": "Veja como funciona no Mac e no iPhone"
   },
   "devices": {
     "kicker_cue": "[[um só roteiro]]",
-    "title": "Um roteiro.",
-    "title_accent": "Dois aparelhos.",
-    "body": "No iPhone, o texto flutua sobre a prévia ao vivo enquanto você grava. No Mac, um painel fica ao lado da câmera para videochamadas e para gravações feitas com outras ferramentas. É um app só na App Store, e uma compra do Sightline Pro libera os dois.",
+    "title": "Conduza a reunião.",
+    "title_accent": "Sem tirar os olhos de quem ouve.",
+    "body": "Você está conduzindo uma reunião, apresentando uma proposta ou explicando um assunto complexo. As anotações estão prontas, mas consultá-las faz você desviar o olhar. No Mac, o Sightline coloca o roteiro logo abaixo da câmera e continua visível quando você muda de aplicativo ou entra em tela cheia. Se quiser, pode ocultar o painel do compartilhamento de tela e das gravações. Os outros veem você; você vê o que precisa dizer.",
     "mac_label": "Mac, abaixo do notch",
     "iphone_label": "iPhone, sobre a prévia ao vivo",
-    "demo_script": "Bem-vindos de volta ao canal. Hoje estou lendo este roteiro direto para a câmera. As palavras acompanham meu ritmo e eu mantenho o olhar na lente."
+    "demo_script": "Bem-vindos de volta ao canal. Hoje estou lendo este roteiro direto para a câmera. As palavras acompanham meu ritmo e eu mantenho o olhar na lente.",
+    "tag_mac": "Mac · reuniões e apresentações",
+    "tag_iphone": "iPhone · gravação de vídeo"
   },
   "autosize": {
-    "title": "Texto na medida",
-    "title_accent": "da sua distância.",
-    "body": "Apoie o iPhone onde a cena pedir. A câmera frontal estima a que distância está o seu rosto e ajusta o tamanho do texto, o comprimento e o número de linhas. Se você se afasta, o texto cresce, e se chega mais perto, diminui, e seus olhos ficam perto da lente.",
+    "title": "Você ajusta a distância.",
+    "title_accent": "O Sightline ajusta o texto.",
+    "body": "Chegue mais perto, recoste-se ou se afaste para abrir o enquadramento. No iPhone, a câmera frontal estima sua distância e ajusta o tamanho das letras quando você faz uma pausa. No Mac, escolha uma distância de leitura ou ative a medição opcional pela câmera. O roteiro continua confortável de ler sem você precisar mexer nas configurações a toda hora.",
     "mac_note": "No Mac, você escolhe a distância em que se senta ou deixa a câmera integrada medir. A câmera fica desligada até você ativá-la, e nada é salvo nem enviado.",
     "script": "Olhe para a lente, respire e diga como você diria a um amigo.",
     "distance_label": "Distância da tela",
@@ -50,43 +51,45 @@
     "caption": "Tamanhos de exemplo para um iPhone 16 Pro."
   },
   "cases": {
-    "title": "Feito para o seu",
-    "title_accent": "próximo take.",
+    "title": "Para os momentos",
+    "title_accent": "em que suas palavras importam.",
     "items": [
+      {
+        "id": "meeting",
+        "tab": "Reuniões e apresentações",
+        "title": "Apresente com segurança, sem mostrar suas anotações.",
+        "body": "Conduza uma reunião, apresente uma proposta ou ensine ao vivo com o roteiro perto da webcam. Você acompanha o texto e mantém o olhar em quem está do outro lado. O painel pode ficar fora da tela compartilhada.",
+        "alt": "Cena ilustrativa: uma pessoa em videochamada em um MacBook, com o painel do roteiro abaixo do notch da câmera"
+      },
       {
         "id": "youtube",
         "tab": "YouTube",
-        "title": "Grave a abertura em um take",
-        "body": "Coloque o roteiro sob a câmera frontal e fale com o público. O texto só avança com as palavras que você realmente diz, então respirar, tossir ou improvisar não faz você perder o fio.",
+        "title": "Fale olhando para a câmera, sem correr atrás do texto.",
+        "body": "Faça pausas, respire e mude uma frase sem correr atrás do texto. O Sightline reconhece as palavras do seu roteiro e avança com a sua fala, em vez de seguir uma velocidade fixa.",
         "alt": "Cena ilustrativa: um criador gravando a abertura de um vídeo no YouTube com o Sightline Prompter no iPhone"
       },
       {
         "id": "reels",
         "tab": "Reels e Shorts",
-        "title": "Vídeos curtos, roteiros enxutos",
-        "body": "Grave na vertical ou na horizontal e o texto fica ao lado da lente, então um Reel ou Short vertical mantém o seu contato visual. Uma guia 9:16 ao vivo mostra o que o corte vertical vai manter.",
+        "title": "Vídeo curto, mensagem bem dita.",
+        "body": "O roteiro fica perto da lente na vertical ou na horizontal. Com a guia 9:16, você confere durante a gravação o que vai aparecer no corte vertical.",
         "alt": "Cena ilustrativa: uma pessoa filmando um vídeo vertical curto no iPhone, com o roteiro flutuando sobre a prévia"
       },
       {
         "id": "course",
         "tab": "Cursos",
-        "title": "Aula inteira, sem rolar a tela",
-        "body": "Leia uma aula inteira sem tocar na tela. Adicione indicações de leitura entre colchetes duplos como lembretes. Elas ficam na tela e nunca são lidas em voz alta nem contadas como palavras. O Pro mostra suas palavras por minuto e o tempo restante.",
+        "title": "Dê sua aula sem perder o ritmo.",
+        "body": "Siga um conteúdo longo sem tocar na tela. Inclua lembretes de pausa e ênfase: eles aparecem para você, mas não entram na contagem das palavras faladas.",
         "alt": "Cena ilustrativa: um instrutor gravando uma aula online em uma mesa, com o roteiro na tela"
-      },
-      {
-        "id": "meeting",
-        "tab": "Chamadas e palestras",
-        "title": "Contato visual nas chamadas",
-        "body": "Em um MacBook com notch, o painel fica logo abaixo dele, ao lado da câmera, então você olha para as pessoas da chamada enquanto lê. Macs sem notch recebem o painel no topo central da tela.",
-        "alt": "Cena ilustrativa: uma pessoa em videochamada em um MacBook, com o painel do roteiro abaixo do notch da câmera"
       }
-    ]
+    ],
+    "intro": "Reunião de equipe, apresentação para clientes, webinar, aula on-line, entrevista, vídeo para YouTube ou conteúdo curto. O Sightline não é só para gravar vídeos. É para quando você quer falar com preparo, sem deixar de olhar para as pessoas.",
+    "tablist_label": "Feito para o seu próximo take."
   },
   "crop": {
-    "title": "Fique dentro",
-    "title_accent": "do quadro",
-    "body": "Gravando na horizontal para uma plataforma vertical? A câmera do iPhone mostra ao vivo uma guia de corte 9:16 enquanto você grava, com regra dos terços e linha de nível. Uma gravação horizontal rende o vídeo largo e um corte vertical com a sua cabeça ainda no quadro.",
+    "title": "Concentre-se na mensagem.",
+    "title_accent": "Não nos ajustes.",
+    "body": "No iPhone, imagem da câmera, roteiro e controles de gravação ficam na mesma tela. Escolha um microfone compatível e use as guias para planejar um corte vertical e conferir o alinhamento. Com o Pro, grave em até 4K a 60 fps, HDR ou ProRes nos aparelhos compatíveis. O equipamento não precisa roubar sua atenção.",
     "tags": [
       "Guia de corte 9:16",
       "Regra dos terços",
@@ -94,22 +97,23 @@
     ]
   },
   "languages": {
-    "title": "Acompanha sua voz em",
-    "title_accent": "31 idiomas",
-    "body": "O acompanhamento de voz funciona em 31 idiomas e variantes regionais, do inglês, alemão e francês ao japonês, coreano, mandarim, cantonês e turco. Muitos são reconhecidos no aparelho, então funcionam sem conexão.",
-    "note": "A versão grátis acompanha sua voz em inglês, turco e espanhol. O Sightline Pro libera os demais. Chinês, japonês e cantonês são comparados por segmentos, então a precisão é menor do que em idiomas escritos com espaços."
+    "title": "Seu idioma.",
+    "title_accent": "Seu ritmo.",
+    "body": "O Sightline é compatível com 31 opções de idiomas e variantes regionais, incluindo português, inglês, espanhol, turco, francês, alemão, japonês, coreano e mandarim. Em muitos casos, o reconhecimento de voz pode funcionar no próprio aparelho quando o modelo correspondente está instalado.",
+    "note": "A versão gratuita acompanha sua voz em inglês, turco e espanhol. Os demais idiomas e variantes são liberados pelo Sightline Pro. Em chinês, japonês e cantonês, a correspondência é feita por trechos; por isso, a precisão pode ser menor do que em idiomas que separam as palavras com espaços."
   },
   "library": {
     "window_title": "Roteiros",
-    "title": "Escreva no Mac.",
-    "title_accent": "Grave no iPhone.",
-    "body": "Escreva, busque e edite roteiros em qualquer um dos aparelhos. Eles sincronizam pelo iCloud, então o roteiro que você escreveu na mesa já está no celular quando você grava. Importe o que você já tem de Word, PDF, Markdown e mais. A sincronização usa sua conta do iCloud e não existe conta do Sightline.",
+    "title": "Prepare uma vez.",
+    "title_accent": "Use nos dois dispositivos.",
+    "body": "Escreva o roteiro no Mac ou importe arquivos Word, PDF, Markdown e outros formatos. Ele fica disponível no iPhone pela sua biblioteca do iCloud. Inclua lembretes para pausas, sorrisos ou mudanças de entonação: eles aparecem na tela, mas não entram na contagem das palavras a serem faladas. Prepare uma vez e use onde precisar.",
     "cue_example": "[[fale devagar, olhe para cima]]",
     "cue_note": "Indicações entre colchetes duplos aparecem na tela como pequenos lembretes. Nunca são lidas em voz alta nem contadas como palavras.",
-    "formats_label": "Importar: Word, PDF, Markdown, RTF, HTML, OpenDocument, texto"
+    "formats_label": "Importar: Word, PDF, Markdown, RTF, HTML, OpenDocument, texto",
+    "alt": "Roteiros: [[fale devagar, olhe para cima]]"
   },
   "pro": {
-    "title": "Comece grátis",
+    "title": "Comece de graça.",
     "free_title": "Gratuito",
     "free_items": [
       "Acompanhamento de voz de até 2 minutos por sessão",
@@ -121,19 +125,24 @@
     "pro_items": [
       "Sem o limite de 2 minutos por sessão",
       "4K a 60 fps, HDR e ProRes",
-      "Todos os 31 idiomas",
+      "Todas as 31 opções de idioma e variantes regionais",
       "Palavras por minuto e tempo restante",
       "Controle DualSense no Mac",
-      "Uma única compra para iPhone e Mac"
+      "Uma compra do Pro vale para iPhone e Mac"
     ],
-    "note": "Os preços atuais e o teste grátis são exibidos na App Store, na sua moeda local."
+    "note": "Experimente gratuitamente o acompanhamento por voz por até dois minutos por sessão, em inglês, turco ou espanhol. No iPhone, grave também vídeos curtos em 1080p. O Pro remove o limite de dois minutos e libera recursos avançados de gravação, informações sobre o ritmo da fala e as 31 opções de idioma e variantes regionais. Escolha entre assinatura mensal, anual ou compra única. Uma compra do Pro vale no Mac e no iPhone.",
+    "title_accent": "Use mais quando precisar."
   },
   "faq": {
     "title": "Perguntas sobre o teleprompter",
     "items": [
       {
+        "q": "Posso usar o Sightline em reuniões sem mostrar minhas anotações?",
+        "a": "Sim. No Mac, o painel fica perto da câmera, acima de outros aplicativos e janelas em tela cheia. Você pode escolher ocultá-lo do compartilhamento de tela e das gravações, mantendo suas anotações só na sua visualização."
+      },
+      {
         "q": "Como funciona um teleprompter que acompanha a voz?",
-        "a": "Ele escuta enquanto você lê e compara o que ouve com as palavras na tela. O texto avança quando você fala e espera quando você pausa, então o ritmo é seu. Só contam as palavras do seu roteiro, por isso uma tosse, um improviso ou uma linha pulada não o fazem pular."
+        "a": "O Sightline compara o que você fala com as palavras do roteiro. O texto avança quando você fala e espera quando você faz uma pausa. Tosse, improviso ou uma linha pulada não fazem o roteiro saltar sem controle: só entram na correspondência as palavras presentes no texto."
       },
       {
         "q": "Existe um app de teleprompter grátis que acompanha a voz?",
@@ -149,7 +158,7 @@
       },
       {
         "q": "E se eu sair do roteiro?",
-        "a": "O texto fica onde você está. Uma tosse, um improviso ou uma linha pulada não o fazem pular. Ele só avança quando você diz palavras que estão na tela."
+        "a": "O texto espera no ponto em que você parou. Uma tosse, um improviso ou uma linha pulada não fazem o roteiro saltar. Ele continua quando você volta a dizer palavras que estão na tela."
       },
       {
         "q": "Preciso de um MacBook com notch?",
@@ -161,11 +170,11 @@
       },
       {
         "q": "Ele grava vídeo?",
-        "a": "Sim, no iPhone. O app grava com o roteiro flutuando sobre a prévia ao vivo e salva o vídeo na sua biblioteca de Fotos. O app para Mac é um painel de teleprompter para chamadas e gravações feitas com outras ferramentas."
+        "a": "Sim, no iPhone. Durante a gravação, o Sightline mostra o roteiro sobre a prévia da câmera e salva o vídeo no app Fotos. No Mac, o aplicativo funciona como um painel de teleprompter para chamadas e gravações feitas em outros programas."
       },
       {
         "q": "Uma compra cobre iPhone e Mac?",
-        "a": "Sim. É um app só na App Store, e o Sightline Pro libera tanto a versão de iPhone quanto a de Mac. As duas usam a mesma biblioteca do iCloud."
+        "a": "Sim. Uma única compra do Sightline Pro libera as funções no iPhone e no Mac. Os roteiros ficam sincronizados entre os dois aparelhos pelo iCloud."
       },
       {
         "q": "Quanto custa o Sightline Pro?",
@@ -186,15 +195,16 @@
     ]
   },
   "close": {
-    "title": "Olhe para cima.",
-    "title_accent": "Continue falando.",
-    "sub": "Experimente grátis no iPhone e no Mac. Cole seu próximo roteiro e leia para a lente."
+    "title": "Levante o olhar.",
+    "title_accent": "A palavra é sua.",
+    "sub": "Agora é só falar."
   },
   "footer": {
     "privacy": "Privacidade",
     "terms": "Termos",
     "support": "Suporte",
-    "rights": "Todos os direitos reservados."
+    "rights": "Todos os direitos reservados.",
+    "legal": "iPhone e MacBook Pro são marcas comerciais da Apple Inc. App Store é uma marca de serviço da Apple Inc."
   },
   "consent": {
     "text": "Este site conta visitas com o Google Analytics. Sem a sua aceitação, ele não usa cookies de análise.",
@@ -205,5 +215,22 @@
   "store": {
     "badge_alt": "Baixar na App Store",
     "badge_lang": "pt-br"
+  },
+  "story": {
+    "pace": {
+      "title": "Quem dita o ritmo",
+      "title_accent": "é você.",
+      "body": "Pare para pensar. Dê ênfase a uma ideia. Acrescente um comentário de improviso. O Sightline compara o que você diz com as palavras do roteiro. Espera durante as pausas e mantém o ponto em que você estava quando improvisa. Você não precisa correr atrás de um texto que rola sozinho."
+    },
+    "connection": {
+      "title": "Menos olhos no roteiro.",
+      "title_accent": "Mais atenção às pessoas.",
+      "body": "No iPhone, poucas linhas aparecem perto da câmera frontal. No Mac, o roteiro fica próximo à webcam. Assim, você consegue acompanhar o texto mantendo o olhar mais perto de quem está ouvindo. Estar preparado não precisa parecer leitura."
+    },
+    "privacy": {
+      "title": "Seus roteiros.",
+      "title_accent": "Sob seu controle.",
+      "body": "Seus roteiros ficam no seu próprio iCloud Drive. Não é preciso criar outra conta no Sightline. Não há anúncios nem rastreamento entre aplicativos. Em muitos idiomas, o reconhecimento de voz pode acontecer diretamente no aparelho, quando há um modelo compatível disponível."
+    }
   }
 }

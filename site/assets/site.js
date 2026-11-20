@@ -42,12 +42,52 @@
   };
   const rm = matchMedia('(prefers-reduced-motion: reduce)');
   let paused = rm.matches, run = () => {};
-  const sets = [...d.querySelectorAll('[data-read]')].map(el => ({ el, w: words(el), i: -1 }));
+  // The app eases the text towards the reading line: step = (goal - y) * (1 - exp(-8 dt)), at most 1200 pt/s (ScrollEngine.tick).
+  // The hero headline stays put, so the reading-line ticks do that move instead.
+  const follow = el => {
+    let y = null, goal = 0, raf = 0, last = 0;
+    const set = () => el.style.setProperty('--ty', y + 'px');
+    const step = now => {
+      const dt = Math.min((now - last) / 1000, .1), lim = 1200 * dt;
+      last = now;
+      y += Math.max(-lim, Math.min(lim, (goal - y) * (1 - Math.exp(-8 * dt))));
+      if (Math.abs(goal - y) < .5) { y = goal; raf = 0; } else raf = requestAnimationFrame(step);
+      set();
+    };
+    return t => {
+      goal = t;
+      if (y === null || rm.matches) { y = t; set(); } else if (!raf) { last = performance.now(); raf = requestAnimationFrame(step); }
+    };
+  };
+  const sets = [...d.querySelectorAll('[data-read]')].map(el => {
+    const w = words(el), s = { el, w, i: -1 };
+    s.cues = [...el.querySelectorAll('.cue')].map(c => ({ c, n: w.filter(e => e.compareDocumentPosition(c) & 4).length }));
+    if (el.classList.contains('reading')) {
+      const go = follow(el);
+      s.tick = () => { const e = w[Math.min(Math.max(s.i, 0), w.length - 1)]; go(e.offsetTop + e.offsetHeight / 2); };
+    }
+    return s;
+  });
   const paint = (s, i) => {
     if (s.i === i) return;
     s.i = i;
     s.w.forEach((e, k) => { e.classList.toggle('r', k < i); e.classList.toggle('c', k === i); });
+    s.cues.forEach(({ c, n }) => c.classList.toggle('r', n < i));  // a cue is "read" once the cursor is past it (PrompterText.cueColor)
+    if (s.tick) s.tick();
   };
+  addEventListener('resize', () => sets.forEach(s => s.tick && s.tick()));
+  if (d.fonts) d.fonts.ready.then(() => sets.forEach(s => s.tick && s.tick()));
+  // distance scene: the cursor rests on the third word, or the last word of the first line when the text is so large that fewer fit
+  const rest = pf => {
+    const w = [...pf.querySelectorAll('.pf-text .w')];
+    if (!w.length) return;
+    let c = 0;
+    while (c < 2 && w[c + 1] && w[c + 1].offsetTop === w[0].offsetTop) c++;
+    w.forEach((e, k) => { e.classList.toggle('r', k < c); e.classList.toggle('c', k === c); });
+  };
+  const sample = d.querySelector('.pf-text');
+  if (sample) words(sample);
+
   if (rm.matches) {
     sets.forEach(s => paint(s, Math.floor(s.w.length / 3)));
   } else if (sets.length) {
@@ -105,7 +145,7 @@
       if (u.k === key) return;
       u.k = key;
       const pf = u.querySelector('.pf'), a = scene.dataset.fmt.replace('{cm}', Math.round(cm)), b = scene.dataset.readout.replace('{pt}', pt).replace('{n}', n);
-      pf.style.setProperty('--s', pt); pf.style.setProperty('--n', n);
+      pf.style.setProperty('--s', pt); pf.style.setProperty('--n', n); rest(pf);
       u.querySelector('[data-cm]').textContent = a;
       u.querySelector('[data-readout-out]').textContent = b;
       u.querySelector('[data-cap]').hidden = ideal <= pt + .5;

@@ -1,0 +1,248 @@
+/* Sightline 1.0.3 — editorial visual system.
+   Homepage-only layer: preserves approved copy, demo behaviour, and all locale strings. */
+:root {
+  --ink:#080A0E;
+  --surface:#11151B;
+  --raised:#191E25;
+  --hair:rgba(236,239,243,.105);
+  --text:#F5F5F1;
+  --text-2:rgba(245,245,241,.72);
+  --text-3:rgba(245,245,241,.46);
+  --yellow:#FFD60A;
+  --glow:rgba(255,214,10,.105);
+  --gutter:max(20px,4.7vw);
+}
+html {scroll-padding-top:90px}
+body {font-size:17px;background:var(--ink);letter-spacing:-.006em}
+.wrap {width:min(1376px,100% - 2*var(--gutter))}
+.top {position:sticky;top:0;z-index:35;background:rgba(8,10,14,.87);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-bottom:1px solid rgba(255,255,255,.07)}
+.nav {min-height:76px}
+.brand {font-weight:680;letter-spacing:-.025em}
+.links {gap:30px;font-weight:550}
+.links a {transition:color .18s}
+.btn.light {background:var(--text);color:var(--ink);box-shadow:0 5px 24px rgba(255,255,255,.09)}
+.btn.light:hover {background:#FFD60A}
+.lang ul {background:#171C22;box-shadow:0 18px 60px rgba(0,0,0,.55)}
+h2 {
+  font-family:var(--sys);
+  font-size:clamp(43px,5.65vw,83px);
+  font-weight:740;
+  line-height:1.035;
+  letter-spacing:-.067em;
+  text-transform:none;
+  max-width:13ch;
+  margin-bottom:clamp(24px,2.8vw,38px);
+  text-wrap:balance;
+}
+h2 span,h2 em {display:block}
+h2 em {color:var(--text);font-weight:560;font-style:normal}
+:lang(ja) h2,:lang(ko) h2,:lang(zh) h2{letter-spacing:-.04em;font-weight:750;line-height:1.16;max-width:14em}
+.sec {padding:clamp(96px,10vw,172px) 0;border-top-color:rgba(255,255,255,.055)}
+.sec-head p:not(.note),.split-head p:not(.note),.case-copy p {
+  max-width:49ch;
+  color:var(--text-2);
+  font-size:clamp(18px,1.45vw,21px);
+  line-height:1.68;
+  text-wrap:pretty;
+}
+.note {font-size:15px;line-height:1.65;color:var(--text-3)}
+.tags {gap:10px;margin-top:30px}
+.tag {min-height:34px;padding:0 14px;border-color:rgba(255,255,255,.18);color:#D8DDE1;letter-spacing:.01em;background:rgba(255,255,255,.035)}
+.store {transition:transform .25s cubic-bezier(.2,1,.3,1)}
+.store:hover {transform:translateY(-3px)}
+
+/* Strong opening: one clear promise, both product surfaces. */
+.hero {padding:clamp(55px,7vh,98px) 0 clamp(78px,9vw,146px);background:radial-gradient(ellipse 74% 70% at 78% 41%,rgba(255,214,10,.085),transparent 67%),linear-gradient(160deg,#0B0D13 5%,#080A0E 86%)}
+.hero::before {right:0;top:50%;width:58%;height:70%;background:radial-gradient(ellipse at center,rgba(250,195,38,.09),transparent 72%)}
+.hero-grid {grid-template-columns:minmax(0,1fr);align-items:center;gap:20px}
+.hero-copy {z-index:3}
+.hero .sub {max-width:43ch;margin-top:32px;font-size:clamp(18px,1.6vw,22px);line-height:1.63;letter-spacing:-.018em}
+.hero .actions {margin-top:36px;gap:14px 30px}
+.hero .link {font-size:15px;text-decoration-color:rgba(255,255,255,.27)}
+.hero-dev {position:relative;min-width:0;height:550px;display:block;isolation:isolate;--hero-h:465px}
+.hero-mac-shot {position:absolute;width:106%;left:-8%;top:14%;z-index:1;filter:drop-shadow(0 28px 50px rgba(0,0,0,.42))}
+.hero-mac-shot img{display:block;width:100%;height:auto}
+.hero-dev>.dev.p {position:absolute;z-index:2;right:0;bottom:0;box-shadow:0 26px 55px rgba(0,0,0,.36);border-radius:32px}
+.hero-dev>.vid-ctl {position:absolute;right:4px;top:1%;z-index:4;background:#181C22;border-color:rgba(255,255,255,.2)}
+@media (min-width:900px){
+  .hero-grid {grid-template-columns:minmax(0,48fr) minmax(0,52fr);gap:clamp(24px,3vw,52px);min-height:600px}
+  .hero-dev {height:clamp(510px,48vw,700px);--hero-h:clamp(465px,40vw,635px)}
+  .hero-mac-shot {top:21%;left:-9%;width:110%}
+  .hero-dev>.dev.p {right:-3%}
+}
+@media (min-width:1360px){
+  .hero-grid {grid-template-columns:minmax(0,48fr) minmax(0,52fr)}
+}
+@media (max-width:899px) {
+  .hero {padding:52px 0 68px}
+  .hero-grid {gap:28px}
+  .hero-dev {width:min(660px,100%);margin:auto;height:clamp(400px,70vw,620px);--hero-h:clamp(360px,63vw,550px)}
+  .hero-mac-shot {left:0;top:19%;width:93%}
+  .hero-dev>.dev.p {right:4%}
+}
+@media (max-width:560px){
+  .hero{padding:36px 0 54px}
+  .hero .sub{margin-top:26px;font-size:17px;line-height:1.62}
+  .hero .actions{margin-top:26px}
+  .hero-dev {height:390px;--hero-h:338px}
+  .hero-mac-shot {width:107%;left:-10%;top:29%}
+  .hero-dev>.dev.p{right:0;bottom:2px}
+  .hero-dev>.vid-ctl {right:2%;top:4%}
+}
+
+/* Mac meeting: generous product photography, humane text rhythm. */
+.devices {background:#11151B;overflow:hidden}
+.devices-grid {gap:clamp(40px,5vw,70px)}
+.devices h2 {max-width:13ch}
+.devices h2 em {color:var(--yellow)}
+.devices .scene{position:relative;align-items:flex-end;min-height:450px}
+.devices .scene::before{content:"";position:absolute;inset:8% -8% 4% -6%;border-radius:44px;background:radial-gradient(circle at 46% 50%,rgba(255,214,10,.085),rgba(255,255,255,.018) 42%,transparent 68%);z-index:0}
+.devices .scene img{position:relative;z-index:1;filter:drop-shadow(0 24px 34px rgba(0,0,0,.35))}
+.devices .scene .mac {width:calc((100% - var(--g))/1.16)}
+.devices .scene .iph {width:calc((100% - var(--g))*.22);margin-bottom:1%}
+@media(min-width:900px){.devices-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}}
+@media(max-width:700px){.devices .scene{min-height:0;gap:8px}.devices .scene .mac{width:77%}.devices .scene .iph{width:19%;margin-bottom:3%}.devices .scene{flex-direction:row;align-items:end}}
+
+/* Story sections: tangible visual proof rather than an empty wall of text. */
+.story {overflow:hidden}
+.story .wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(36px,5vw,72px);align-items:center}
+.story .sec-head{max-width:610px}
+.story h2{max-width:11ch}
+.story h2 em{color:var(--yellow)}
+.story-art{position:relative;min-width:0;margin:0;border-radius:26px;border:1px solid rgba(255,255,255,.09);overflow:hidden}
+#pace {background:#0B0E13}
+#pace .story-art{display:grid;place-items:center;padding:clamp(20px,3vw,44px);background:radial-gradient(circle at 45% 35%,#242A2E 0%,#13181E 70%,#10151C 100%)}
+#pace .story-art img{display:block;width:auto;height:clamp(380px,44vw,600px);max-width:100%;object-fit:contain;filter:drop-shadow(0 24px 34px rgba(0,0,0,.35))}
+#connection {background:#080A0E}
+#connection .story-art{border-radius:26px;background:#22272C;min-height:0;aspect-ratio:16/11;box-shadow:0 32px 90px rgba(0,0,0,.2)}
+#connection .story-art img{display:block;width:100%;height:100%;object-fit:cover}
+#connection .story-art::after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid rgba(255,255,255,.13);border-radius:inherit}
+@media(min-width:900px) {
+ .story .wrap{grid-template-columns:minmax(0,1fr) minmax(0,1.12fr)}
+ #connection .story-art{order:-1}
+ #connection .sec-head{padding-left:4%}
+}
+@media(max-width:899px){.story .wrap{gap:32px}}
+@media(max-width:560px){.story-art{border-radius:20px}}
+
+/* The auto-size demo remains real and interactive, but loses the endless scroll. */
+.autosize {background:#151A1F}
+.autosize h2{max-width:12ch}
+.autosize h2 em{color:var(--yellow)}
+.as-out {padding:3px 0}
+.as-read b{color:var(--yellow)}
+.autosize .as-after{padding-bottom:56px}
+
+/* Camera and library: product-first, less catalogue-like. */
+.crop {background:#080A0E}
+.crop h2 {max-width:13ch}
+.crop-dev {min-width:0;padding:clamp(18px,3vw,50px);border:1px solid rgba(255,255,255,.08);border-radius:34px;background:radial-gradient(circle at 50% 20%,#252A32,#13171E 72%);}
+.library {background:#11151B}
+.library h2{max-width:11ch}
+.library h2 em{color:var(--yellow)}
+.library .maclib{border-radius:16px;border:1px solid rgba(255,255,255,.13);box-shadow:0 35px 90px rgba(0,0,0,.32)}
+@media(min-width:900px){.library .split{grid-template-columns:minmax(0,5fr) minmax(0,7fr)}}
+
+/* Usage is a selected scene, not four equal feature cards. */
+.cases {background:#080A0E}
+.cases-head {gap:28px}
+.cases h2 {max-width:15ch;margin:0}
+.cases h2 em {color:var(--yellow)}
+.story-intro{max-width:64ch;color:var(--text-2);font-size:clamp(18px,1.5vw,21px);line-height:1.62}
+.tablist {border-radius:14px;padding:5px;background:#191E24;border-color:rgba(255,255,255,.095);gap:4px}
+.tab{border-radius:10px;font-weight:620;padding:0 21px}
+.tab[aria-selected=true]{background:var(--yellow);color:#080A0E}
+.case{gap:clamp(32px,5vw,80px);min-height:440px}
+.stage{border-radius:26px;background:radial-gradient(circle at 55% 50%,#282D34,#13171D 75%);min-width:0;overflow:hidden}
+.case .case-copy {padding:20px 0}
+.case-copy h3{font-size:clamp(28px,3vw,40px);letter-spacing:-.035em}
+.case .stage .photo{border-radius:20px}
+@media(min-width:900px){.case{grid-template-columns:minmax(0,6fr) minmax(0,5fr)}}
+@media(max-width:640px){.stage{border-radius:20px}.tablist{border-radius:16px}.tab{border-radius:12px}}
+
+/* Languages: confidence without screaming. */
+.languages{background:#12161B}
+.languages h2{max-width:11ch}
+.languages h2 em{color:var(--yellow)}
+.wall{font-size:clamp(32px,5.2vw,68px);line-height:1.52;letter-spacing:-.04em}
+.wall .w{margin-right:.24em}
+
+/* Pricing and small print become clear, rather than decorative clutter. */
+.pro{background:#0C0F13}
+.pro h2{max-width:14ch}
+.pro h2 em{color:var(--yellow)}
+.plans {gap:18px}
+.plan{background:#171B21;border:1px solid rgba(255,255,255,.11);border-radius:26px;min-height:345px}
+.plan.is-pro{background:linear-gradient(155deg,#24271E,#191E23 55%,#151B20);border-color:rgba(255,214,10,.4)}
+.plan h3{font-family:var(--sys);font-size:clamp(25px,3vw,36px);font-weight:740;letter-spacing:-.045em;text-transform:none}
+.plan li{font-size:17px;line-height:1.5;color:var(--text-2);padding-left:28px}
+.plan li::before{top:.76em;height:6px;width:6px;border-radius:50%;background:rgba(255,255,255,.5)}
+.plan.is-pro li::before{background:var(--yellow)}
+.pro>.wrap>.note{margin-top:28px;max-width:70ch}
+
+/* Privacy: a single, reassuring closing argument before FAQ. */
+#privacy-benefit {background:#141A1E}
+#privacy-benefit .wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:32px;align-items:center}
+#privacy-benefit h2{max-width:12ch}
+#privacy-benefit h2 em{color:var(--yellow)}
+.art-privacy{background:#22272C;box-shadow:0 32px 90px rgba(0,0,0,.2)}
+.art-privacy img{display:block;width:100%;height:auto}
+@media(min-width:900px){#privacy-benefit .wrap{grid-template-columns:minmax(0,1fr) minmax(0,.8fr)}}
+
+/* FAQ is a quiet place to make decisions. */
+.faq {background:#090B0F}
+.faq .wrap{max-width:1090px}
+.faq h2{font-size:clamp(38px,4.8vw,62px);max-width:none}
+.qas{max-width:none}
+.qa summary{font-size:clamp(17px,1.5vw,19px);padding:19px 0}
+.qa p{max-width:67ch;line-height:1.65}
+
+/* A decisive final frame; not another black panel. */
+.close{padding:clamp(90px,12vw,180px) 0;background:var(--yellow);color:#090A0D;border:0}
+.close h2{font-size:clamp(54px,8.7vw,136px);line-height:.99;letter-spacing:-.085em;max-width:14ch;margin-inline:auto}
+.close h2 em{color:#090A0D;font-weight:520}
+.close .sub{color:#292923;max-width:47ch;margin:24px auto 37px}
+.close .store{filter:drop-shadow(0 14px 20px rgba(0,0,0,.13))}
+.foot{background:#080A0E}
+
+/* Cookies: unobtrusive but legible, with reachable controls. */
+.consent{left:auto;right:20px;bottom:20px;width:min(430px,calc(100% - 32px));border-radius:16px;padding:16px 18px;background:rgba(22,27,33,.96);box-shadow:0 18px 58px rgba(0,0,0,.5);backdrop-filter:blur(16px)}
+.consent .btn{min-height:38px}
+@media(max-width:640px){.consent{left:10px;right:10px;bottom:10px;width:auto}}
+
+/* Locale-sensitive widths so no language is clipped. */
+:lang(de) h2,:lang(fr) h2,:lang(es) h2,:lang(it) h2,:lang(pt) h2{letter-spacing:-.053em;max-width:15ch}
+:lang(ko) .tab,:lang(ja) .tab,:lang(zh) .tab{white-space:normal}
+@media(max-width:900px){
+ .sec{padding:clamp(74px,11vw,122px) 0}
+ .devices .scene{min-height:unset}
+ .split{gap:36px}
+ .story-art{width:100%}
+}
+@media(max-width:640px){
+ .nav{min-height:62px}
+ .links{gap:22px}
+ h2{font-size:clamp(38px,10vw,54px);letter-spacing:-.065em}
+ .sec-head p:not(.note),.split-head p:not(.note),.case-copy p{font-size:17px;line-height:1.7}
+ .story-intro{font-size:17px}
+ .plan{min-height:unset;padding:26px}
+ .case{min-height:0}
+ .crop-dev{padding:18px;border-radius:20px}
+ .story .wrap{gap:28px}
+ .devices .scene{margin-top:12px}
+}
+@media(prefers-reduced-motion:reduce){
+ .hero-mac-shot img,.hero-dev>.dev.p{transition:none}
+}
+
+
+/* Remove the browser's default figure margins from the meeting photograph. */
+.art-connection{margin:0}
+
+/* Long native words must not force the page wider than a narrow phone. */
+.cases-head>* ,.split-head>* {min-width:0}
+@media(max-width:360px){
+ h2{font-size:33px;overflow-wrap:anywhere}
+ .cases-head,.split-head{min-width:0}
+ .tablist{min-width:0}
+}

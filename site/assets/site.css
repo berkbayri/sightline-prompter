@@ -8,7 +8,7 @@
   color-scheme:dark;
   --ink:#07080C;--surface:#0E1016;--raised:#16181F;--hair:rgba(255,255,255,.08);
   --text:#F4F4F6;--text-2:rgba(244,244,246,.68);--text-3:rgba(244,244,246,.42);
-  --yellow:#FFD60A;--gold:#F5D77A;--cue:#7DB8FF;--rec:#FF3B30;--glow:rgba(255,214,10,.18);
+  --yellow:#FFD60A;--gold:#F5D77A;--cue:#73CCFF;--rec:#FF3B30;
   --sys:-apple-system,"SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;
   --display:"Barlow Condensed","BC Fallback","Arial Narrow",sans-serif;
   --ease:cubic-bezier(.16,1,.3,1);
@@ -16,12 +16,15 @@
   --dt:uppercase;--tr:.1em;--fs:1;--lh:1;--dw:800;
   /* the prompter text in every demo, set to the defaults of docs/prompter-typography.md (sections 1.5, 1.6, 7, 8) */
   --prompter-font:var(--sys);--prompter-weight:600;--prompter-tracking:0em;--prompter-word:.04em;--prompter-leading:1.3;
-  --prompter-upcoming:#fff;--prompter-read:rgba(255,255,255,.78);--prompter-dim:rgba(244,244,246,.5);
-  --prompter-current-bg:rgba(255,214,10,.16);--prompter-current-ink:#FFDB66;--prompter-hl-radius:.22em;--prompter-hl-pad:.1em;
-  --prompter-cue:var(--cue);--prompter-cue-style:italic;--prompter-cue-weight:500;
+  /* colours read straight from PrompterUIView / PrompterText: read = white .55, current = #FFDB66 on a .16 fill, cue = rgb(115,204,255) */
+  --prompter-upcoming:#fff;--prompter-read:rgba(255,255,255,.55);
+  --prompter-current-bg:rgba(255,219,102,.16);--prompter-current-ink:#FFDB66;--prompter-hl-radius:.2em;--prompter-hl-pad:.12em;
+  /* current-word band = PrompterTypography.highlightBand (cap top - .14em .. baseline + .2em) on SF metrics: ascent .952, descent .241, cap .705 */
+  --hb-t:.107em;--hb-b:.041em;
+  --prompter-cue-style:italic;--prompter-cue-weight:500;
   /* legibility over video: halo on every glyph (em, so it scales) plus one soft plate per line */
   --prompter-halo:0 .03em .07em rgba(0,0,0,.9),0 0 .28em rgba(0,0,0,.55);
-  --prompter-plate:rgba(0,0,0,.5);
+  --prompter-plate:#000;
 }
 :lang(fr),:lang(es),:lang(it),:lang(pt){--lh:1.06}
 :lang(tr),:lang(de){--lh:1.12} /* capital diacritics (İ Ü Ö Ä) clear the line above */
@@ -107,14 +110,15 @@ ul{padding:0;list-style:none}
 .lang li a[aria-current]{font-weight:600}
 
 /* reading states, shared by every demo */
-.w{transition:color .15s,background-color .15s;color:var(--prompter-upcoming)}
+.w{position:relative;z-index:0;color:var(--prompter-upcoming)}
 .w.r{color:var(--prompter-read)}
-.w.c{color:var(--prompter-current-ink);background:var(--prompter-current-bg);border-radius:var(--prompter-hl-radius);padding:0 var(--prompter-hl-pad);margin:0 calc(-1*var(--prompter-hl-pad))}
-.cue{color:var(--prompter-cue);font-style:var(--prompter-cue-style);font-weight:var(--prompter-cue-weight);letter-spacing:0;text-transform:none}
+.w.c{color:var(--prompter-current-ink)}
+.w.c::before{content:"";position:absolute;z-index:-1;left:calc(-1*var(--prompter-hl-pad));right:calc(-1*var(--prompter-hl-pad));top:var(--hb-t);bottom:var(--hb-b);border-radius:var(--prompter-hl-radius);background:var(--prompter-current-bg)}
+.cue{color:rgba(115,204,255,.95);background:rgba(115,204,255,.16);font-style:var(--prompter-cue-style);font-weight:var(--prompter-cue-weight);letter-spacing:0;text-transform:none}
+.cue.r{color:rgba(115,204,255,.35);background:rgba(115,204,255,.06)}
 
 /* hero: the reading line beside the real product */
 .hero{position:relative;overflow:clip;padding:clamp(16px,2.4vw,32px) 0 clamp(40px,6vw,88px)}
-.hero::before{content:"";position:absolute;right:max(-140px,-9vw);top:50%;width:min(900px,120%);height:min(780px,100%);transform:translateY(-50%);background:radial-gradient(ellipse at center,var(--glow),rgba(255,214,10,0) 68%);pointer-events:none}
 .hero-grid{position:relative;display:grid;gap:clamp(28px,4vw,48px);align-items:center}
 .hero-copy{container-type:inline-size;min-width:0}
 .hero-dev{--hero-h:min(500px,calc(100svh - 190px));display:flex;align-items:flex-end;justify-content:center;gap:12px}
@@ -123,10 +127,12 @@ ul{padding:0;list-style:none}
   .hero-dev{--hero-h:clamp(440px,calc(100svh - 150px),720px)}
 }
 /* all three lines share one size, sized so the widest never wraps */
-.reading{font:var(--prompter-weight) min(64px,max(var(--hero-min,0px),calc(100cqw/var(--w,20))))/1.35 var(--prompter-font);letter-spacing:var(--prompter-tracking);word-spacing:var(--prompter-word)}
+.reading{position:relative;font:var(--prompter-weight) min(64px,max(var(--hero-min,0px),calc(100cqw/var(--w,20))))/var(--prompter-leading) var(--prompter-font);letter-spacing:var(--prompter-tracking);word-spacing:var(--prompter-word)}
 .reading .ln{display:block;white-space:nowrap;color:var(--prompter-upcoming)}
-.reading .ln.dim{font-size:.72em;color:var(--prompter-dim)}
-.reading .cue{display:inline-block;margin-left:.6em;padding:.12em .55em;border-radius:.45em;background:rgba(125,184,255,.14);font:var(--prompter-cue-weight) max(13px,.5em)/1.3 var(--sys);font-style:normal;vertical-align:.15em}
+.reading .cue{display:block;width:fit-content;margin:.45em 0;font-size:.62em;line-height:1.25}
+/* the app draws the reading line as two hairline ticks in the margins; here they ease to the current line (ScrollEngine follow, rate 8) */
+.reading::before,.reading::after{content:"";position:absolute;top:0;width:10px;height:1px;background:rgba(255,255,255,.18);transform:translateY(var(--ty,-9999px));pointer-events:none}
+.reading::before{left:-12px}.reading::after{right:-12px}
 .hero .sub{margin-inline:0}
 @media (max-width:640px){.reading{--hero-min:27px}:lang(ja) .reading,:lang(ko) .reading,:lang(zh) .reading{--hero-min:23px}:lang(ja) .reading .ln,:lang(zh) .reading .ln{white-space:nowrap}.reading .ln{white-space:normal;text-wrap:balance}}
 .sub{max-width:40em;margin:clamp(20px,2.6vw,32px) auto 0;font-size:clamp(17px,1.35vw,19px);color:var(--text-2);text-wrap:pretty}
@@ -135,12 +141,6 @@ ul{padding:0;list-style:none}
 .vid-ctl:hover{color:var(--text);background:rgba(255,255,255,.08)}
 .vid-ctl[aria-pressed=true] .i-pause,.vid-ctl[aria-pressed=false] .i-play{display:none}
 .no-js .vid-ctl{display:none}
-@media (prefers-reduced-motion:no-preference){
-  .reading .ln{animation:rise .9s var(--ease) both}
-  .reading .ln:nth-child(2){animation-delay:.08s}
-  .reading .ln:nth-child(3){animation-delay:.16s}
-  @keyframes rise{from{opacity:0;transform:translateY(14px)}}
-}
 
 /* real Apple bezels: content under the frame, frame untouched (no shadow, filter, tilt or overlay) */
 .dev{position:relative;aspect-ratio:1350/2760;flex:none}
@@ -175,7 +175,6 @@ h2 em{font-style:normal;color:var(--yellow)}
 .scene .mac{width:calc((100% - var(--g))/1.23)}
 .scene .iph{width:calc((100% - var(--g))*.187)}
 @media (max-width:700px){.scene{flex-direction:column;align-items:center;gap:40px}.scene .mac{width:100%}.scene .iph{width:min(220px,64%)}}
-.plate{padding:.04em .3em;border-radius:.5em;background:var(--prompter-plate);box-shadow:0 .05em .3em .1em var(--prompter-plate);-webkit-box-decoration-break:clone;box-decoration-break:clone}
 
 /* distance scene: tall track + one sticky screen; scroll progress = distance 35 -> 100 -> 45 cm */
 .autosize{padding:0}
@@ -185,18 +184,27 @@ h2 em{font-style:normal;color:var(--yellow)}
 .dist{display:flex;justify-content:center;min-height:0}
 .as-unit{--d:0;display:grid;grid-template-columns:auto 44px;grid-template-rows:minmax(0,1fr) var(--oh,auto);column-gap:20px;row-gap:14px;justify-items:start;min-height:0}
 .pf{--s:28;--n:3;width:min(260px,100%)}
-.pf-photo{position:absolute;inset:0;transform-origin:51% 42%;transform:scale(calc(1.7 - .7*var(--d)))}
-.pf-photo img{display:block;width:100%;height:100%;object-fit:cover}
+/* the screen as PrompterUIView draws it: picture between status bar and controls, text left-aligned from the top, soft plate, halo, feathered band */
+.pf-photo{position:absolute;left:0;right:0;top:9.1%;bottom:9.5%;overflow:hidden;border-radius:2.8cqw}
+.pf-photo img{display:block;width:100%;height:100%;object-fit:cover;transform-origin:51% 42%;transform:scale(calc(1.7 - .7*var(--d)))}
 /* real iPhone status bar capture: screen content (under the bezel), fixed while the photo zooms */
 .dev .scr>img.pf-sb{position:absolute;left:0;top:0;height:auto;z-index:1;pointer-events:none}
-.pf-text{position:absolute;left:0;right:0;top:19cqw;max-height:calc(var(--n,3)*1.3em);overflow:hidden;padding:0 5cqw;text-align:center;font:var(--prompter-weight) calc(var(--s,28)*100cqw/402)/var(--prompter-leading) var(--prompter-font);letter-spacing:var(--prompter-tracking);word-spacing:var(--prompter-word);color:var(--prompter-upcoming);text-shadow:var(--prompter-halo);-webkit-mask-image:linear-gradient(#000 calc(100% - .9em),transparent);mask-image:linear-gradient(#000 calc(100% - .9em),transparent)}
+.pf-copy{position:absolute;left:0;right:0;top:17.6cqw;z-index:1;font:var(--prompter-weight) calc(var(--s,28)*100cqw/402)/var(--prompter-leading) var(--prompter-font);letter-spacing:var(--prompter-tracking);word-spacing:var(--prompter-word)}
+/* one blurred (sigma .3em) black plate per line, united so overlaps never darken twice; the lines are the same text, invisible, so they wrap the same */
+.plate{position:absolute;left:0;right:0;top:0;height:calc(var(--n,3)*1.3em);overflow:hidden;padding:0 5.5cqw;opacity:.35;filter:blur(.3em);pointer-events:none}
+.plate i{font:inherit;font-style:normal;color:transparent;background:var(--prompter-plate);padding:.16em .6em;margin:0 -.6em;border-radius:.5em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.pf-text{position:relative;max-height:calc(var(--n,3)*1.3em + .3em);overflow:hidden;padding:0 5.5cqw;color:var(--prompter-upcoming);text-shadow:var(--prompter-halo);-webkit-mask-image:linear-gradient(transparent,#000 .6em,#000 calc(100% - .6em),transparent);mask-image:linear-gradient(transparent,#000 .6em,#000 calc(100% - .6em),transparent)}
+.pf-copy::before,.pf-copy::after{content:"";position:absolute;top:.65em;width:2.5cqw;height:1px;background:rgba(255,255,255,.18);z-index:1}
+.pf-copy::before{left:2.5cqw}.pf-copy::after{left:calc(100% - 5cqw)}
+/* the control bar is the real capture, cropped from the demo poster */
+.pf-bar{position:absolute;left:0;right:0;bottom:0;height:9.8%;z-index:2;background:#000 bottom/100% auto no-repeat}
 /* ruler: a real vertical range input (invisible thumb) over decorative ticks and a needle */
 .ruler{position:relative;width:44px;border-radius:6px}
 .ruler:has(input:focus-visible){outline:2px solid var(--yellow);outline-offset:4px}
 .ruler-ticks{position:absolute;inset:0 0 -1px;background:repeating-linear-gradient(var(--text-3) 0 1px,transparent 1px calc(100%/13)) left/9px 100% no-repeat}
 .ruler-ticks b{position:absolute;left:0;top:var(--v);padding-left:14px;transform:translateY(-50%);font:600 11px/1 var(--sys);font-variant-numeric:tabular-nums;color:var(--text-2)}
 .ruler-needle{position:absolute;left:0;right:0;top:0;height:100%;transform:translateY(calc(var(--d)*100%))}
-.ruler-needle::before{content:"";position:absolute;left:-6px;top:-1px;width:19px;height:2px;border-radius:1px;background:var(--yellow);box-shadow:0 0 10px var(--glow)}
+.ruler-needle::before{content:"";position:absolute;left:-6px;top:-1px;width:19px;height:2px;border-radius:1px;background:var(--yellow);}
 .ruler input{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:ns-resize;writing-mode:vertical-lr;-webkit-appearance:none;appearance:none}
 .as-out{grid-column:1/-1;display:grid;gap:2px;min-width:0;contain:inline-size;justify-self:stretch;align-content:start;overflow:hidden}
 .as-out label{font:600 13px/1.3 var(--sys);color:var(--text-2)}
@@ -216,7 +224,7 @@ h2 em{font-style:normal;color:var(--yellow)}
   .dist{height:min(100%,740px)}
   .as-unit{--oh:104px;height:100%}
   .as-pin .pf{height:100%;width:auto;min-height:0;max-width:100%}
-  .pf-photo,.ruler-needle{will-change:transform}
+  .pf-photo img,.ruler-needle{will-change:transform}
   @media (min-width:900px){
     .as-track{height:280svh}
     .as-pin .split{height:min(100%,820px);grid-template-rows:minmax(0,1fr);gap:clamp(48px,6vw,96px)}
@@ -225,7 +233,7 @@ h2 em{font-style:normal;color:var(--yellow)}
   /* scroll-linked on the compositor where supported; site.js mirrors it (same key points) for the rest and for keyboard use */
   @supports (animation-timeline:view()){
     .as-track{view-timeline:--as block}
-    .as-track:not([data-manual]) .pf-photo{animation:as-photo linear both;animation-timeline:--as;animation-range:100svh calc(100% - 100svh)}
+    .as-track:not([data-manual]) .pf-photo img{animation:as-photo linear both;animation-timeline:--as;animation-range:100svh calc(100% - 100svh)}
     .as-track:not([data-manual]) .ruler-needle{animation:as-needle linear both;animation-timeline:--as;animation-range:100svh calc(100% - 100svh)}
   }
 }
@@ -267,7 +275,7 @@ h2 em{font-style:normal;color:var(--yellow)}
 
 /* languages: the wall reads itself too */
 .wall{margin-top:clamp(40px,6vw,80px);font:var(--prompter-weight) clamp(30px,5.4vw,72px)/1.3 var(--prompter-font);letter-spacing:var(--prompter-tracking);word-spacing:var(--prompter-word)}
-.wall .w{display:inline-block;margin-right:.18em}
+.wall .w{display:inline-block;margin-right:.18em;--hb-t:.1605em;--hb-b:.0945em}
 
 /* library: real Mac app capture */
 .maclib{display:block;width:100%;height:auto;border-radius:10px}

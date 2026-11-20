@@ -226,9 +226,9 @@ def device_rel(code, name):
 
 
 def reading_width(lines, cue):
-    """Width in em of the widest hero line at the current line's size (dim lines are .72em; wide scripts 1em/char, latin ~.56em/char)."""
+    """Width in em of the widest hero line (all three share one size; wide scripts 1em/char, latin ~.56em/char). The cue sits on its own row."""
     w = lambda x: sum(1.08 if ord(ch) > 0x2E80 else .56 for ch in x)
-    return round(max(w(lines[1]), .72 * (w(lines[0]) + w(cue) * .34 + 1.6), .72 * w(lines[2])), 1)
+    return round(max(w(x) for x in lines), 1)
 
 
 def make_og(code, t, lang):
@@ -239,8 +239,8 @@ def make_og(code, t, lang):
     out.parent.mkdir(parents=True, exist_ok=True)
     l = t["hero"]["lines"]
     wide = lambda x: sum(1.0 if ord(ch) > 0x2E80 else .56 for ch in x)
-    fs = int(min(60, 630 / max(wide(l[1]), .72 * wide(l[0]), .72 * wide(l[2]))))
-    ctx = {"lang": lang, "l0": l[0], "l1": l[1], "l2": l[2], "cue": t["hero"]["cue"].strip("[]"), "fs": fs, "fs_dim": round(fs * .72),
+    fs = int(min(60, 630 / max(wide(l[1]), .72 * wide(l[0]), *(.72 * wide(x) for x in l[2:]))))
+    ctx = {"lang": lang, "l0": l[0], "l1": l[1], "l2": "".join(l[2:]), "cue": t["hero"]["cue"].strip("[]"), "fs": fs, "fs_dim": round(fs * .72),
            "poster": (SITE / "assets" / video_rel(code, "demo-portrait-poster.webp")).as_uri(),
            "frame": (SITE / "assets/img/devices/iphone-frame-portrait.webp").as_uri()}
     with tempfile.TemporaryDirectory() as tmp:
@@ -349,7 +349,8 @@ def main():
     og = SITE / "assets/img/og.png"
     og_url = f"{SITE_URL}/assets/img/og.png?v={file_hash(og)}" if og.exists() else SITE_URL + "/icon-512.png"
     tpl = parse((SITE / "template.html").read_text(encoding="utf-8"))
-    v = {"css": file_hash(SITE / "assets/site.css"), "js": file_hash(SITE / "assets/site.js")}
+    v = {"css": file_hash(SITE / "assets/site.css"), "js": file_hash(SITE / "assets/site.js"),
+         "editorial": file_hash(SITE / "assets/editorial.css")}
     analytics = GA_ID != "G-XXXXXXXXXX"
     meta = {c: (lang, ogl, name, skip) for c, lang, ogl, name, skip in LOCALES}
     switcher = lambda cur: [{"code": c, "path": loc_path(c), "name": meta[c][2], "lang": meta[c][0],
@@ -376,7 +377,7 @@ def main():
                  "statusbar": asset("img/devices/statusbar-portrait.webp"), "mac": asset(device_rel(code, "macbook-panel.webp")), "iph_p": asset(device_rel(code, "iphone-prompter-portrait.webp"))},
             video={k: {e: asset(video_rel(code, f"demo-{k}{s}")) for e, s in (("mp4", ".mp4"), ("webm", ".webm"), ("poster", "-poster.webp"))}
                    for k in ("portrait", "landscape")},
-            wide=image("autosize-wide", (3072, 1728)),
+            wide=image("autosize-wide", (3072, 1728)), meet=image("case-meeting", CASE_DIMS, code),
             maclib=image(f"devices/{code}/mac-library" if (SITE / "assets/img/devices" / code / "mac-library.webp").exists() else "devices/en/mac-library", (1600, 996)),
             lang_offers="" if code != "en" else html_attr_json({c: [t2["nav"]["lang_offer"], loc_path(c)] for c, t2 in built.items() if c != "en"}),
             year=date.today().year, phone=image("iphone-preview-person", PHONE_DIMS),

@@ -186,7 +186,7 @@ h2 em{font-style:normal;color:var(--yellow)}
 .pf{--s:28;--n:3;width:min(260px,100%)}
 /* the screen as PrompterUIView draws it: picture between status bar and controls, text left-aligned from the top, soft plate, halo, feathered band */
 .pf-photo{position:absolute;left:0;right:0;top:9.1%;bottom:9.5%;overflow:hidden;border-radius:2.8cqw}
-.pf-photo img{display:block;width:100%;height:100%;object-fit:cover;transform-origin:51% 42%;transform:scale(calc(1.7 - .7*var(--d)))}
+.pf-photo img{display:block;width:100%;height:100%;object-fit:cover;transform-origin:var(--fx,50%) var(--fy,37%);transform:scale(calc(2.5 - 1.5*var(--d)))}
 /* real iPhone status bar capture: screen content (under the bezel), fixed while the photo zooms */
 .dev .scr>img.pf-sb{position:absolute;left:0;top:0;height:auto;z-index:1;pointer-events:none}
 .pf-copy{position:absolute;left:0;right:0;top:17.6cqw;z-index:1;font:var(--prompter-weight) calc(var(--s,28)*100cqw/402)/var(--prompter-leading) var(--prompter-font);letter-spacing:var(--prompter-tracking);word-spacing:var(--prompter-word)}
@@ -237,7 +237,7 @@ h2 em{font-style:normal;color:var(--yellow)}
     .as-track:not([data-manual]) .ruler-needle{animation:as-needle linear both;animation-timeline:--as;animation-range:100svh calc(100% - 100svh)}
   }
 }
-@keyframes as-photo{0%,10%{transform:scale(1.7)}55%,66%{transform:scale(1)}92%,100%{transform:scale(1.5923)}}
+@keyframes as-photo{0%,10%{transform:scale(2.5)}55%,66%{transform:scale(1)}92%,100%{transform:scale(2.2692)}}
 @keyframes as-needle{0%,10%{transform:translateY(0)}55%,66%{transform:translateY(100%)}92%,100%{transform:translateY(15.38%)}}
 
 /* cases */

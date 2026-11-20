@@ -129,6 +129,8 @@
   const scene = d.querySelector('[data-dist]');
   if (scene) {
     const pin = scene.querySelector('.as-pin'), unit = scene.querySelector('.as-unit'), range = unit.querySelector('input'), tan = x => Math.tan(x * Math.PI / 180);
+    const ph = scene.querySelector('.pf-photo'); // zoom about the face centre so the face stays put while the room grows or shrinks
+    if (ph) { ph.style.setProperty('--fx', (ph.dataset.faceX || 50) + '%'); ph.style.setProperty('--fy', (ph.dataset.faceY || 37) + '%'); }
     const KEYS = [[0, 35], [.1, 35], [.55, 100], [.66, 100], [.92, 45], [1, 45]]; // same key points as @keyframes as-photo
     const at = p => {
       let i = 1;

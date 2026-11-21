@@ -209,6 +209,13 @@ extension CameraLayout {
         return CGRect(x: area.midX - width / 2, y: area.midY - height / 2, width: width, height: height)
     }
 
+    /// The smallest rect of `aspect` (width / height) that covers `area`, centred on it.
+    static func fill(aspect: CGFloat, covering area: CGRect) -> CGRect {
+        guard aspect > 0, area.width > 0, area.height > 0 else { return area }
+        let width = max(area.width, area.height * aspect)
+        return CGRect(x: area.midX - width / 2, y: area.midY - width / aspect / 2, width: width, height: width / aspect)
+    }
+
     fileprivate static func recordingPortrait(size: CGSize, insets: ScreenInsets, band: RecordingBand) -> CameraLayout {
         let left = max(insets.left, 24)
         let right = max(insets.right, 24)
@@ -225,9 +232,9 @@ extension CameraLayout {
         // The video uses the whole screen below the camera cutout, edge to edge. The prompter text and the
         // controls sit on top of it, so the picture is as large as the screen allows.
         let area = CGRect(x: 0, y: top, width: size.width, height: max(size.height - top, 1))
-        // The whole recorded picture is shown, never cropped, as large as the screen allows. The screen around it is
-        // not left empty: the app draws the same live picture, dimmed and blurred, behind it.
-        let preview = fit(aspect: 1 / band.videoAspect, in: CGRect(origin: .zero, size: size))
+        // The picture fills the whole screen, edge to edge, in the recorded shape: the screen is taller than 9:16,
+        // so its sides run past the screen edges (the recording holds slightly more width than the screen shows).
+        let preview = fill(aspect: 1 / band.videoAspect, covering: CGRect(origin: .zero, size: size))
         // First line of the band is the reading line, so the word being read sits right under the lens.
         return CameraLayout(
             textFrame: textFrame,
@@ -276,7 +283,8 @@ extension CameraLayout {
             controlsFrame: controlsFrame,
             cameraEdge: cameraOnLeft ? .left : .right,
             isLandscape: true,
-            previewFrame: fit(aspect: band.videoAspect, in: CGRect(origin: .zero, size: size)),
+            // Edge to edge like portrait: the screen is wider than 16:9, so the picture's top and bottom run past it.
+            previewFrame: fill(aspect: band.videoAspect, covering: CGRect(origin: .zero, size: size)),
             arrangeArea: area,
             previewAspect: band.videoAspect
         )
@@ -298,7 +306,11 @@ extension CameraLayout {
 
     /// The frames now in use, for starting an edit.
     public var arrangedFrames: ArrangedFrames? {
-        previewFrame.map { ArrangedFrames(preview: $0, text: textFrame) }
+        // A preview filling the screen runs past the arrange area; arranging starts from the whole picture inside it.
+        previewFrame.map { frame in
+            let preview = arrangeArea.contains(frame) || arrangeArea.isEmpty ? frame : Self.fit(aspect: previewAspect, in: arrangeArea)
+            return ArrangedFrames(preview: preview, text: textFrame)
+        }
     }
 
     /// The same layout with the preview and the text where the user put them.

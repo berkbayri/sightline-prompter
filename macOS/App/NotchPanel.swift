@@ -115,6 +115,10 @@ final class NotchPanel: NSPanel {
 
         setupControlBar()
         content.onHoverChange = { [weak self] hovering in
+            #if DEBUG
+            // Site captures show the panel as it reads, not as the pointer happens to hover it.
+            if ProcessInfo.processInfo.environment["SIGHTLINE_RENDER_FRAMES"] != nil { return }
+            #endif
             self?.setControlBarVisible(hovering)
         }
 

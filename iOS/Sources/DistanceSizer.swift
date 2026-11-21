@@ -107,6 +107,12 @@ final class DistanceSizer: ObservableObject {
         if shown != distanceCm { distanceCm = shown }
         let far = distance.map { plan($0).tooFar } ?? false
         if far != tooFar { tooFar = far }
+        #if DEBUG
+        if let distance {
+            print(String(format: "[sizer] smoothed %.0f mm  wanted %.1f pt  applied %.1f pt  width %.0f", distance, plan(distance).fontSize,
+                         appliedSize, usableWidth()))
+        }
+        #endif
     }
 
     /// The Font size setting changed by hand. It applies at once; with Auto running it also teaches the gain.

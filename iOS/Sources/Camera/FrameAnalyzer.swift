@@ -66,6 +66,10 @@ final class FrameAnalyzer: NSObject, AVCaptureVideoDataOutputSampleBufferDelegat
                   let focal = Self.focalPx(sampleBuffer, buffer: buffer, fov: fov, zoom: zoom),
                   let distance = PrompterTypography.distanceMm(ipdPx: face.ipdPx, yawRad: face.yawRad, focalPx: focal)
             else { return }
+            #if DEBUG
+            print(String(format: "[face] ipd %.1f px  yaw %.2f  focal %.0f px  buffer %dx%d  orient %d  -> %.0f mm", face.ipdPx, face.yawRad, focal,
+                         CVPixelBufferGetWidth(buffer), CVPixelBufferGetHeight(buffer), orientation.rawValue, distance))
+            #endif
             onDistance?(distance)
         }
     }

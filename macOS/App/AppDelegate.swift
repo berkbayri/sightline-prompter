@@ -50,6 +50,47 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ControllerInputDelegat
         if ProcessInfo.processInfo.environment["SIGHTLINE_EDIT"] != nil {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [prompter] in prompter.beginEditing() }
         }
+        // Site captures: move the reading position the way voice following does, at a natural speaking pace,
+        // from word SIGHTLINE_DEMO_SPEECH on (spaced languages ~155 wpm, CJK ~7 characters a second).
+        if let start = ProcessInfo.processInfo.environment["SIGHTLINE_DEMO_SPEECH"].flatMap(Int.init) {
+            let language = ScriptLanguage.named(Settings.shared.scriptLanguage)
+            let tokens = ScriptTokenizer.parse(Settings.shared.script, language: language).tokens.map(\.display)
+            prompter.setCursor(wordIndex: start)
+            panel.setControlState(playing: false, tracking: true)
+            panel.setStatus("Listening…")
+            var t = 2.0
+            for index in tokens.indices.dropFirst(start) {
+                let word = tokens[index]
+                let letters = Double(word.filter { $0.isLetter || $0.isNumber }.count)
+                t += language.spaced ? 0.15 + 0.052 * letters : 0.145 * max(letters, 1)
+                if let last = word.last {
+                    if ".!?。！？".contains(last) { t += 0.45 } else if ",;:，、；：".contains(last) { t += 0.2 }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + t + 0.15) { [prompter] in
+                    prompter.setCursor(wordIndex: min(index + 1, tokens.count - 1))
+                }
+            }
+        }
+        // Site captures: the panel's own layers drawn to PNG frames at 2x, 30 a second, then quit.
+        if let dir = ProcessInfo.processInfo.environment["SIGHTLINE_RENDER_FRAMES"] {
+            let seconds = ProcessInfo.processInfo.environment["SIGHTLINE_RENDER_SECONDS"].flatMap(Double.init) ?? 0.1
+            let count = max(Int(seconds * 30), 1)
+            let delay = ProcessInfo.processInfo.environment["SIGHTLINE_RENDER_DELAY"].flatMap(Double.init) ?? 2
+            try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+            for i in 0..<count {
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay + Double(i) / 30) { [weak self] in
+                    guard let view = self?.panel.contentView, let layer = view.layer,
+                          let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(view.bounds.width * 2), pixelsHigh: Int(view.bounds.height * 2),
+                                                     bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+                                                     colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0),
+                          let context = NSGraphicsContext(bitmapImageRep: rep) else { return }
+                    context.cgContext.scaleBy(x: 2, y: 2)
+                    layer.render(in: context.cgContext)
+                    try? rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: String(format: "%@/f%04d.png", dir, i)))
+                    if i == count - 1 { NSApp.terminate(nil) }
+                }
+            }
+        }
         #endif
         #endif
 

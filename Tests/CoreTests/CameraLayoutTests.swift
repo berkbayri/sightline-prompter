@@ -129,7 +129,7 @@ final class CameraLayoutTests: XCTestCase {
         XCTAssertEqual(layout.textFrame.midY, size.height / 2, accuracy: 0.5)
     }
 
-    func testRecordingPreviewShowsTheWholePictureAsLargeAsTheScreenAllows() {
+    func testRecordingPreviewKeepsTheVideoShape() {
         let screens = [CGSize(width: 393, height: 852), CGSize(width: 852, height: 393)]
         for aspect in [16.0 / 9.0, 4.0 / 3.0] {
             for size in screens {
@@ -141,12 +141,13 @@ final class CameraLayoutTests: XCTestCase {
                     readingDistanceCm: 0.5, landscapeColumnWidth: 480, recording: band
                 )
                 let preview = layout.previewFrame ?? .zero
-                // The picture is never cropped: the preview has exactly the shape of the video.
+                // The preview has exactly the shape of the video.
                 let shape = landscape ? CGFloat(aspect) : 1 / CGFloat(aspect)
                 XCTAssertEqual(preview.width / preview.height, shape, accuracy: 0.001)
-                // And it is as large as the screen allows: it touches the screen on one axis.
+                // It fills the screen edge to edge, touching it on one axis and running past it on the other.
+                let screen = CGRect(origin: .zero, size: size)
+                XCTAssertTrue(preview.insetBy(dx: -0.5, dy: -0.5).contains(screen))
                 XCTAssertTrue(abs(preview.width - size.width) < 0.5 || abs(preview.height - size.height) < 0.5)
-                XCTAssertTrue(CGRect(origin: .zero, size: size).contains(preview))
                 // The text and the controls sit on top of it.
                 XCTAssertTrue(preview.intersects(layout.textFrame))
             }
@@ -203,6 +204,9 @@ final class CameraLayoutTests: XCTestCase {
         )
         let preview = portrait.previewFrame ?? .zero
         XCTAssertEqual(preview.width / preview.height, 9.0 / 16.0, accuracy: 0.001)
-        XCTAssertEqual(preview.width, portraitSize.width, accuracy: 0.5)
+        // No empty band above or below: the picture covers the whole screen, centred.
+        XCTAssertEqual(preview.minY, 0, accuracy: 0.5)
+        XCTAssertEqual(preview.height, portraitSize.height, accuracy: 0.5)
+        XCTAssertEqual(preview.midX, portraitSize.width / 2, accuracy: 0.5)
     }
 }

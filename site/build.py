@@ -45,8 +45,8 @@ WALL = [("English", "en"), ("Türkçe", "tr"), ("Español", "es"), ("Deutsch", "
 PLACEMENTS = ["hero", "devices", "cases", "pro", "close", "nav"]
 CASE_DIMS = (1200, 900)   # placeholder box when an image is missing
 PHONE_DIMS = (590, 1278)
-CASE_ORIENT = {"youtube": "l", "reels": "p", "course": "p", "meeting": "photo"}  # real Apple bezel: landscape, portrait, none (a photograph)
-CASE_IMG = {"youtube": "case-youtube", "reels": "case-reels", "course": "case-course", "meeting": "case-meeting"}
+CASE_ORIENT = {"youtube": "l", "reels": "p", "course": "p", "meeting": "mac"}  # real Apple bezel: iPhone landscape, portrait, MacBook
+CASE_LIVE = {"youtube": "youtube_l", "reels": "reels_p", "course": "course_p", "meeting": "meeting_mac"}
 
 
 # ---------- tiny mustache-style engine: {{x}} escaped, {{{x}}} raw, {{#x}}..{{/x}}, {{^x}}..{{/x}} ----------
@@ -209,6 +209,25 @@ def image(name, default, locale=None):
     return {"has": True, "url": url, "w": w, "h": h, "srcset": ", ".join(parts + [f"{url} {w}w"])}
 
 
+WORDS = json.loads((SITE / "render/prompter-words.json").read_text(encoding="utf-8"))
+LIVE_PT = 35.5  # the size DistanceSizer commits at 45 cm on an iPhone 17 Pro
+
+
+def live_prompter(code):
+    """data-prompter JSON per scene (o: p portrait, l landscape, mac panel) and the stills under them."""
+    words = WORDS.get(code, WORDS["en"])
+    def data(key, o, pt=LIVE_PT):
+        w = words[key]
+        return json.dumps({"o": o, "w": w["words"], "sp": w["spaced"], "pt": 40 if o == "mac" else pt}, ensure_ascii=False, separators=(",", ":"))
+    mac = lambda m: asset(f"img/live/{code}/mac-{m}.webp") if (SITE / f"assets/img/live/{code}/mac-{m}.webp").exists() else asset(f"img/live/en/mac-{m}.webp")
+    return {
+        "youtube_p": data("youtube", "p"), "youtube_l": data("youtube", "l"), "reels_p": data("reels", "p"), "reels_l": data("reels", "l"),
+        "course_p": data("course", "p"), "meeting_mac": data("meeting", "mac"), "youtube_mac": data("youtube", "mac"),
+        "bg": {k: asset(f"img/live/iphone-{k}.webp") for k in ("talking", "reels", "course")}, "bg_l": asset("img/live/iphone-youtube-l.webp"),
+        "mac_meeting": mac("meeting"), "mac_record": mac("record"), "dist": "/assets/img/live/dist-",
+    }
+
+
 def asset(rel):
     """Versioned URL of a file under site/assets."""
     p = SITE / "assets" / rel
@@ -216,13 +235,8 @@ def asset(rel):
 
 
 def video_rel(code, name):
-    """Per-locale loop under video/<code>/, falling back to the root (English) file."""
+    """Per-locale poster under video/<code>/ (the OG card's phone screen), falling back to the root (English) file."""
     return f"video/{code}/{name}" if (SITE / "assets/video" / code / name).exists() else f"video/{name}"
-
-
-def device_rel(code, name):
-    """Per-locale device composite under img/devices/<code>/, falling back to the root (English) file."""
-    return f"img/devices/{code}/{name}" if (SITE / "assets/img/devices" / code / name).exists() else f"img/devices/{name}"
 
 
 def reading_width(lines, cue):
@@ -349,7 +363,7 @@ def main():
     og = SITE / "assets/img/og.png"
     og_url = f"{SITE_URL}/assets/img/og.png?v={file_hash(og)}" if og.exists() else SITE_URL + "/icon-512.png"
     tpl = parse((SITE / "template.html").read_text(encoding="utf-8"))
-    v = {"css": file_hash(SITE / "assets/site.css"), "js": file_hash(SITE / "assets/site.js"),
+    v = {"css": file_hash(SITE / "assets/site.css"), "js": file_hash(SITE / "assets/site.js"), "pjs": file_hash(SITE / "assets/prompter.js"),
          "editorial": file_hash(SITE / "assets/editorial.css")}
     analytics = GA_ID != "G-XXXXXXXXXX"
     meta = {c: (lang, ogl, name, skip) for c, lang, ogl, name, skip in LOCALES}
@@ -362,10 +376,13 @@ def main():
         lang, ogl, _, skip = meta[code]
         store = dict(t["store"], **{f"url_{p}": store_url(p) for p in PLACEMENTS})
         store["badge"] = BADGE + t["store"]["badge_lang"]
+        lp = live_prompter(code)
+        case_bg = {"youtube": lp["bg_l"], "reels": lp["bg"]["reels"], "course": lp["bg"]["course"], "meeting": lp["mac_meeting"]}
         cases = dict(t["cases"], items=[
             dict(it, idx=i, selected="true" if i == 0 else "false", hidden="" if i == 0 else " hidden",
-                 tabindex=0 if i == 0 else -1, img=image(CASE_IMG[it["id"]], CASE_DIMS, code),
-                 orient={k: CASE_ORIENT[it["id"]] == k for k in ("p", "l", "photo")})
+                 tabindex=0 if i == 0 else -1,
+                 orient={k: CASE_ORIENT[it["id"]] == k for k in ("p", "l", "mac")},
+                 pr=lp[CASE_LIVE[it["id"]]], prbg=case_bg[it["id"]])
             for i, it in enumerate(t["cases"]["items"])])
         ctx = dict(
             t, lang=lang, code=code, og_locale=ogl, og_image=og_url, skip=skip, home=home,
@@ -374,10 +391,10 @@ def main():
             # width estimate in em for the hero line: wide scripts 1em/char, latin ~.52em/char
             hero_w=reading_width(t["hero"]["lines"], t["hero"]["cue"].strip("[]")), hero_cue=t["hero"]["cue"].strip("[]"),
             dev={"frame_p": asset("img/devices/iphone-frame-portrait.webp"), "frame_l": asset("img/devices/iphone-frame-landscape.webp"),
-                 "statusbar": asset("img/devices/statusbar-portrait.webp"), "mac": asset(device_rel(code, "macbook-panel.webp")), "iph_p": asset(device_rel(code, "iphone-prompter-portrait.webp"))},
-            video={k: {e: asset(video_rel(code, f"demo-{k}{s}")) for e, s in (("mp4", ".mp4"), ("webm", ".webm"), ("poster", "-poster.webp"))}
-                   for k in ("portrait", "landscape")},
-            wide=image("autosize-wide", (3072, 1728)), meet=image("case-meeting", CASE_DIMS, code),
+                 "mac_frame": asset("img/devices/macbook-frame.webp")},
+            # the live prompter (assets/prompter.js): the approved scripts as the app splits them, over stills of each screen
+            lp=lp,
+            # distance scene frames rendered by site/render (one per 5 cm); the version follows the 35 cm frame
             maclib=image(f"devices/{code}/mac-library" if (SITE / "assets/img/devices" / code / "mac-library.webp").exists() else "devices/en/mac-library", (1600, 996)),
             lang_offers="" if code != "en" else html_attr_json({c: [t2["nav"]["lang_offer"], loc_path(c)] for c, t2 in built.items() if c != "en"}),
             year=date.today().year, phone=image("iphone-preview-person", PHONE_DIMS),

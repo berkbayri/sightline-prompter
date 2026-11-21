@@ -9,7 +9,7 @@
   --ink:#07080C;--surface:#0E1016;--raised:#16181F;--hair:rgba(255,255,255,.08);
   --text:#F4F4F6;--text-2:rgba(244,244,246,.68);--text-3:rgba(244,244,246,.42);
   --yellow:#FFD60A;--gold:#F5D77A;--cue:#73CCFF;--rec:#FF3B30;
-  --sys:-apple-system,"SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;
+  --sys:BlinkMacSystemFont,-apple-system,"SF Pro Text",system-ui,"Segoe UI",Roboto,sans-serif;
   --display:"Barlow Condensed","BC Fallback","Arial Narrow",sans-serif;
   --ease:cubic-bezier(.16,1,.3,1);
   --gutter:max(16px,4.4vw);
@@ -30,10 +30,10 @@
 :lang(tr),:lang(de){--lh:1.12} /* capital diacritics (İ Ü Ö Ä) clear the line above */
 /* CJK: real family names, phrase-aware breaking, no tracking or uppercase, no synthesized italics */
 :lang(ja),:lang(ko),:lang(zh){--dt:none;--tr:0;--fs:.74;--lh:1.22;--dw:900;--prompter-tracking:0;--prompter-word:0;line-height:1.75}
-:lang(ja){--sys:-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif;--display:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif}
-:lang(ko){--sys:-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;--display:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
-:lang(zh-Hans){--sys:-apple-system,"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;--display:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif}
-:lang(zh-Hant){--sys:-apple-system,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;--display:"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif}
+:lang(ja){--sys:BlinkMacSystemFont,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif;--display:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,"Noto Sans JP",sans-serif}
+:lang(ko){--sys:BlinkMacSystemFont,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;--display:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+:lang(zh-Hans){--sys:BlinkMacSystemFont,-apple-system,"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;--display:"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif}
+:lang(zh-Hant){--sys:BlinkMacSystemFont,-apple-system,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;--display:"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif}
 :lang(ja),:lang(zh){line-break:strict;word-break:auto-phrase;overflow-wrap:anywhere}
 :lang(ko){word-break:keep-all;line-break:strict;overflow-wrap:break-word}
 :lang(ja) .cue,:lang(ko) .cue,:lang(zh) .cue{font-style:normal}
@@ -150,6 +150,15 @@ ul{padding:0;list-style:none}
 .dev.l .scr{left:calc(2.5% - 1.5px);top:calc(5.333% - 1.5px);width:calc(95% + 3px);height:calc(89.333% + 3px);border-radius:7.9%/17.2%}
 .dev .scr>video,.dev .scr>img{display:block;width:100%;height:100%;object-fit:cover}
 .dev .bez{position:absolute;inset:0;z-index:2;width:100%;height:100%;pointer-events:none}
+/* every iPhone shown here records, so iOS lights its green camera dot in the Dynamic Island, right of the lens */
+.dev::after{content:"";position:absolute;z-index:3;left:62.444%;top:5.978%;width:1.185%;aspect-ratio:1;border-radius:50%;background:#30D158;transform:translate(-50%,-50%);pointer-events:none}
+.dev.l::after{left:5.978%;top:37.556%;width:.58%}
+/* MacBook Pro 14 bezel over the app's own screen recording; the camera light next to the lens is lit (the call or recording uses it) */
+.macdev{position:relative;aspect-ratio:2000/1316}
+.macdev .mscr{position:absolute;left:10.829%;top:11.339%;width:78.342%;height:77.323%;overflow:hidden;background:#000}
+.macdev .mscr>video{display:block;width:100%;height:100%;object-fit:cover}
+.macdev .mbez{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.macdev::after{content:"";position:absolute;z-index:3;left:50.70%;top:13.82%;width:.16%;aspect-ratio:1;border-radius:50%;background:#30D158;transform:translate(-50%,-50%);box-shadow:0 0 3px #30D158}
 
 /* sections */
 .sec{position:relative;padding:clamp(56px,7vw,104px) 0;border-top:1px solid var(--hair)}
@@ -171,7 +180,7 @@ h2 em{font-style:normal;color:var(--yellow)}
 .devices .store{margin-top:32px}
 @media (min-width:900px){.devices-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,4vw,64px)}}
 .scene{--g:3%;display:flex;align-items:flex-end;gap:var(--g);width:100%}
-.scene img{display:block;height:auto}
+.scene>div{display:block}
 .scene .mac{width:calc((100% - var(--g))/1.23)}
 .scene .iph{width:calc((100% - var(--g))*.187)}
 @media (max-width:700px){.scene{flex-direction:column;align-items:center;gap:40px}.scene .mac{width:100%}.scene .iph{width:min(220px,64%)}}
@@ -184,20 +193,6 @@ h2 em{font-style:normal;color:var(--yellow)}
 .dist{display:flex;justify-content:center;min-height:0}
 .as-unit{--d:0;display:grid;grid-template-columns:auto 44px;grid-template-rows:minmax(0,1fr) var(--oh,auto);column-gap:20px;row-gap:14px;justify-items:start;min-height:0}
 .pf{--s:28;--n:3;width:min(260px,100%)}
-/* the screen as PrompterUIView draws it: picture between status bar and controls, text left-aligned from the top, soft plate, halo, feathered band */
-.pf-photo{position:absolute;left:0;right:0;top:9.1%;bottom:9.5%;overflow:hidden;border-radius:2.8cqw}
-.pf-photo img{display:block;width:100%;height:100%;object-fit:cover;transform-origin:var(--fx,50%) var(--fy,37%);transform:scale(calc(2.5 - 1.5*var(--d)))}
-/* real iPhone status bar capture: screen content (under the bezel), fixed while the photo zooms */
-.dev .scr>img.pf-sb{position:absolute;left:0;top:0;height:auto;z-index:1;pointer-events:none}
-.pf-copy{position:absolute;left:0;right:0;top:17.6cqw;z-index:1;font:var(--prompter-weight) calc(var(--s,28)*100cqw/402)/var(--prompter-leading) var(--prompter-font);letter-spacing:var(--prompter-tracking);word-spacing:var(--prompter-word)}
-/* one blurred (sigma .3em) black plate per line, united so overlaps never darken twice; the lines are the same text, invisible, so they wrap the same */
-.plate{position:absolute;left:0;right:0;top:0;height:calc(var(--n,3)*1.3em);overflow:hidden;padding:0 5.5cqw;opacity:.35;filter:blur(.3em);pointer-events:none}
-.plate i{font:inherit;font-style:normal;color:transparent;background:var(--prompter-plate);padding:.16em .6em;margin:0 -.6em;border-radius:.5em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-.pf-text{position:relative;max-height:calc(var(--n,3)*1.3em + .3em);overflow:hidden;padding:0 5.5cqw;color:var(--prompter-upcoming);text-shadow:var(--prompter-halo);-webkit-mask-image:linear-gradient(transparent,#000 .6em,#000 calc(100% - .6em),transparent);mask-image:linear-gradient(transparent,#000 .6em,#000 calc(100% - .6em),transparent)}
-.pf-copy::before,.pf-copy::after{content:"";position:absolute;top:.65em;width:2.5cqw;height:1px;background:rgba(255,255,255,.18);z-index:1}
-.pf-copy::before{left:2.5cqw}.pf-copy::after{left:calc(100% - 5cqw)}
-/* the control bar is the real capture, cropped from the demo poster */
-.pf-bar{position:absolute;left:0;right:0;bottom:0;height:9.8%;z-index:2;background:#000 bottom/100% auto no-repeat}
 /* ruler: a real vertical range input (invisible thumb) over decorative ticks and a needle */
 .ruler{position:relative;width:44px;border-radius:6px}
 .ruler:has(input:focus-visible){outline:2px solid var(--yellow);outline-offset:4px}
@@ -224,7 +219,6 @@ h2 em{font-style:normal;color:var(--yellow)}
   .dist{height:min(100%,740px)}
   .as-unit{--oh:104px;height:100%}
   .as-pin .pf{height:100%;width:auto;min-height:0;max-width:100%}
-  .pf-photo img,.ruler-needle{will-change:transform}
   @media (min-width:900px){
     .as-track{height:280svh}
     .as-pin .split{height:min(100%,820px);grid-template-rows:minmax(0,1fr);gap:clamp(48px,6vw,96px)}
@@ -233,11 +227,9 @@ h2 em{font-style:normal;color:var(--yellow)}
   /* scroll-linked on the compositor where supported; site.js mirrors it (same key points) for the rest and for keyboard use */
   @supports (animation-timeline:view()){
     .as-track{view-timeline:--as block}
-    .as-track:not([data-manual]) .pf-photo img{animation:as-photo linear both;animation-timeline:--as;animation-range:100svh calc(100% - 100svh)}
     .as-track:not([data-manual]) .ruler-needle{animation:as-needle linear both;animation-timeline:--as;animation-range:100svh calc(100% - 100svh)}
   }
 }
-@keyframes as-photo{0%,10%{transform:scale(2.5)}55%,66%{transform:scale(1)}92%,100%{transform:scale(2.2692)}}
 @keyframes as-needle{0%,10%{transform:translateY(0)}55%,66%{transform:translateY(100%)}92%,100%{transform:translateY(15.38%)}}
 
 /* cases */
@@ -253,9 +245,16 @@ h2 em{font-style:normal;color:var(--yellow)}
 @media (min-width:900px){.case{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(32px,5vw,72px);align-items:center}}
 /* one fixed stage height, so switching tabs never moves the page */
 .stage{--sh:min(62svh,560px);display:grid;place-items:center}
+/* wide screens: the cases pin while the page scrolls through all four (site.js picks the tab from the scroll position) */
+@media (min-width:900px) and (prefers-reduced-motion:no-preference){
+  .cases-track{height:400svh}
+  .cases-pin{position:sticky;top:0;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding-block:24px}
+  .cases-pin .stage{--sh:min(50svh,520px)}
+  .cases-pin .cases-head{margin-bottom:clamp(20px,3vh,40px)}
+}
 @media (min-width:641px){.stage{min-height:var(--sh)}}
 .stage .dev.l{width:min(100%,calc(var(--sh)*2.04))}
-.stage .photo{width:auto;max-width:100%;max-height:var(--sh);border-radius:20px}
+.stage .macdev{width:min(100%,calc(var(--sh)*1.52))}
 .ph{width:100%;aspect-ratio:4/3;border-radius:22px;border:1px solid var(--hair);background:var(--surface)}
 .case-copy h3,.plan h3{margin-bottom:14px}
 .case-copy h3{font:600 clamp(24px,2.6vw,34px)/1.15 var(--sys);letter-spacing:-.02em}
@@ -364,3 +363,21 @@ h2 em{font-style:normal;color:var(--yellow)}
 .langbar-link{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;font-weight:600;text-decoration:underline;text-decoration-color:rgba(255,255,255,.4);text-underline-offset:.3em}
 .langbar-x{display:grid;place-items:center;width:44px;height:44px;border:0;background:none;color:var(--text-2);cursor:pointer}
 .langbar-x:hover{color:var(--text)}
+
+/* the live prompter (prompter.js) over a still of the screen: every length in device points (--u) times the text size (--fs) */
+.lp{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;transition:opacity .3s}
+.lp-stage{position:absolute;left:0;top:0;transform-origin:0 0;font-size:calc(var(--fs,36)*1px)}
+.lp.lp-fade{animation:lp-fade .3s ease}
+@keyframes lp-fade{0%{opacity:.25}100%{opacity:1}}
+.lp-plates{position:absolute;inset:0;width:100%;height:100%}
+.lp-clip{position:absolute;left:0;right:0;overflow:hidden;-webkit-mask-image:linear-gradient(transparent,#000 var(--f),#000 calc(100% - var(--f)),transparent);mask-image:linear-gradient(transparent,#000 var(--f),#000 calc(100% - var(--f)),transparent)}
+.lp-move{position:absolute;will-change:transform}
+.lp-text{position:relative;margin:0;font:600 1em/1.53101 BlinkMacSystemFont,-apple-system,system-ui,sans-serif;letter-spacing:-.0016em;word-spacing:.04em;font-kerning:none;font-feature-settings:"kern" 0;color:#fff;text-align:start;overflow-wrap:break-word;white-space:normal;text-transform:none}
+.lp.cam .lp-text{text-shadow:0 0 .28em rgba(0,0,0,.55),0 .03em .07em rgba(0,0,0,.9)}
+.lp-text .r{color:rgba(255,255,255,.55)}
+.lp-text .c{color:#FFDB66}
+.lp-hl{position:absolute;background:rgba(255,219,102,.16);border-radius:.2em}
+.lp-tick{position:absolute;width:10px;height:1px;background:rgba(255,255,255,.18)}
+.lp-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* the Mac panel: black, square under the notch, 18 pt bottom corners, 520 x 220 pt centred on the 1512 x 982 pt screen */
+.lp-panel{position:absolute;left:32.804%;top:0;width:34.392%;height:22.403%;background:#000;border-radius:0 0 3.462% 3.462%/0 0 8.182% 8.182%;container-type:inline-size}

@@ -36,6 +36,7 @@
 <script>document.documentElement.classList.remove('no-js')</script>
 {{{ga}}}
 <script type="application/ld+json">{{{jsonld}}}</script>
+<script src="/assets/prompter.js?v={{v.pjs}}" defer></script>
 <script src="/assets/site.js?v={{v.js}}" defer></script>
 </head>
 <body>
@@ -61,11 +62,8 @@
       </div>
     </div>
     <div class="hero-dev">
-      <div class="hero-mac-shot" aria-hidden="true"><img src="{{dev.mac}}" width="2000" height="1316" alt="" decoding="async"></div>
-      <div class="dev p" style="--sh:var(--hero-h)">
-        <div class="scr"><video data-loop autoplay muted loop playsinline preload="metadata" poster="{{video.portrait.poster}}" width="720" height="1564" aria-label="{{devices.iphone_label}}"><source src="{{video.portrait.webm}}" type="video/webm"><source src="{{video.portrait.mp4}}" type="video/mp4"></video></div>
-        <img class="bez" src="{{dev.frame_p}}" width="900" height="1840" alt="" decoding="async">
-      </div>
+      <div class="hero-mac-shot" aria-hidden="true"><div class="macdev"><div class="mscr"><img class="lp-bg" src="{{lp.mac_meeting}}" alt="" decoding="async"><div class="lp-panel"><div class="lp" data-prompter="{{lp.meeting_mac}}"></div></div></div><img class="mbez" src="{{dev.mac_frame}}" width="2000" height="1316" alt="" decoding="async"></div></div>
+      <div class="dev p" style="--sh:var(--hero-h)"><div class="scr"><img class="lp-bg" src="{{lp.bg.talking}}" alt="" decoding="async"><div class="lp" data-prompter="{{lp.youtube_p}}"></div></div><img class="bez" src="{{dev.frame_p}}" width="900" height="1840" alt="" decoding="async"></div>
       <button class="vid-ctl" type="button" id="motion-ctl" data-pause="{{nav.motion_pause}}" data-play="{{nav.motion_play}}" aria-label="{{nav.motion_pause}}" aria-pressed="false"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><rect class="i-pause" x="5" y="4" width="3.4" height="12" rx="1" fill="currentColor"/><rect class="i-pause" x="11.6" y="4" width="3.4" height="12" rx="1" fill="currentColor"/><path class="i-play" d="M6 4l10 6-10 6z" fill="currentColor"/></svg></button>
     </div>
   </div>
@@ -83,18 +81,18 @@
       <a class="store" href="{{store.url_devices}}"><img src="{{store.badge}}" alt="{{store.badge_alt}}" width="156" height="52" loading="lazy"></a>
     </div>
     <div class="scene">
-      <img class="mac" src="{{dev.mac}}" width="2000" height="1316" alt="{{devices.mac_label}}" loading="lazy" decoding="async">
-      <img class="iph" src="{{dev.iph_p}}" width="900" height="1840" alt="{{devices.iphone_label}}" loading="lazy" decoding="async">
+      <div class="mac" role="img" aria-label="{{devices.mac_label}}"><div class="macdev"><div class="mscr"><img class="lp-bg" src="{{lp.mac_record}}" alt="" loading="lazy" decoding="async"><div class="lp-panel"><div class="lp" data-prompter="{{lp.youtube_mac}}"></div></div></div><img class="mbez" src="{{dev.mac_frame}}" width="2000" height="1316" alt="" loading="lazy" decoding="async"></div></div>
+      <div class="iph" role="img" aria-label="{{devices.iphone_label}}"><div class="dev p"><div class="scr"><img class="lp-bg" src="{{lp.bg.reels}}" alt="" loading="lazy" decoding="async"><div class="lp" data-prompter="{{lp.reels_p}}"></div></div><img class="bez" src="{{dev.frame_p}}" width="900" height="1840" alt="" loading="lazy" decoding="async"></div></div>
     </div>
   </div>
 </section>
 
 <section class="sec story" id="pace">
-  <div class="wrap"><div class="sec-head"><h2><span>{{story.pace.title}}</span> <em>{{story.pace.title_accent}}</em></h2><p>{{story.pace.body}}</p></div><figure class="story-art art-pace" aria-hidden="true"><img src="{{dev.iph_p}}" width="900" height="1840" loading="lazy" decoding="async" alt=""></figure></div>
+  <div class="wrap"><div class="sec-head"><h2><span>{{story.pace.title}}</span> <em>{{story.pace.title_accent}}</em></h2><p>{{story.pace.body}}</p></div><figure class="story-art art-pace" aria-hidden="true"><div class="dev p"><div class="scr"><img class="lp-bg" src="{{lp.bg.course}}" alt="" loading="lazy" decoding="async"><div class="lp" data-prompter="{{lp.course_p}}"></div></div><img class="bez" src="{{dev.frame_p}}" width="900" height="1840" alt="" loading="lazy" decoding="async"></div></figure></div>
 </section>
 
 <section class="sec story" id="connection">
-  <div class="wrap"><div class="sec-head"><h2><span>{{story.connection.title}}</span> <em>{{story.connection.title_accent}}</em></h2><p>{{story.connection.body}}</p></div>{{#meet.has}}<figure class="story-art art-connection" aria-hidden="true"><img src="{{meet.url}}" srcset="{{meet.srcset}}" sizes="(max-width:900px) 100vw, 640px" width="{{meet.w}}" height="{{meet.h}}" loading="lazy" decoding="async" alt=""></figure>{{/meet.has}}</div>
+  <div class="wrap"><div class="sec-head"><h2><span>{{story.connection.title}}</span> <em>{{story.connection.title_accent}}</em></h2><p>{{story.connection.body}}</p></div><figure class="story-art art-connection" aria-hidden="true"><div class="dev l"><div class="scr"><img class="lp-bg" src="{{lp.bg_l}}" alt="" loading="lazy" decoding="async"><div class="lp" data-prompter="{{lp.youtube_l}}"></div></div><img class="bez" src="{{dev.frame_l}}" width="1840" height="900" alt="" loading="lazy" decoding="async"></div></figure></div>
 </section>
 
 <section class="sec autosize" id="autosize">
@@ -110,10 +108,7 @@
           <div class="as-unit">
             <div class="pf dev p" aria-hidden="true">
               <div class="scr">
-                {{#wide.has}}<div class="pf-photo" data-face-x="50" data-face-y="37"><img src="{{wide.url}}" srcset="{{wide.srcset}}" sizes="1000px" width="{{wide.w}}" height="{{wide.h}}" alt="" decoding="async"></div>{{/wide.has}}
-                <img class="pf-sb" src="{{dev.statusbar}}" width="1320" height="160" alt="" decoding="async">
-                <div class="pf-copy"><span class="plate"><i>{{autosize.script}}</i></span><p class="pf-text">{{autosize.script}}</p></div>
-                <span class="pf-bar" style="background-image:url({{video.portrait.poster}})"></span>
+                <img class="lp-bg pf-frame" src="{{lp.dist}}35.webp" data-base="{{lp.dist}}" alt="" decoding="async"><div class="lp" data-prompter="{{lp.youtube_p}}"></div>
               </div>
               <img class="bez" src="{{dev.frame_p}}" width="900" height="1840" alt="" loading="lazy" decoding="async">
             </div>
@@ -147,7 +142,7 @@
     </div>
     <div class="crop-dev">
       <div class="dev l">
-        <div class="scr"><video data-loop muted loop playsinline preload="none" poster="{{video.landscape.poster}}" width="1600" height="736" aria-label="{{devices.iphone_label}}"><source src="{{video.landscape.webm}}" type="video/webm"><source src="{{video.landscape.mp4}}" type="video/mp4"></video></div>
+        <div class="scr"><img class="lp-bg" src="{{lp.bg_l}}" alt="" loading="lazy" decoding="async"><div class="lp" data-prompter="{{lp.reels_l}}"></div></div>
         <img class="bez" src="{{dev.frame_l}}" width="1840" height="900" alt="" loading="lazy" decoding="async">
       </div>
     </div>
@@ -165,7 +160,7 @@
 </section>
 
 <section class="sec cases" id="cases">
-  <div class="wrap">
+  <div class="cases-track"><div class="cases-pin"><div class="wrap">
     <div class="cases-head">
       <h2><span>{{cases.title}}</span> <em>{{cases.title_accent}}</em></h2>
       <p class="story-intro">{{cases.intro}}</p>
@@ -176,8 +171,7 @@
     </div>
     {{#cases.items}}<div class="case" role="tabpanel" id="panel-{{id}}" aria-labelledby="tab-{{id}}" tabindex="0"{{hidden}}>
       <div class="stage">
-        {{#img.has}}{{#orient.p}}<div class="dev p"><div class="scr"><img src="{{img.url}}" srcset="{{img.srcset}}" sizes="260px" width="{{img.w}}" height="{{img.h}}" alt="{{alt}}" loading="lazy" decoding="async"></div><img class="bez" src="{{dev.frame_p}}" width="900" height="1840" alt="" loading="lazy" decoding="async"></div>{{/orient.p}}{{#orient.l}}<div class="dev l"><div class="scr"><img src="{{img.url}}" srcset="{{img.srcset}}" sizes="(max-width:900px) 100vw, 680px" width="{{img.w}}" height="{{img.h}}" alt="{{alt}}" loading="lazy" decoding="async"></div><img class="bez" src="{{dev.frame_l}}" width="1840" height="900" alt="" loading="lazy" decoding="async"></div>{{/orient.l}}{{#orient.photo}}<img class="photo" src="{{img.url}}" srcset="{{img.srcset}}" sizes="(max-width:900px) 100vw, 640px" width="{{img.w}}" height="{{img.h}}" alt="{{alt}}" loading="lazy" decoding="async">{{/orient.photo}}{{/img.has}}
-        {{^img.has}}<div class="ph" role="img" aria-label="{{alt}}"></div>{{/img.has}}
+        {{#orient.p}}<div class="dev p"><div class="scr"><img class="lp-bg" src="{{prbg}}" alt="" loading="lazy" decoding="async"><div class="lp" data-prompter="{{pr}}"></div></div><img class="bez" src="{{dev.frame_p}}" width="900" height="1840" alt="" loading="lazy" decoding="async"></div>{{/orient.p}}{{#orient.l}}<div class="dev l"><div class="scr"><img class="lp-bg" src="{{prbg}}" alt="" loading="lazy" decoding="async"><div class="lp" data-prompter="{{pr}}"></div></div><img class="bez" src="{{dev.frame_l}}" width="1840" height="900" alt="" loading="lazy" decoding="async"></div>{{/orient.l}}{{#orient.mac}}<div role="img" aria-label="{{alt}}"><div class="macdev"><div class="mscr"><img class="lp-bg" src="{{prbg}}" alt="" loading="lazy" decoding="async"><div class="lp-panel"><div class="lp" data-prompter="{{pr}}"></div></div></div><img class="mbez" src="{{dev.mac_frame}}" width="2000" height="1316" alt="" loading="lazy" decoding="async"></div></div>{{/orient.mac}}
       </div>
       <div class="case-copy">
         <h3>{{title}}</h3>
@@ -186,7 +180,7 @@
       </div>
     </div>
     {{/cases.items}}
-  </div>
+  </div></div></div>
 </section>
 
 <section class="sec languages" id="languages">

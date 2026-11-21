@@ -77,16 +77,6 @@
   };
   addEventListener('resize', () => sets.forEach(s => s.tick && s.tick()));
   if (d.fonts) d.fonts.ready.then(() => sets.forEach(s => s.tick && s.tick()));
-  // distance scene: the cursor rests on the third word, or the last word of the first line when the text is so large that fewer fit
-  const rest = pf => {
-    const w = [...pf.querySelectorAll('.pf-text .w')];
-    if (!w.length) return;
-    let c = 0;
-    while (c < 2 && w[c + 1] && w[c + 1].offsetTop === w[0].offsetTop) c++;
-    w.forEach((e, k) => { e.classList.toggle('r', k < c); e.classList.toggle('c', k === c); });
-  };
-  const sample = d.querySelector('.pf-text');
-  if (sample) words(sample);
 
   if (rm.matches) {
     sets.forEach(s => paint(s, Math.floor(s.w.length / 3)));
@@ -103,17 +93,6 @@
     d.addEventListener('visibilitychange', run);
   }
 
-  // real-app loops: play only while on screen and not paused; under reduced motion they rest on the poster
-  const vids = [...d.querySelectorAll('video[data-loop]')], seen = new Map();
-  const sync = () => vids.forEach(v => (!paused && seen.get(v) && !d.hidden ? v.play().catch(() => {}) : v.pause()));
-  if (vids.length) {
-    if (rm.matches) vids.forEach(v => { v.removeAttribute('autoplay'); v.pause(); });
-    else {
-      const vio = new IntersectionObserver(es => { es.forEach(e => seen.set(e.target, e.isIntersecting)); sync(); }, { rootMargin: '120px' });
-      vids.forEach(v => vio.observe(v));
-      d.addEventListener('visibilitychange', sync);
-    }
-  }
   const ctl = d.getElementById('motion-ctl');
   if (ctl) {
     if (rm.matches) ctl.hidden = true;
@@ -121,7 +100,9 @@
       paused = !paused;
       ctl.setAttribute('aria-pressed', paused);
       ctl.setAttribute('aria-label', paused ? ctl.dataset.play : ctl.dataset.pause);
-      sync(); run();
+      // the live prompters (prompter.js) stop and start with the rest of the motion
+      d.dispatchEvent(new CustomEvent('sp-motion', { detail: paused }));
+      run();
     };
   }
 
@@ -129,25 +110,29 @@
   const scene = d.querySelector('[data-dist]');
   if (scene) {
     const pin = scene.querySelector('.as-pin'), unit = scene.querySelector('.as-unit'), range = unit.querySelector('input'), tan = x => Math.tan(x * Math.PI / 180);
-    const ph = scene.querySelector('.pf-photo'); // zoom about the face centre so the face stays put while the room grows or shrinks
-    if (ph) { ph.style.setProperty('--fx', (ph.dataset.faceX || 50) + '%'); ph.style.setProperty('--fy', (ph.dataset.faceY || 37) + '%'); }
-    const KEYS = [[0, 35], [.1, 35], [.55, 100], [.66, 100], [.92, 45], [1, 45]]; // same key points as @keyframes as-photo
+    const KEYS = [[0, 35], [.1, 35], [.55, 100], [.66, 100], [.92, 45], [1, 45]]; // same key points as @keyframes as-needle
     const at = p => {
       let i = 1;
       while (i < KEYS.length - 1 && p > KEYS[i][0]) i++;
       const [a, x] = KEYS[i - 1], [b, y] = KEYS[i];
       return x + (y - x) * Math.min(1, Math.max(0, (p - a) / (b - a)));
     };
+    // DistanceSizer on an iPhone 17 Pro in camera mode: PrompterTypography.plan (354 pt column), then the controller's 20 pt x 1.10^n grid; 3 lines
+    const snap = s => Math.round(20 * 1.1 ** Math.round(Math.log(s / 20) / Math.log(1.1)) * 2) / 2;
     const render = (u, cm) => {
-      const mm = cm * 10, ideal = mm * tan(.4) * 6.037 / .526;
-      const pt = Math.round(Math.min(ideal, 370 / (.5 * 13))), alpha = Math.atan(pt * .526 / 6.037 / mm) * 180 / Math.PI;
-      const n = Math.max(2, Math.min(3, Math.floor((tan(3) - 4 / mm) / (1.3 * tan(alpha) / .526) + .55)));
+      const mm = cm * 10, ideal = mm * tan(.4) * 6.037 / .526, cap = 354 / (.5 * 13);
+      const pt = snap(Math.max(Math.min(ideal, cap), 20)), n = 3;
+      // the frames are the app's own drawing, one per 5 cm
+      const step = Math.min(100, Math.max(35, Math.round(cm / 5) * 5));
       u.style.setProperty('--d', ((cm - 35) / 65).toFixed(4));
-      const key = pt + '/' + n + '/' + Math.round(cm);
+      const key = pt + '/' + Math.round(cm) + '/' + step;
       if (u.k === key) return;
       u.k = key;
-      const pf = u.querySelector('.pf'), a = scene.dataset.fmt.replace('{cm}', Math.round(cm)), b = scene.dataset.readout.replace('{pt}', pt).replace('{n}', n);
-      pf.style.setProperty('--s', pt); pf.style.setProperty('--n', n); rest(pf);
+      const pf = u.querySelector('.pf'), a = scene.dataset.fmt.replace('{cm}', Math.round(cm)), b = scene.dataset.readout.replace('{pt}', String(pt).replace('.', scene.dataset.dec || '.')).replace('{n}', n);
+      const fr = pf.querySelector('.pf-frame'), lp = pf.querySelector('.lp');
+      if (fr) fr.src = fr.dataset.base + step + '.webp';
+      // the text at the size the app commits for this distance, eased in like an automatic change
+      if (lp && lp.prompter) lp.prompter.setSize(pt, true);
       u.querySelector('[data-cm]').textContent = a;
       u.querySelector('[data-readout-out]').textContent = b;
       u.querySelector('[data-cap]').hidden = ideal <= pt + .5;
@@ -161,6 +146,8 @@
       [40, 70, 100].forEach(cm => {
         const u = unit.cloneNode(true);
         u.querySelector('.ruler').remove(); u.querySelector('label').remove();
+        const lp = u.querySelector('.lp');
+        if (lp && window.SPPrompter) window.SPPrompter(lp);
         render(u, cm); row.append(u);
       });
       unit.hidden = true; unit.parentNode.append(row);
@@ -200,6 +187,41 @@
       if (k !== undefined) { e.preventDefault(); pick((k + n) % n, 1); }
     };
   });
+  // scrolling walks the four cases: the section pins and each case gets a quarter of the track (wide screens, motion allowed)
+  const ct = d.querySelector('.cases-track');
+  if (ct && tabs.length) {
+    const wide = matchMedia('(min-width: 900px)'), on = () => wide.matches && !rm.matches;
+    const span = () => ct.offsetHeight - innerHeight;
+    let cur = 0;
+    const step = () => {
+      if (!on() || span() <= 0) return;
+      const i = Math.min(tabs.length - 1, Math.max(0, Math.floor(-ct.getBoundingClientRect().top / span() * tabs.length)));
+      if (i !== cur) { cur = i; pick(i); }
+      ct.style.setProperty('--cp', Math.min(1, Math.max(0, -ct.getBoundingClientRect().top / span())).toFixed(3));
+    };
+    addEventListener('scroll', step, { passive: true });
+    step();
+    // a tab click moves the page into that case's stretch, so scrolling carries on from there
+    tabs.forEach((t, i) => t.addEventListener('click', () => {
+      if (!on()) return;
+      cur = i;
+      scrollTo({ top: scrollY + ct.getBoundingClientRect().top + span() * (i + .5) / tabs.length });
+    }));
+  }
+
+  // scroll reveals: CSS scroll-driven animations (view()) where supported; elsewhere a one-shot IntersectionObserver. Reduced motion: none.
+  if (!rm.matches) {
+    const RV = '.sec h2, .sec-head p, .split-head p, .tags, .devices .sec-head .store, .plan, .qas, .wall, .pro .note, .pro .store, .close .sub, .close .store, .as-after .note';
+    const GROW = '.scene, #connection .story-art, .library .maclib, .crop-dev, .art-privacy';
+    const skip = e => e.closest('.hero, .as-pin, .cases-pin');
+    const els = [...d.querySelectorAll(RV + ', ' + GROW)].filter(e => !skip(e));
+    els.forEach(e => { e.classList.add(e.matches(GROW) ? 'grow' : 'rv'); if (e.matches('p')) e.classList.add('sec-p'); });
+    if (!(window.CSS && CSS.supports('animation-timeline', 'view()')) && window.IntersectionObserver) {
+      root.classList.add('rv-js');
+      const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+      els.forEach(e => io.observe(e));
+    }
+  }
 
   // language menu: remember the choice, then follow the link
   const menu = d.getElementById('lang');

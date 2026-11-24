@@ -239,8 +239,8 @@ def video_rel(code, name):
     return f"video/{code}/{name}" if (SITE / "assets/video" / code / name).exists() else f"video/{name}"
 
 
-def reading_width(lines, cue):
-    """Width in em of the widest hero line (all three share one size; wide scripts 1em/char, latin ~.56em/char). The cue sits on its own row."""
+def reading_width(lines):
+    """Width in em of the widest hero line (all three share one size; wide scripts 1em/char, latin ~.56em/char)."""
     w = lambda x: sum(1.08 if ord(ch) > 0x2E80 else .56 for ch in x)
     return round(max(w(x) for x in lines), 1)
 
@@ -254,7 +254,7 @@ def make_og(code, t, lang):
     l = t["hero"]["lines"]
     wide = lambda x: sum(1.0 if ord(ch) > 0x2E80 else .56 for ch in x)
     fs = int(min(60, 630 / max(wide(l[1]), .72 * wide(l[0]), *(.72 * wide(x) for x in l[2:]))))
-    ctx = {"lang": lang, "l0": l[0], "l1": l[1], "l2": "".join(l[2:]), "cue": t["hero"]["cue"].strip("[]"), "fs": fs, "fs_dim": round(fs * .72),
+    ctx = {"lang": lang, "l0": l[0], "l1": l[1], "l2": "".join(l[2:]), "fs": fs, "fs_dim": round(fs * .72),
            "poster": (SITE / "assets" / video_rel(code, "demo-portrait-poster.webp")).as_uri(),
            "frame": (SITE / "assets/img/devices/iphone-frame-portrait.webp").as_uri()}
     with tempfile.TemporaryDirectory() as tmp:
@@ -389,7 +389,7 @@ def main():
             locales=",".join(built), store=store, cases=cases, v=v, analytics=analytics, ga=ga_snippet(),
             gsc=f'<meta name="google-site-verification" content="{html.escape(GSC_TOKEN)}">\n' if GSC_TOKEN else "",
             # width estimate in em for the hero line: wide scripts 1em/char, latin ~.52em/char
-            hero_w=reading_width(t["hero"]["lines"], t["hero"]["cue"].strip("[]")), hero_cue=t["hero"]["cue"].strip("[]"),
+            hero_w=reading_width(t["hero"]["lines"]),
             dev={"frame_p": asset("img/devices/iphone-frame-portrait.webp"), "frame_l": asset("img/devices/iphone-frame-landscape.webp"),
                  "mac_frame": asset("img/devices/macbook-frame.webp")},
             # the live prompter (assets/prompter.js): the approved scripts as the app splits them, over stills of each screen

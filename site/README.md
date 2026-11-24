@@ -38,7 +38,6 @@ Do not edit generated files in `docs/` by hand. `docs/images/` and `docs/release
   "nav": { "iphone": "", "mac": "", "languages": "", "faq": "", "download": "", "language_menu": "" },
   "hero": {
     "lines": ["previous line", "current line, read word by word", "next line"],
-    "cue": "[[smile]]",
     "sub": "",
     "cta_secondary": ""
   },

@@ -1,9 +1,9 @@
 {
   "meta": {
     "title": "Sightline Prompter | Teleprompter para reuniões e vídeos",
-    "description": "O Sightline acompanha sua voz e deixa o roteiro perto da câmera. Um teleprompter para reuniões e apresentações no Mac e para gravar vídeos no iPhone.",
-    "og_title": "Levante o olhar. Não perca o fio da conversa. | Sightline",
-    "og_description": "O Sightline acompanha sua voz e deixa o roteiro perto da câmera. Um teleprompter para reuniões e apresentações no Mac e para gravar vídeos no iPhone.",
+    "description": "O Sightline é um teleprompter que acompanha a sua voz: rola o roteiro enquanto você fala e mantém o texto ao lado da câmera no iPhone e no Mac.",
+    "og_title": "Você fala. O texto rola. | Sightline",
+    "og_description": "O Sightline é um teleprompter que acompanha a sua voz: rola o roteiro enquanto você fala e mantém o texto ao lado da câmera no iPhone e no Mac.",
     "og_image_alt": "Sightline Prompter no iPhone e no Mac, com o texto logo abaixo da câmera"
   },
   "nav": {
@@ -20,11 +20,11 @@
   },
   "hero": {
     "lines": [
-      "Levante o olhar.",
-      "Não perca o fio da conversa."
+      "Você fala.",
+      "O texto rola."
     ],
     "cue": "[[sorria]]",
-    "sub": "O Sightline é o teleprompter para iPhone e Mac que acompanha a sua voz e mantém o roteiro perto da câmera. Numa apresentação importante ou no próximo vídeo, você pode se concentrar em quem está ouvindo.",
+    "sub": "O Sightline é um teleprompter que acompanha a sua voz. Ele rola o roteiro palavra por palavra enquanto você fala, para quando você faz uma pausa e mantém o texto bem ao lado da câmera no iPhone e no Mac. Sem pedal e sem se perder no texto.",
     "cta_secondary": "Veja como funciona no Mac e no iPhone"
   },
   "devices": {

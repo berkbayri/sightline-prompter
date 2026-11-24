@@ -216,9 +216,10 @@ h2 em{font-style:normal;color:var(--yellow)}
   .as-pin .split{height:100%;min-height:0;align-content:center;grid-template-rows:auto minmax(0,1fr);gap:12px}
   .as-pin h2{margin-bottom:12px;font-size:calc(clamp(34px,8vw,96px)*var(--fs))}
   .as-pin .note{margin-top:10px}
-  .dist{height:min(100%,740px)}
+  .dist{height:min(100%,740px);container-type:size}
   .as-unit{--oh:104px;height:100%}
-  .as-pin .pf{height:100%;width:auto;min-height:0;max-width:100%}
+  /* width from the container's height, not height:100%: WebKit sizes an auto track around a %-height aspect-ratio box as 0 */
+  .as-pin .pf{width:min(calc((100cqh - var(--oh) - 14px)*1350/2760),calc(100cqw - 70px));height:auto}
   @media (min-width:900px){
     .as-track{height:280svh}
     .as-pin .split{height:min(100%,820px);grid-template-rows:minmax(0,1fr);gap:clamp(48px,6vw,96px)}

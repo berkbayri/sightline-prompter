@@ -1,9 +1,9 @@
 {
   "meta": {
     "title": "Sightline Prompter | Téléprompteur pour réunions et vidéos",
-    "description": "Sightline suit votre voix et garde votre texte près de la caméra. Un téléprompteur pour vos réunions et présentations sur Mac, et vos vidéos sur iPhone.",
-    "og_title": "Regardez la caméra. Gardez le fil. | Sightline",
-    "og_description": "Sightline suit votre voix et garde votre texte près de la caméra. Un téléprompteur pour vos réunions et présentations sur Mac, et vos vidéos sur iPhone.",
+    "description": "Sightline est un téléprompteur qui suit votre voix : il fait défiler votre texte pendant que vous parlez et le garde juste à côté de la caméra sur iPhone et Mac.",
+    "og_title": "Vous parlez. Le texte suit. | Sightline",
+    "og_description": "Sightline est un téléprompteur qui suit votre voix : il fait défiler votre texte pendant que vous parlez et le garde juste à côté de la caméra sur iPhone et Mac.",
     "og_image_alt": "Sightline Prompter sur iPhone et Mac, avec le texte juste sous la caméra"
   },
   "nav": {
@@ -20,11 +20,11 @@
   },
   "hero": {
     "lines": [
-      "Regardez la caméra.",
-      "Gardez le fil."
+      "Vous parlez.",
+      "Le texte suit."
     ],
     "cue": "[[sourire]]",
-    "sub": "Sightline est le téléprompteur pour iPhone et Mac qui suit votre voix et garde votre texte près de la caméra. Pour une présentation décisive comme pour votre prochaine vidéo, concentrez-vous sur les personnes qui vous écoutent.",
+    "sub": "Sightline est un téléprompteur qui suit votre voix. Il fait défiler votre texte mot à mot pendant que vous parlez, s'arrête quand vous marquez une pause et le garde juste à côté de la caméra sur iPhone et Mac. Sans pédale, sans perdre le fil.",
     "cta_secondary": "Voir Sightline sur Mac et iPhone"
   },
   "devices": {

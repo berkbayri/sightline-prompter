@@ -1,9 +1,9 @@
 {
   "meta": {
     "title": "Sightline Prompter | 会議も動画撮影も、声に合わせて進むプロンプター",
-    "description": "Sightlineは、話す声に合わせて原稿が進むiPhone・Mac用テレプロンプター。オンライン会議やプレゼン、動画撮影でも、カメラの近くで原稿を確認できます。",
-    "og_title": "顔を上げて。伝えることに集中。| Sightline",
-    "og_description": "Sightlineは、話す声に合わせて原稿が進むiPhone・Mac用テレプロンプター。オンライン会議やプレゼン、動画撮影でも、カメラの近くで原稿を確認できます。",
+    "description": "Sightlineは、声に合わせて進むテレプロンプターです。話すと原稿が進み、iPhoneでもMacでもカメラのすぐそばに表示されます。",
+    "og_title": "話せば、原稿が進む。| Sightline",
+    "og_description": "Sightlineは、声に合わせて進むテレプロンプターです。話すと原稿が進み、iPhoneでもMacでもカメラのすぐそばに表示されます。",
     "og_image_alt": "iPhoneとMacに表示されたSightline Prompter。カメラのすぐ下に原稿の文字があります"
   },
   "nav": {
@@ -20,11 +20,11 @@
   },
   "hero": {
     "lines": [
-      "顔を上げて。",
-      "伝えることに集中。"
+      "話せば、",
+      "原稿が進む。"
     ],
     "cue": "[[笑顔]]",
-    "sub": "Sightlineは、話す声に合わせて原稿が進むiPhone・Mac用テレプロンプター。大切なプレゼンでも、次の動画撮影でも、文字はカメラの近くに。目の前の相手に集中して話せます。",
+    "sub": "Sightlineは、声に合わせて進むテレプロンプターです。話すと原稿が一語ずつ進み、間を取れば止まります。文字はiPhoneでもMacでもカメラのすぐそば。フットペダルは不要で、読んでいる場所を見失うこともありません。",
     "cta_secondary": "MacとiPhoneでの使い方を見る"
   },
   "devices": {

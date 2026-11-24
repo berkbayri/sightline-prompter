@@ -1,9 +1,9 @@
 {
   "meta": {
     "title": "Sightline Prompter | Voice-following Teleprompter for Mac & iPhone",
-    "description": "Meet Sightline, the voice-following teleprompter that keeps your words near the camera and moves when you speak. From an important presentation to your next video, your script stays…",
-    "og_title": "Look up. Stay on point. | Sightline Prompter",
-    "og_description": "Meet Sightline, the voice-following teleprompter that keeps your words near the camera and moves when you speak. From an important presentation to your next video, your script stays…",
+    "description": "Sightline is a teleprompter that follows your voice: it scrolls your script as you speak and keeps it right beside the camera on iPhone and Mac.",
+    "og_title": "You talk. It scrolls. | Sightline Prompter",
+    "og_description": "Sightline is a teleprompter that follows your voice: it scrolls your script as you speak and keeps it right beside the camera on iPhone and Mac.",
     "og_image_alt": "Sightline Prompter on iPhone and Mac, with the script text just below the camera"
   },
   "nav": {
@@ -20,11 +20,11 @@
   },
   "hero": {
     "lines": [
-      "Look up.",
-      "Stay on point."
+      "You talk.",
+      "It scrolls."
     ],
     "cue": "[[smile]]",
-    "sub": "Meet Sightline, the voice-following teleprompter that keeps your words near the camera and moves when you speak. From an important presentation to your next video, your script stays with you without pulling you away from the moment.",
+    "sub": "Sightline is a teleprompter that follows your voice. It scrolls your script word by word as you speak, pauses when you pause, and keeps the text right beside the camera on iPhone and Mac. No foot pedal, no lost lines.",
     "cta_secondary": "Explore iPhone and Mac"
   },
   "devices": {

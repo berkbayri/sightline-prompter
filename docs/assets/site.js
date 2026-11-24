@@ -64,6 +64,14 @@
     s.cues = [...el.querySelectorAll('.cue')].map(c => ({ c, n: w.filter(e => e.compareDocumentPosition(c) & 4).length }));
     if (el.classList.contains('reading')) {
       const go = follow(el);
+      // build.py's --w is a per-character guess; measure the widest line in em so each line fits its column on one row
+      s.fit = () => {
+        el.classList.add('fit');
+        const fs = parseFloat(getComputedStyle(el).fontSize), r = d.createRange();
+        const em = Math.max(...[...el.querySelectorAll('.ln')].map(l => { r.selectNodeContents(l); return r.getBoundingClientRect().width / fs; }));
+        if (em > 0) el.style.setProperty('--w', (em * 1.06).toFixed(2));  // 6%: the current-word highlight box
+      };
+      s.fit();
       s.tick = () => { const e = w[Math.min(Math.max(s.i, 0), w.length - 1)]; go(e.offsetTop + e.offsetHeight / 2); };
     }
     return s;
@@ -76,7 +84,7 @@
     if (s.tick) s.tick();
   };
   addEventListener('resize', () => sets.forEach(s => s.tick && s.tick()));
-  if (d.fonts) d.fonts.ready.then(() => sets.forEach(s => s.tick && s.tick()));
+  if (d.fonts) d.fonts.ready.then(() => sets.forEach(s => { if (s.fit) s.fit(); if (s.tick) s.tick(); }));
 
   if (rm.matches) {
     sets.forEach(s => paint(s, Math.floor(s.w.length / 3)));

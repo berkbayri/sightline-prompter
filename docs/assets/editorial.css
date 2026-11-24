@@ -328,3 +328,7 @@ h2 em {color:var(--text-3);font-weight:700;font-style:normal}
     #pace .sec-head p:not(.note) {animation:pace-txt linear both;animation-timeline:--pace;animation-range:52svh 124svh}
   }
 }
+
+/* site.js measured the hero lines: one row each, no size floor that could push a line past the column */
+.hero .reading.fit {--hero-min:0px}
+.hero .reading.fit .ln {white-space:nowrap}

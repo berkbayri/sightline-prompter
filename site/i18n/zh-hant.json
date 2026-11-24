@@ -1,9 +1,9 @@
 {
   "meta": {
     "title": "Sightline Prompter｜視訊會議與拍片都能用的語音提詞器",
-    "description": "Sightline 是適用於 iPhone 和 Mac 的語音跟隨提詞器。視訊會議、簡報或拍片時，講稿靠近鏡頭，隨著你的語速前進。",
-    "og_title": "抬頭看鏡頭。照自己的節奏說。｜Sightline",
-    "og_description": "Sightline 是適用於 iPhone 和 Mac 的語音跟隨提詞器。視訊會議、簡報或拍片時，講稿靠近鏡頭，隨著你的語速前進。",
+    "description": "Sightline 是一款跟著你的聲音走的提詞機：你說話時稿件自動捲動，在 iPhone 和 Mac 上緊貼鏡頭顯示。",
+    "og_title": "你開口，稿子就跟著走。｜Sightline",
+    "og_description": "Sightline 是一款跟著你的聲音走的提詞機：你說話時稿件自動捲動，在 iPhone 和 Mac 上緊貼鏡頭顯示。",
     "og_image_alt": "Sightline Prompter 在 iPhone 和 Mac 上執行，稿子文字就在鏡頭正下方"
   },
   "nav": {
@@ -20,11 +20,11 @@
   },
   "hero": {
     "lines": [
-      "抬頭看鏡頭。",
-      "照自己的節奏說。"
+      "你開口，",
+      "稿子就跟著走。"
     ],
     "cue": "[[微笑]]",
-    "sub": "Sightline 是 iPhone 與 Mac 都能使用的語音跟隨提詞器。講稿放在鏡頭附近，隨著你實際說出的內容前進。不論是重要簡報還是下一支影片，都能把注意力留給聽你說話的人。",
+    "sub": "Sightline 是一款跟著你的聲音走的提詞機。你說話時，稿件逐字捲動；你停頓，它也停下。在 iPhone 和 Mac 上，文字就在鏡頭旁邊。不需要腳踏板，也不會再讀錯行。",
     "cta_secondary": "看看 Mac 和 iPhone 怎麼使用"
   },
   "devices": {

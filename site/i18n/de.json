@@ -1,9 +1,9 @@
 {
   "meta": {
     "title": "Sightline Prompter | Teleprompter für Meetings und Videos",
-    "description": "Sightline folgt deiner Stimme: ein Teleprompter für Meetings und Präsentationen am Mac und Videoaufnahmen mit dem iPhone. Der Text bleibt nah an der Kamera.",
-    "og_title": "Blick in die Kamera. Bleib beim Wesentlichen. | Sightline",
-    "og_description": "Sightline folgt deiner Stimme: ein Teleprompter für Meetings und Präsentationen am Mac und Videoaufnahmen mit dem iPhone. Der Text bleibt nah an der Kamera.",
+    "description": "Sightline ist ein Teleprompter, der deiner Stimme folgt: Er scrollt dein Skript beim Sprechen und zeigt es direkt neben der Kamera auf iPhone und Mac.",
+    "og_title": "Du sprichst. Der Text läuft mit. | Sightline",
+    "og_description": "Sightline ist ein Teleprompter, der deiner Stimme folgt: Er scrollt dein Skript beim Sprechen und zeigt es direkt neben der Kamera auf iPhone und Mac.",
     "og_image_alt": "Sightline Prompter auf iPhone und Mac, der Skripttext direkt unter der Kamera"
   },
   "nav": {
@@ -20,11 +20,11 @@
   },
   "hero": {
     "lines": [
-      "Blick in die Kamera.",
-      "Bleib beim Wesentlichen."
+      "Du sprichst.",
+      "Der Text läuft mit."
     ],
     "cue": "[[lächeln]]",
-    "sub": "Sightline ist der sprachgesteuerte Teleprompter für iPhone und Mac. Dein Text bleibt in Kameranähe und folgt deinen Worten. Ob wichtige Präsentation oder nächstes Video: Du kannst dich auf die Menschen vor dir konzentrieren.",
+    "sub": "Sightline ist ein Teleprompter, der deiner Stimme folgt. Er scrollt dein Skript Wort für Wort, während du sprichst, hält an, wenn du eine Pause machst, und zeigt den Text direkt neben der Kamera auf iPhone und Mac. Kein Fußpedal, keine verlorenen Zeilen.",
     "cta_secondary": "So funktioniert’s auf Mac und iPhone"
   },
   "devices": {

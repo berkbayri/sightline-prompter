@@ -1,9 +1,9 @@
 {
   "meta": {
     "title": "Sightline Prompter | Mac ve iPhone için Ses Takipli Teleprompter",
-    "description": "Sightline, Mac’te toplantı ve sunumlar, iPhone’da video çekimleri için sesini takip eden bir teleprompter. Metnin kameraya yakın durur; konuştuğun hızda ilerler.",
-    "og_title": "Gözünü kaldır. Söz sende. | Sightline",
-    "og_description": "Sightline, Mac’te toplantı ve sunumlar, iPhone’da video çekimleri için sesini takip eden bir teleprompter. Metnin kameraya yakın durur; konuştuğun hızda ilerler.",
+    "description": "Sightline, sesini takip eden bir teleprompter: konuştukça metni kaydırır ve iPhone'da ve Mac'te kameranın hemen yanında tutar.",
+    "og_title": "Sen konuşursun. Metin akar. | Sightline",
+    "og_description": "Sightline, sesini takip eden bir teleprompter: konuştukça metni kaydırır ve iPhone'da ve Mac'te kameranın hemen yanında tutar.",
     "og_image_alt": "iPhone ve Mac'te Sightline Prompter, metin kameranın hemen altında"
   },
   "nav": {
@@ -20,11 +20,11 @@
   },
   "hero": {
     "lines": [
-      "Gözünü kaldır.",
-      "Söz sende."
+      "Sen konuşursun.",
+      "Metin akar."
     ],
     "cue": "[[gülümse]]",
-    "sub": "Sightline, iPhone ve Mac için sesini takip eden bir teleprompter. Metnin kameraya yakın durur, sen konuştukça ilerler. Önemli bir sunumda da video çekerken de gözünü karşındaki insandan ayırmadan söyleyeceklerine odaklanırsın.",
+    "sub": "Sightline, sesini takip eden bir teleprompter. Konuştukça metni kelime kelime kaydırır, sen durunca durur ve yazıyı iPhone'da ve Mac'te kameranın hemen yanında tutar. Ayak pedalı yok, kaybolan satır yok.",
     "cta_secondary": "iPhone ve Mac’te nasıl çalıştığını gör"
   },
   "devices": {

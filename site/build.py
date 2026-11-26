@@ -298,11 +298,11 @@ def jsonld(t, canonical, lang, faq):
         {"@type": ["SoftwareApplication", "MobileApplication"], "@id": SITE_URL + "/#app", "name": "Sightline Prompter",
          "operatingSystem": "iOS 17, macOS 14", "applicationCategory": "MultimediaApplication",
          "description": t["meta"]["description"], "url": canonical, "downloadUrl": APPSTORE,
-         "image": SITE_URL + "/icon-512.png", "inLanguage": lang, "publisher": org,
+         "installUrl": APPSTORE, "image": SITE_URL + "/icon-512.png", "inLanguage": lang, "publisher": org,
          "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD",
                     "description": "Free to download. Sightline Pro is an in-app purchase."}},
         {"@type": "Organization", "@id": SITE_URL + "/#org", "name": "Sightline Prompter", "url": SITE_URL + "/",
-         "logo": SITE_URL + "/icon-512.png",
+         "logo": SITE_URL + "/icon-512.png", "sameAs": [APPSTORE],
          "contactPoint": {"@type": "ContactPoint", "contactType": "customer support", "email": "hi@sightlineprompter.app"}},
         {"@type": "WebSite", "@id": SITE_URL + "/#site", "url": SITE_URL + "/", "name": "Sightline Prompter",
          "inLanguage": lang, "publisher": org},
@@ -446,7 +446,12 @@ def main():
     (DOCS / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
         f'xmlns:xhtml="http://www.w3.org/1999/xhtml">{urls}</urlset>\n', encoding="utf-8")
-    (DOCS / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
+    # search and AI crawlers named explicitly (same rule as `*`): a clear invitation for answer engines, and nothing else changes
+    bots = ["Googlebot", "Bingbot", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "Claude-User",
+            "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended"]
+    (DOCS / "robots.txt").write_text("".join(f"User-agent: {b}\nAllow: /\n\n" for b in bots)
+                                     + f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
+    (DOCS / "llms.txt").write_text((SITE / "llms.txt").read_text(encoding="utf-8"), encoding="utf-8")
     (DOCS / "CNAME").write_text("sightlineprompter.app\n", encoding="utf-8")
     ctx = context("en", built["en"], "/")
     en = built["en"]

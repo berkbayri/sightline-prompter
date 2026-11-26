@@ -1,0 +1,33 @@
+# Sightline Prompter
+
+> Sightline Prompter is a teleprompter for iPhone and Mac that follows your voice. It scrolls your script word by word as you speak, waits when you pause, and keeps the text right beside the camera so you can read and still look at the lens. One App Store app covers iPhone and Mac.
+
+Key facts:
+- Voice following matches what it hears to the words in your script only, so a cough, an ad-lib or a skipped line does not make the text jump.
+- Works in 31 languages and regional variants. Many are recognized on the device; if a language has no offline model installed, audio goes to Apple's speech service and the app says so on screen.
+- iPhone: records video with the script over the live preview and saves it to Photos. The front camera estimates your distance and sizes the text to match.
+- Mac: a prompter panel near the camera for calls, presentations and recordings made with other tools. A DualSense controller works with the Mac app.
+- Scripts live in your own iCloud Drive and sync between iPhone and Mac. Import plain text, Markdown, Word, PDF, RTF, HTML and OpenDocument files.
+- Free to download. The free version follows your voice for up to 2 minutes per run in English, Turkish and Spanish and records up to 2 minutes of 1080p video on iPhone. Sightline Pro, an in-app purchase, removes the limits. The App Store shows current prices.
+- No ads, no Sightline account needed. Requires iOS 17 or macOS 14.
+
+## Download
+- [Sightline Prompter on the App Store](https://apps.apple.com/app/id6833947315): iPhone and Mac, one app
+
+## Website (same content in 11 languages)
+- [English](https://sightlineprompter.app/): product overview, devices, use cases, languages, free and Pro, FAQ
+- [Türkçe](https://sightlineprompter.app/tr/)
+- [Deutsch](https://sightlineprompter.app/de/)
+- [Español](https://sightlineprompter.app/es/)
+- [Français](https://sightlineprompter.app/fr/)
+- [Italiano](https://sightlineprompter.app/it/)
+- [Português (Brasil)](https://sightlineprompter.app/pt-br/)
+- [日本語](https://sightlineprompter.app/ja/)
+- [한국어](https://sightlineprompter.app/ko/)
+- [简体中文](https://sightlineprompter.app/zh-hans/)
+- [繁體中文](https://sightlineprompter.app/zh-hant/)
+
+## Support and legal
+- [Support](https://sightlineprompter.app/support.html)
+- [Privacy](https://sightlineprompter.app/privacy.html)
+- [Terms](https://sightlineprompter.app/terms.html)
